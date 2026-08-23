@@ -13,11 +13,19 @@
 
 <title>Student ID Scanner</title>
 
-<!-- Tesseract.js -->
+
+<!-- =================================================
+     TESSERACT.JS
+================================================== -->
+
 <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
 
 
 <style>
+
+    /* =================================================
+       GLOBAL
+    ================================================= */
 
     * {
         box-sizing: border-box;
@@ -75,7 +83,7 @@
 
 
     /* =================================================
-       CAMERA
+       CAMERA CONTAINER
     ================================================= */
 
     #cameraContainer {
@@ -134,7 +142,7 @@
 
         box-shadow:
 
-            0 0 0 9999px rgba(0,0,0,0.45);
+            0 0 0 9999px rgba(0, 0, 0, 0.45);
 
         pointer-events: none;
 
@@ -145,7 +153,7 @@
 
         position: absolute;
 
-        top: calc(50% + 150px);
+        top: calc(50% + 145px);
 
         left: 50%;
 
@@ -157,7 +165,9 @@
 
         font-size: 14px;
 
-        text-shadow: 0 1px 3px black;
+        text-shadow:
+
+            0 1px 3px black;
 
         pointer-events: none;
 
@@ -193,7 +203,11 @@
 
         opacity: 1;
 
-        animation: scanAnimation 2s linear infinite;
+        animation:
+
+            scanAnimation 2s
+            linear
+            infinite;
 
     }
 
@@ -307,7 +321,7 @@
 
 
     /* =================================================
-       OCR PROGRESS
+       PROGRESS
     ================================================= */
 
     #progressContainer {
@@ -366,6 +380,10 @@
     }
 
 
+    /* =================================================
+       PROCESSED IMAGE
+    ================================================= */
+
     #processedImage {
 
         width: 100%;
@@ -380,6 +398,10 @@
 
     }
 
+
+    /* =================================================
+       OCR RESULT
+    ================================================= */
 
     #ocrResult {
 
@@ -405,7 +427,7 @@
 
 
     /* =================================================
-       INFORMATION FIELDS
+       EXTRACTED FIELDS
     ================================================= */
 
     .field {
@@ -435,7 +457,7 @@
 
         color: #777;
 
-        margin-bottom: 4px;
+        margin-bottom: 5px;
 
     }
 
@@ -452,11 +474,13 @@
 
         background: transparent;
 
+        color: #111;
+
     }
 
 
     /* =================================================
-       HIDDEN CANVAS
+       CANVAS
     ================================================= */
 
     #canvas {
@@ -510,7 +534,9 @@
 <header>
 
 ```
-<h1>Student ID Scanner</h1>
+<h1>
+    Student ID Scanner
+</h1>
 
 <p>
     Place the ID inside the guide
@@ -520,7 +546,7 @@
 </header>
 
 <!-- =====================================================
-     CAMERA
+     LIVE CAMERA
 ===================================================== -->
 
 <div id="cameraContainer">
@@ -605,6 +631,8 @@
 <div id="results">
 
 ```
+<!-- PROCESSED IMAGE -->
+
 <h2>
     Processed Image
 </h2>
@@ -614,6 +642,9 @@
     id="processedImage"
     alt="Processed ID image">
 
+
+
+<!-- RAW OCR -->
 
 <h2>
     OCR Result
@@ -627,14 +658,18 @@
 </div>
 
 
-<!-- ================================================
+
+<!-- =================================================
      EXTRACTED INFORMATION
-================================================= -->
+================================================== -->
 
 <h2>
     Extracted Information
 </h2>
 
+
+
+<!-- NAME -->
 
 <div class="field">
 
@@ -650,6 +685,9 @@
 </div>
 
 
+
+<!-- GRADE -->
+
 <div class="field">
 
     <label>
@@ -663,6 +701,9 @@
 
 </div>
 
+
+
+<!-- SECTION -->
 
 <div class="field">
 
@@ -678,10 +719,30 @@
 </div>
 
 
+
+<!-- LRN -->
+
 <div class="field">
 
     <label>
-        LRN / ID NUMBER
+        LRN
+    </label>
+
+    <input
+        id="lrnField"
+        type="text"
+        placeholder="Not detected">
+
+</div>
+
+
+
+<!-- ID NUMBER -->
+
+<div class="field">
+
+    <label>
+        ID NUMBER
     </label>
 
     <input
@@ -704,7 +765,7 @@
 
 
 /* =====================================================
-   ELEMENTS
+   ELEMENT REFERENCES
 ===================================================== */
 
 const video =
@@ -791,6 +852,12 @@ const sectionField =
     );
 
 
+const lrnField =
+    document.getElementById(
+        "lrnField"
+    );
+
+
 const idField =
     document.getElementById(
         "idField"
@@ -802,14 +869,17 @@ const idField =
    CAMERA STATE
 ===================================================== */
 
-let cameraStream = null;
+let cameraStream =
+    null;
 
-let scanning = false;
+
+let scanning =
+    false;
 
 
 
 /* =====================================================
-   CHECK CAMERA SUPPORT
+   CAMERA SUPPORT CHECK
 ===================================================== */
 
 if (
@@ -821,6 +891,7 @@ if (
         "Live camera is not supported by this browser.";
 
 }
+
 
 
 /* =====================================================
@@ -839,19 +910,16 @@ async function startCamera() {
 
 
         status.textContent =
-            "Requesting camera...";
+            "Requesting camera permission...";
 
 
         /*
-            Make sure we're running
-            over HTTPS.
+            GitHub Pages should use HTTPS.
         */
 
         if (
-            location.protocol !==
-            "https:" &&
-            location.hostname !==
-            "localhost"
+            location.protocol !== "https:" &&
+            location.hostname !== "localhost"
         ) {
 
             throw new Error(
@@ -862,8 +930,7 @@ async function startCamera() {
 
 
         /*
-            Ask specifically for
-            the rear camera.
+            Request rear camera.
         */
 
         const constraints = {
@@ -873,19 +940,31 @@ async function startCamera() {
             video: {
 
                 facingMode: {
-                    ideal: "environment"
+
+                    ideal:
+                        "environment"
+
                 },
 
                 width: {
-                    ideal: 1920
+
+                    ideal:
+                        1920
+
                 },
 
                 height: {
-                    ideal: 1080
+
+                    ideal:
+                        1080
+
                 },
 
                 frameRate: {
-                    ideal: 30
+
+                    ideal:
+                        30
+
                 }
 
             }
@@ -902,7 +981,7 @@ async function startCamera() {
 
 
         /*
-            Attach camera to video.
+            Attach stream.
         */
 
         video.srcObject =
@@ -913,7 +992,7 @@ async function startCamera() {
 
 
         /*
-            Get camera information.
+            Camera information.
         */
 
         const track =
@@ -964,10 +1043,6 @@ async function startCamera() {
             error.name;
 
 
-        /*
-            Give useful error information.
-        */
-
         let message =
             "";
 
@@ -980,9 +1055,10 @@ async function startCamera() {
             message =
                 "Camera permission was denied.\n\n" +
                 "Check Chrome's camera permission " +
-                "for this website.";
+                "for this GitHub Pages website.";
 
         }
+
 
         else if (
             error.name ===
@@ -994,6 +1070,7 @@ async function startCamera() {
 
         }
 
+
         else if (
             error.name ===
             "NotReadableError"
@@ -1004,6 +1081,7 @@ async function startCamera() {
                 "by another application.";
 
         }
+
 
         else {
 
@@ -1043,7 +1121,8 @@ function stopCamera() {
         cameraStream
             .getTracks()
             .forEach(
-                track => track.stop()
+                track =>
+                    track.stop()
             );
 
     }
@@ -1082,7 +1161,7 @@ function stopCamera() {
 
 
 /* =====================================================
-   SCAN
+   CAPTURE + SCAN
 ===================================================== */
 
 scanButton.addEventListener(
@@ -1122,8 +1201,8 @@ async function captureAndScan() {
 
 
     /*
-        Small delay gives the
-        camera a moment to stabilize.
+        Give camera a moment
+        to stabilize.
     */
 
     await sleep(200);
@@ -1153,18 +1232,9 @@ async function captureAndScan() {
 
 
         /*
-            =================================================
-            CROP TO ID GUIDE
-            =================================================
-
-            The guide is approximately
-            the same aspect ratio as
-            a standard ID card.
-
-            We crop the center of
-            the camera image instead
-            of sending the entire
-            camera frame to Tesseract.
+            =============================================
+            CROP TO GREEN GUIDE
+            =============================================
         */
 
 
@@ -1188,21 +1258,24 @@ async function captureAndScan() {
 
         const cropX =
             Math.floor(
-                (videoWidth -
-                    cropWidth) / 2
+                (
+                    videoWidth -
+                    cropWidth
+                ) / 2
             );
 
 
         const cropY =
             Math.floor(
-                (videoHeight -
-                    cropHeight) / 2
+                (
+                    videoHeight -
+                    cropHeight
+                ) / 2
             );
 
 
         /*
-            Use a larger canvas
-            to upscale the ID.
+            Upscale image.
         */
 
         const scale =
@@ -1210,11 +1283,13 @@ async function captureAndScan() {
 
 
         canvas.width =
-            cropWidth * scale;
+            cropWidth *
+            scale;
 
 
         canvas.height =
-            cropHeight * scale;
+            cropHeight *
+            scale;
 
 
         const ctx =
@@ -1224,7 +1299,7 @@ async function captureAndScan() {
 
 
         /*
-            Draw only the ID.
+            Draw ID.
         */
 
         ctx.drawImage(
@@ -1233,11 +1308,13 @@ async function captureAndScan() {
 
             cropX,
             cropY,
+
             cropWidth,
             cropHeight,
 
             0,
             0,
+
             canvas.width,
             canvas.height
 
@@ -1249,7 +1326,7 @@ async function captureAndScan() {
 
 
         /*
-            Process the ID.
+            Preprocess.
         */
 
         preprocessImage(
@@ -1341,11 +1418,10 @@ function preprocessImage(
         imageData.data;
 
 
-    /*
-        =================================================
-        GRAYSCALE
-        =================================================
-    */
+
+    /* =================================================
+       GRAYSCALE
+    ================================================= */
 
     for (
         let i = 0;
@@ -1367,9 +1443,11 @@ function preprocessImage(
 
 
         const gray =
-            0.299 * r +
-            0.587 * g +
-            0.114 * b;
+            (
+                0.299 * r +
+                0.587 * g +
+                0.114 * b
+            );
 
 
         data[i] =
@@ -1386,11 +1464,10 @@ function preprocessImage(
     }
 
 
-    /*
-        =================================================
-        CONTRAST
-        =================================================
-    */
+
+    /* =================================================
+       CONTRAST
+    ================================================= */
 
     const contrast =
         1.7;
@@ -1438,11 +1515,10 @@ function preprocessImage(
     }
 
 
-    /*
-        =================================================
-        SHARPEN
-        =================================================
-    */
+
+    /* =================================================
+       SHARPENING
+    ================================================= */
 
     const original =
         new Uint8ClampedArray(
@@ -1564,8 +1640,7 @@ function preprocessImage(
 
 
     /*
-        Put processed image
-        back on canvas.
+        Save processed image.
     */
 
     ctx.putImageData(
@@ -1650,9 +1725,9 @@ async function performOCR() {
 
 
                     /*
-                        Page segmentation mode.
+                        PSM 6:
 
-                        6 = assume a single
+                        Treat image as a
                         uniform block of text.
                     */
 
@@ -1669,7 +1744,7 @@ async function performOCR() {
 
 
         console.log(
-            "========== OCR RESULT =========="
+            "========== RAW OCR =========="
         );
 
 
@@ -1679,9 +1754,13 @@ async function performOCR() {
 
 
         console.log(
-            "================================="
+            "=============================="
         );
 
+
+        /*
+            Display raw OCR.
+        */
 
         if (
             text &&
@@ -1702,7 +1781,7 @@ async function performOCR() {
 
 
         /*
-            Try basic field extraction.
+            Extract fields.
         */
 
         extractFields(
@@ -1753,398 +1832,452 @@ async function performOCR() {
 
 
 /* =====================================================
-   BASIC FIELD EXTRACTION
+   EXTRACT STUDENT INFORMATION
 ===================================================== */
 
-function extractFields(text) {
-
-```
-if (!text) {
-    return;
-}
+function extractFields(
+    text
+) {
 
 
-/*
-    Split OCR result into individual lines.
-*/
+    if (!text) {
 
-const lines = text
-    .split(/\r?\n/)
-    .map(line => line.trim())
-    .filter(line => line.length > 0);
+        return;
 
-
-console.log("OCR LINES:");
-console.log(lines);
-
-
-/*
-    =================================================
-    NAME
-    =================================================
-
-    Based on your ID:
-
-    FARRELL FREDRIC FERNAND F. FANO
-    LRN: ...
-    ID NO: ...
-    GRADE 12- ROENTGEN
-
-    Therefore, the name is most likely
-    the first meaningful line.
-*/
-
-let name = "";
-
-
-for (let line of lines) {
-
-    const upper =
-        line.toUpperCase();
-
-
-    /*
-        Ignore lines containing
-        known labels.
-    */
-
-    if (
-        upper.includes("LRN") ||
-        upper.includes("ID NO") ||
-        upper.includes("IDNO") ||
-        upper.includes("GRADE")
-    ) {
-        continue;
     }
 
 
     /*
-        A name should contain
-        mostly letters/spaces.
+        =============================================
+        SPLIT OCR INTO LINES
+        =============================================
     */
 
-    const cleaned =
-        line.replace(
-            /[^A-Za-zÀ-ÿ.' -]/g,
-            ""
-        ).trim();
-
-
-    /*
-        Require at least two words.
-    */
-
-    const words =
-        cleaned
-            .split(/\s+/)
+    const lines =
+        text
+            .split(/\r?\n/)
+            .map(
+                line =>
+                    line.trim()
+            )
             .filter(
-                word => word.length > 0
+                line =>
+                    line.length > 0
             );
 
 
-    if (
-        words.length >= 2 &&
-        cleaned.length >= 5
+    console.log(
+        "OCR LINES:",
+        lines
+    );
+
+
+    /*
+        =============================================
+        VARIABLES
+        =============================================
+    */
+
+    let name = "";
+
+    let grade = "";
+
+    let section = "";
+
+    let lrn = "";
+
+    let idNumber = "";
+
+
+
+    /* =================================================
+       NAME
+       =================================================
+
+       Expected:
+
+       FARRELL FREDRIC FERNAND F. FANO
+
+       We assume the first meaningful
+       non-label line is the name.
+    */
+
+    for (
+        let line of lines
     ) {
 
-        name = cleaned;
 
-        break;
+        const upper =
+            line.toUpperCase();
+
+
+        /*
+            Ignore known fields.
+        */
+
+        if (
+            upper.includes("LRN") ||
+            upper.includes("ID NO") ||
+            upper.includes("IDNO") ||
+            upper.includes("GRADE")
+        ) {
+
+            continue;
+
+        }
+
+
+        /*
+            Remove weird OCR symbols.
+        */
+
+        const cleaned =
+            line
+                .replace(
+                    /[^A-Za-zÀ-ÿ.' -]/g,
+                    ""
+                )
+                .replace(
+                    /\s+/g,
+                    " "
+                )
+                .trim();
+
+
+        /*
+            Count words.
+        */
+
+        const words =
+            cleaned
+                .split(/\s+/)
+                .filter(
+                    word =>
+                        word.length > 0
+                );
+
+
+        /*
+            Student name should
+            have at least two words.
+        */
+
+        if (
+            words.length >= 2 &&
+            cleaned.length >= 5
+        ) {
+
+            name =
+                cleaned;
+
+            break;
+
+        }
 
     }
 
-}
 
 
-/*
-    =================================================
-    LRN
-    =================================================
-*/
+    /* =================================================
+       LRN
+       =================================================
 
-let lrn = "";
+       Expected:
 
+       LRN: 123456789012
+    */
 
-const lrnMatch =
-    text.match(
-        /LRN\s*[:\-]?\s*([0-9]{8,20})/i
-    );
-
-
-if (lrnMatch) {
-
-    lrn =
-        lrnMatch[1];
-
-}
-
-
-/*
-    =================================================
-    ID NUMBER
-    =================================================
-
-    Example:
-
-    ID NO: 123456 -123
-
-    We keep the format:
-
-    123456-123
-*/
-
-let idNumber = "";
-
-
-const idMatch =
-    text.match(
-        /ID\s*(?:NO|NUMBER)?\s*[:#\-]?\s*([0-9]+)\s*[-–—]\s*([0-9]+)/i
-    );
-
-
-if (idMatch) {
-
-    idNumber =
-        idMatch[1] +
-        "-" +
-        idMatch[2];
-
-}
-
-
-/*
-    If Tesseract doesn't recognize
-    the "ID NO" label correctly,
-    try a more general pattern.
-*/
-
-if (!idNumber) {
-
-    const generalID =
+    const lrnMatch =
         text.match(
-            /\b([0-9]{4,8})\s*[-–—]\s*([0-9]{2,6})\b/
+            /LRN\s*[:\-]?\s*([0-9]{8,20})/i
         );
 
 
-    if (generalID) {
+    if (lrnMatch) {
+
+        lrn =
+            lrnMatch[1];
+
+    }
+
+
+
+    /*
+        FALLBACK:
+
+        If OCR misses the colon or label.
+    */
+
+    if (!lrn) {
+
+
+        for (
+            let line of lines
+        ) {
+
+
+            if (
+                /LRN/i.test(line)
+            ) {
+
+
+                const number =
+                    line.match(
+                        /\d{8,20}/
+                    );
+
+
+                if (number) {
+
+                    lrn =
+                        number[0];
+
+                    break;
+
+                }
+
+            }
+
+        }
+
+    }
+
+
+
+    /* =================================================
+       ID NUMBER
+       =================================================
+
+       Expected:
+
+       ID NO: 123456 -123
+    */
+
+    const idMatch =
+        text.match(
+            /ID\s*(?:NO|NUMBER)?\s*[:#\-]?\s*([0-9]+)\s*[-–—]\s*([0-9]+)/i
+        );
+
+
+    if (idMatch) {
 
         idNumber =
-            generalID[1] +
+            idMatch[1] +
             "-" +
-            generalID[2];
+            idMatch[2];
 
     }
 
-}
-
-
-/*
-    =================================================
-    GRADE + SECTION
-    =================================================
-
-    Example:
-
-    GRADE 12- ROENTGEN
-
-    We extract:
-
-    Grade = 12
-    Section = ROENTGEN
-*/
-
-let grade = "";
-
-let section = "";
-
-
-const gradeMatch =
-    text.match(
-        /GRADE\s*(?:LEVEL)?\s*([7-9]|10|11|12)\s*[-–—:]?\s*([A-Za-z0-9][A-Za-z0-9 .'-]*)/i
-    );
-
-
-if (gradeMatch) {
-
-    grade =
-        gradeMatch[1];
-
-
-    section =
-        gradeMatch[2]
-            .trim();
 
 
     /*
-        Remove accidental OCR
-        punctuation.
+        FALLBACK ID NUMBER
+
+        Example:
+
+        123456 -123
     */
 
-    section =
-        section
-            .replace(
-                /^[\s\-:]+/,
-                ""
-            )
-            .replace(
-                /[\s\-:]+$/,
-                ""
+    if (!idNumber) {
+
+
+        const generalID =
+            text.match(
+                /\b([0-9]{4,8})\s*[-–—]\s*([0-9]{2,6})\b/
             );
 
-}
+
+        if (generalID) {
+
+            idNumber =
+                generalID[1] +
+                "-" +
+                generalID[2];
+
+        }
+
+    }
 
 
-/*
-    =================================================
-    FALLBACK FOR GRADE
-    =================================================
 
-    If Tesseract reads:
+    /* =================================================
+       GRADE + SECTION
+       =================================================
 
-    GRADE 12
+       Expected:
 
-    but misses the section.
-*/
+       GRADE 12- ROENTGEN
 
-if (!grade) {
+       Result:
 
-    const gradeOnly =
+       Grade = 12
+       Section = ROENTGEN
+    */
+
+    const gradeMatch =
         text.match(
-            /GRADE\s*(?:LEVEL)?\s*([7-9]|10|11|12)\b/i
+            /GRADE\s*(?:LEVEL)?\s*(7|8|9|10|11|12)\s*[-–—:]?\s*([A-Za-z0-9][A-Za-z0-9 .'-]*)/i
         );
 
 
-    if (gradeOnly) {
+    if (gradeMatch) {
+
 
         grade =
-            gradeOnly[1];
+            gradeMatch[1];
+
+
+        section =
+            gradeMatch[2]
+                .trim();
+
+
+        /*
+            Remove trailing junk.
+        */
+
+        section =
+            section
+                .replace(
+                    /^[\s\-:]+/,
+                    ""
+                )
+                .replace(
+                    /[\s\-:]+$/,
+                    ""
+                );
 
     }
 
-}
 
 
-/*
-    =================================================
-    CLEAN SECTION
-    =================================================
-*/
+    /* =================================================
+       GRADE FALLBACK
+       ================================================= */
 
-if (section) {
+    if (!grade) {
 
-    /*
-        Remove common OCR junk.
-    */
 
-    section =
+        const gradeOnly =
+            text.match(
+                /GRADE\s*(?:LEVEL)?\s*(7|8|9|10|11|12)\b/i
+            );
+
+
+        if (gradeOnly) {
+
+            grade =
+                gradeOnly[1];
+
+        }
+
+    }
+
+
+
+    /* =================================================
+       SECTION CLEANUP
+       ================================================= */
+
+    if (section) {
+
+
+        section =
+            section
+                .replace(
+                    /^[^A-Za-z0-9]+/,
+                    ""
+                )
+                .trim();
+
+    }
+
+
+
+    /* =================================================
+       DISPLAY
+       ================================================= */
+
+    nameField.value =
+        name;
+
+
+    gradeField.value =
+        grade;
+
+
+    sectionField.value =
+        section;
+
+
+    lrnField.value =
+        lrn;
+
+
+    idField.value =
+        idNumber;
+
+
+
+    /* =================================================
+       DEBUG
+       ================================================= */
+
+    console.log(
+        "================================"
+    );
+
+
+    console.log(
+        "EXTRACTED STUDENT INFORMATION"
+    );
+
+
+    console.log(
+        "NAME:",
+        name
+    );
+
+
+    console.log(
+        "GRADE:",
+        grade
+    );
+
+
+    console.log(
+        "SECTION:",
         section
-            .replace(
-                /^[^A-Za-z0-9]+/,
-                ""
-            )
-            .trim();
+    );
+
+
+    console.log(
+        "LRN:",
+        lrn
+    );
+
+
+    console.log(
+        "ID NUMBER:",
+        idNumber
+    );
+
+
+    console.log(
+        "================================"
+    );
 
 }
 
-
-/*
-    =================================================
-    DISPLAY RESULTS
-    =================================================
-*/
-
-document.getElementById(
-    "nameField"
-).value =
-    name;
-
-
-document.getElementById(
-    "gradeField"
-).value =
-    grade;
-
-
-document.getElementById(
-    "sectionField"
-).value =
-    section;
-
-
-document.getElementById(
-    "idField"
-).value =
-    lrn;
-
-
-/*
-    Console debugging.
-*/
-
-console.log(
-    "========== EXTRACTED INFORMATION =========="
-);
-
-console.log(
-    "NAME:",
-    name
-);
-
-console.log(
-    "GRADE:",
-    grade
-);
-
-console.log(
-    "SECTION:",
-    section
-);
-
-console.log(
-    "LRN:",
-    lrn
-);
-
-console.log(
-    "ID NUMBER:",
-    idNumber
-);
-
-console.log(
-    "============================================"
-);
-```
-
-}
-
-
-
-/* =========================================
-   CLEAN OCR VALUE
-========================================= */
-
-function cleanValue(value) {
-
-    return value
-        .replace(
-            /\s+/g,
-            " "
-        )
-        .trim()
-        .replace(
-            /^[:\-]+/,
-            ""
-        )
-        .trim();
-
-}
 
 
 /* =====================================================
    UTILITY
 ===================================================== */
 
-function sleep(ms) {
+function sleep(
+    ms
+) {
 
     return new Promise(
         resolve =>
@@ -2173,4 +2306,3 @@ window.addEventListener(
 </body>
 
 </html>
-
