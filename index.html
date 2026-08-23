@@ -1,5 +1,4 @@
 <!DOCTYPE html>
-
 <html lang="en">
 
 <head>
@@ -7,11 +6,13 @@
 <meta charset="UTF-8">
 
 <meta name="viewport"
-   content="width=device-width, initial-scale=1.0">
+      content="width=device-width, initial-scale=1.0">
 
 <title>Student ID Scanner</title>
 
+
 <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
+
 
 <style>
 
@@ -19,185 +20,431 @@
     box-sizing: border-box;
 }
 
+
 body {
+
     margin: 0;
+
     background: #111;
+
     color: white;
+
     font-family: Arial, sans-serif;
+
     text-align: center;
+
 }
+
 
 header {
+
     padding: 15px;
+
     background: #1b1b1b;
+
 }
+
 
 header h1 {
+
     margin: 0;
+
     font-size: 22px;
+
 }
+
 
 header p {
-    margin: 5px 0 0;
+
+    margin: 5px 0;
+
     color: #aaa;
+
 }
+
+
+/* =========================================
+   CAMERA
+========================================= */
 
 #cameraContainer {
+
     position: relative;
+
     width: 100%;
+
     height: 60vh;
+
     min-height: 350px;
+
     background: black;
+
     overflow: hidden;
+
 }
+
 
 #video {
+
     width: 100%;
+
     height: 100%;
+
     object-fit: cover;
+
 }
+
 
 #scanGuide {
+
     position: absolute;
+
     width: 88%;
+
     max-width: 520px;
+
     aspect-ratio: 1.586 / 1;
+
     top: 50%;
+
     left: 50%;
+
     transform: translate(-50%, -50%);
+
     border: 3px solid #00ff88;
+
     border-radius: 12px;
-    box-shadow: 0 0 0 9999px rgba(0,0,0,0.45);
+
+    box-shadow:
+        0 0 0 9999px
+        rgba(0,0,0,0.45);
+
     pointer-events: none;
+
 }
+
 
 #guideText {
+
     position: absolute;
+
     top: calc(50% + 130px);
+
     left: 50%;
+
     transform: translateX(-50%);
+
     width: 100%;
+
     font-size: 14px;
-    text-shadow: 0 1px 4px black;
+
+    text-shadow:
+        0 1px 4px black;
+
     pointer-events: none;
+
 }
+
+
+/* =========================================
+   BUTTONS
+========================================= */
 
 #controls {
+
     padding: 15px;
+
     background: #1b1b1b;
+
 }
+
 
 button {
+
     border: none;
+
     border-radius: 10px;
+
     padding: 14px 20px;
+
     margin: 5px;
+
     font-size: 16px;
+
     font-weight: bold;
+
 }
+
 
 #startButton {
+
     background: #2196f3;
+
     color: white;
+
 }
+
 
 #scanButton {
+
     background: #00c853;
+
     color: white;
+
 }
+
 
 #stopButton {
+
     background: #f44336;
+
     color: white;
+
 }
+
+
+#databaseButton {
+
+    background: #ff9800;
+
+    color: white;
+
+}
+
 
 button:disabled {
+
     background: #555;
+
     color: #999;
+
 }
+
 
 #status {
+
     margin: 10px;
+
     color: #00ff88;
+
 }
+
+
+/* =========================================
+   PROGRESS
+========================================= */
 
 #progressContainer {
+
     display: none;
+
     width: 90%;
+
     max-width: 500px;
+
     height: 10px;
+
     margin: 10px auto;
+
     background: #333;
+
     border-radius: 10px;
+
     overflow: hidden;
+
 }
+
 
 #progressBar {
+
     width: 0%;
+
     height: 100%;
+
     background: #00ff88;
+
 }
+
+
+/* =========================================
+   RESULTS
+========================================= */
 
 #results {
+
     background: #f4f4f4;
+
     color: #111;
+
     padding: 20px;
+
 }
+
 
 #processedImage {
+
     display: none;
+
     width: 100%;
+
     max-width: 700px;
+
     margin: 10px auto;
+
     border-radius: 10px;
+
 }
+
 
 #ocrResult {
+
     background: white;
+
     padding: 15px;
+
     border-radius: 10px;
+
     text-align: left;
+
     white-space: pre-wrap;
+
     word-break: break-word;
+
 }
+
+
+/* =========================================
+   FIELDS
+========================================= */
 
 .field {
+
     background: white;
+
     margin: 10px 0;
+
     padding: 12px;
+
     border-radius: 8px;
+
     text-align: left;
+
 }
+
 
 .field label {
+
     display: block;
+
     font-size: 12px;
+
     color: #777;
+
     margin-bottom: 5px;
+
 }
+
 
 .field input {
+
     width: 100%;
+
     border: none;
+
     outline: none;
+
     font-size: 17px;
+
     background: transparent;
+
     color: #111;
+
 }
 
-#canvas {
+
+/* =========================================
+   DATABASE RESULT
+========================================= */
+
+#databaseResult {
+
+    margin-top: 20px;
+
+    padding: 20px;
+
+    border-radius: 12px;
+
+    background: white;
+
+    text-align: left;
+
     display: none;
+
 }
+
+
+.valid {
+
+    border: 4px solid #00c853;
+
+}
+
+
+.invalid {
+
+    border: 4px solid #f44336;
+
+}
+
+
+#databaseResult h2 {
+
+    margin-top: 0;
+
+}
+
+
+#databaseStatus {
+
+    font-size: 20px;
+
+    font-weight: bold;
+
+    margin-bottom: 15px;
+
+}
+
+
+/* =========================================
+   CANVAS
+========================================= */
+
+#canvas {
+
+    display: none;
+
+}
+
+
+/* =========================================
+   MOBILE
+========================================= */
 
 @media (max-width: 600px) {
 
     #cameraContainer {
+
         height: 60vh;
+
     }
 
+
     button {
+
         width: 90%;
+
         max-width: 400px;
+
     }
 
 }
@@ -206,7 +453,9 @@ button:disabled {
 
 </head>
 
+
 <body>
+
 
 <header>
 
@@ -216,178 +465,321 @@ button:disabled {
 
 </header>
 
+
+<!-- =========================================
+     CAMERA
+========================================= -->
+
 <div id="cameraContainer">
 
-<video
- id="video"
- autoplay
- muted
- playsinline> </video>
+    <video
+        id="video"
+        autoplay
+        muted
+        playsinline>
+    </video>
 
-<div id="scanGuide"></div>
 
-<div id="guideText">
-    Align the entire ID inside the box
+    <div id="scanGuide"></div>
+
+
+    <div id="guideText">
+
+        Align the entire ID inside the box
+
+    </div>
+
 </div>
 
-</div>
+
+<!-- =========================================
+     CONTROLS
+========================================= -->
 
 <div id="controls">
 
-<button id="startButton">
-    📷 Start Camera
-</button>
+    <button id="startButton">
 
-<button id="scanButton" disabled>
-    🔍 Scan ID
-</button>
+        📷 Start Camera
 
-<button id="stopButton" disabled>
-    ⛔ Stop Camera
-</button>
+    </button>
 
-<div id="status">
-    Camera not started.
+
+    <button
+        id="scanButton"
+        disabled>
+
+        🔍 Scan ID
+
+    </button>
+
+
+    <button
+        id="stopButton"
+        disabled>
+
+        ⛔ Stop Camera
+
+    </button>
+
+
+    <button
+        id="databaseButton"
+        disabled>
+
+        🔎 Check Database
+
+    </button>
+
+
+    <div id="status">
+
+        Camera not started.
+
+    </div>
+
+
+    <div id="progressContainer">
+
+        <div id="progressBar"></div>
+
+    </div>
+
 </div>
 
-<div id="progressContainer">
 
-<div id="progressBar"></div>
-
-</div>
-
-</div>
+<!-- =========================================
+     RESULTS
+========================================= -->
 
 <div id="results">
 
+
 <h2>Processed Image</h2>
 
-<img id="processedImage">
+
+<img
+    id="processedImage">
+
 
 <h2>OCR Result</h2>
 
+
 <div id="ocrResult">
+
     Nothing scanned yet.
+
 </div>
 
+
 <h2>Extracted Information</h2>
+
 
 <div class="field">
 
 <label>NAME</label>
 
 <input
- id="nameField"
- type="text"
- placeholder="Not detected">
+    id="nameField"
+    type="text"
+    placeholder="Not detected">
 
 </div>
+
 
 <div class="field">
 
 <label>GRADE LEVEL</label>
 
 <input
- id="gradeField"
- type="text"
- placeholder="Not detected">
+    id="gradeField"
+    type="text"
+    placeholder="Not detected">
 
 </div>
+
 
 <div class="field">
 
 <label>SECTION</label>
 
 <input
- id="sectionField"
- type="text"
- placeholder="Not detected">
+    id="sectionField"
+    type="text"
+    placeholder="Not detected">
 
 </div>
+
 
 <div class="field">
 
 <label>LRN</label>
 
 <input
- id="lrnField"
- type="text"
- placeholder="Not detected">
+    id="lrnField"
+    type="text"
+    placeholder="Not detected">
 
 </div>
+
 
 <div class="field">
 
 <label>ID NUMBER</label>
 
 <input
- id="idField"
- type="text"
- placeholder="Not detected">
+    id="idField"
+    type="text"
+    placeholder="Not detected">
 
 </div>
 
+
+<!-- =========================================
+     DATABASE RESULT
+========================================= -->
+
+<div id="databaseResult">
+
+    <div id="databaseStatus"></div>
+
+    <div id="databaseDetails"></div>
+
 </div>
+
+
+</div>
+
 
 <canvas id="canvas"></canvas>
+
 
 <script>
 
 
-/* =====================================================
+/* =========================================
+   GOOGLE APPS SCRIPT URL
+=========================================
+
+   REPLACE THIS WITH YOUR WEB APP URL.
+
+========================================= */
+
+const DATABASE_URL =
+    "https://script.googleusercontent.com/macros/echo?user_content_key=AUkAhnTsx6KCnOTFOOfeXEfb73fuzAc_3JNuU6OHeQ3l2-uEUjVnmS-5wyE3Dgi0NJzNHAtFI5oWiBohoP23-GwsVRoIQBwLBUfBmKsXXeMfTn4jAElWtprm6dkoazPmbNGqRdaEf04CkOH3rBk6SHncRdPU9kLqikLJZzPJ-faovRJ7Wmq1P2jJPbsB-q9pQHi_ukn-AYwh5YdvrASnDeakiCYR3b8HXuRop8SuJOwhupY0UV0QewOXJwLMxFDVstwP0Y9J7-duJb2zSlmTstHoPQx19soSPg&lib=MhIlHKHhaZAK0MrYerH9q2gtksEdkwibt";
+
+
+
+/* =========================================
    ELEMENTS
-===================================================== */
+========================================= */
 
 const video =
     document.getElementById("video");
 
+
 const canvas =
     document.getElementById("canvas");
+
 
 const startButton =
     document.getElementById("startButton");
 
+
 const scanButton =
     document.getElementById("scanButton");
+
 
 const stopButton =
     document.getElementById("stopButton");
 
+
+const databaseButton =
+    document.getElementById(
+        "databaseButton"
+    );
+
+
 const status =
     document.getElementById("status");
 
+
 const processedImage =
-    document.getElementById("processedImage");
+    document.getElementById(
+        "processedImage"
+    );
+
 
 const ocrResult =
-    document.getElementById("ocrResult");
+    document.getElementById(
+        "ocrResult"
+    );
+
 
 const progressContainer =
-    document.getElementById("progressContainer");
+    document.getElementById(
+        "progressContainer"
+    );
+
 
 const progressBar =
-    document.getElementById("progressBar");
+    document.getElementById(
+        "progressBar"
+    );
+
 
 const nameField =
-    document.getElementById("nameField");
+    document.getElementById(
+        "nameField"
+    );
+
 
 const gradeField =
-    document.getElementById("gradeField");
+    document.getElementById(
+        "gradeField"
+    );
+
 
 const sectionField =
-    document.getElementById("sectionField");
+    document.getElementById(
+        "sectionField"
+    );
+
 
 const lrnField =
-    document.getElementById("lrnField");
+    document.getElementById(
+        "lrnField"
+    );
+
 
 const idField =
-    document.getElementById("idField");
+    document.getElementById(
+        "idField"
+    );
+
+
+const databaseResult =
+    document.getElementById(
+        "databaseResult"
+    );
+
+
+const databaseStatus =
+    document.getElementById(
+        "databaseStatus"
+    );
+
+
+const databaseDetails =
+    document.getElementById(
+        "databaseDetails"
+    );
 
 
 
-/* =====================================================
+/* =========================================
    CAMERA
-===================================================== */
+========================================= */
 
 let cameraStream = null;
 
@@ -411,27 +803,28 @@ async function startCamera() {
 
 
         cameraStream =
-            await navigator.mediaDevices.getUserMedia({
+            await navigator.mediaDevices
+                .getUserMedia({
 
-                audio: false,
+                    audio: false,
 
-                video: {
+                    video: {
 
-                    facingMode: {
-                        ideal: "environment"
-                    },
+                        facingMode: {
+                            ideal: "environment"
+                        },
 
-                    width: {
-                        ideal: 1920
-                    },
+                        width: {
+                            ideal: 1920
+                        },
 
-                    height: {
-                        ideal: 1080
+                        height: {
+                            ideal: 1080
+                        }
+
                     }
 
-                }
-
-            });
+                });
 
 
         video.srcObject =
@@ -448,18 +841,21 @@ async function startCamera() {
         startButton.disabled =
             true;
 
+
         scanButton.disabled =
             false;
+
 
         stopButton.disabled =
             false;
 
-
     }
+
 
     catch (error) {
 
         console.error(error);
+
 
         status.textContent =
             "Camera error: " +
@@ -479,9 +875,9 @@ async function startCamera() {
 
 
 
-/* =====================================================
+/* =========================================
    STOP CAMERA
-===================================================== */
+========================================= */
 
 stopButton.addEventListener(
     "click",
@@ -506,6 +902,7 @@ function stopCamera() {
     cameraStream =
         null;
 
+
     video.srcObject =
         null;
 
@@ -513,8 +910,10 @@ function stopCamera() {
     startButton.disabled =
         false;
 
+
     scanButton.disabled =
         true;
+
 
     stopButton.disabled =
         true;
@@ -527,9 +926,9 @@ function stopCamera() {
 
 
 
-/* =====================================================
-   SCAN BUTTON
-===================================================== */
+/* =========================================
+   SCAN
+========================================= */
 
 scanButton.addEventListener(
     "click",
@@ -544,13 +943,26 @@ async function captureAndScan() {
         !cameraStream ||
         scanning
     ) {
+
         return;
+
     }
 
 
-    scanning = true;
+    scanning =
+        true;
 
-    scanButton.disabled = true;
+
+    scanButton.disabled =
+        true;
+
+
+    databaseButton.disabled =
+        true;
+
+
+    databaseResult.style.display =
+        "none";
 
 
     status.textContent =
@@ -561,6 +973,7 @@ async function captureAndScan() {
 
         const videoWidth =
             video.videoWidth;
+
 
         const videoHeight =
             video.videoHeight;
@@ -579,8 +992,7 @@ async function captureAndScan() {
 
 
         /*
-         * Crop the center area
-         * where the green guide is.
+         * Crop center area.
          */
 
         const cropWidth =
@@ -597,25 +1009,29 @@ async function captureAndScan() {
 
         const cropX =
             Math.floor(
-                (videoWidth - cropWidth) / 2
+                (videoWidth -
+                    cropWidth) / 2
             );
 
 
         const cropY =
             Math.floor(
-                (videoHeight - cropHeight) / 2
+                (videoHeight -
+                    cropHeight) / 2
             );
 
 
         /*
-         * Upscale.
+         * Upscale image.
          */
 
-        const scale = 2;
+        const scale =
+            2;
 
 
         canvas.width =
             cropWidth * scale;
+
 
         canvas.height =
             cropHeight * scale;
@@ -649,9 +1065,13 @@ async function captureAndScan() {
 
 
         preprocessImage(
+
             ctx,
+
             canvas.width,
+
             canvas.height
+
         );
 
 
@@ -665,24 +1085,28 @@ async function captureAndScan() {
                 0.95
             );
 
+
         processedImage.style.display =
             "block";
 
 
         /*
-         * Start OCR.
+         * OCR
          */
 
         await performOCR();
 
     }
 
+
     catch (error) {
 
         console.error(error);
 
+
         status.textContent =
             "Scan failed.";
+
 
         ocrResult.textContent =
             "Scan Error:\n\n" +
@@ -694,6 +1118,7 @@ async function captureAndScan() {
     scanButton.disabled =
         false;
 
+
     scanning =
         false;
 
@@ -701,9 +1126,9 @@ async function captureAndScan() {
 
 
 
-/* =====================================================
+/* =========================================
    IMAGE PREPROCESSING
-===================================================== */
+========================================= */
 
 function preprocessImage(
     ctx,
@@ -725,7 +1150,7 @@ function preprocessImage(
 
 
     /*
-     * Grayscale
+     * Grayscale.
      */
 
     for (
@@ -734,11 +1159,16 @@ function preprocessImage(
         i += 4
     ) {
 
-        const r = data[i];
+        const r =
+            data[i];
 
-        const g = data[i + 1];
 
-        const b = data[i + 2];
+        const g =
+            data[i + 1];
+
+
+        const b =
+            data[i + 2];
 
 
         const gray =
@@ -750,8 +1180,10 @@ function preprocessImage(
         data[i] =
             gray;
 
+
         data[i + 1] =
             gray;
+
 
         data[i + 2] =
             gray;
@@ -760,10 +1192,11 @@ function preprocessImage(
 
 
     /*
-     * Contrast
+     * Contrast.
      */
 
-    const contrast = 1.5;
+    const contrast =
+        1.5;
 
 
     for (
@@ -797,8 +1230,10 @@ function preprocessImage(
         data[i] =
             value;
 
+
         data[i + 1] =
             value;
+
 
         data[i + 2] =
             value;
@@ -816,9 +1251,9 @@ function preprocessImage(
 
 
 
-/* =====================================================
+/* =========================================
    OCR
-===================================================== */
+========================================= */
 
 async function performOCR() {
 
@@ -842,11 +1277,15 @@ async function performOCR() {
 
         const result =
             await Tesseract.recognize(
+
                 canvas,
+
                 "eng",
+
                 {
 
-                    logger: function(info) {
+                    logger:
+                    function(info) {
 
                         console.log(info);
 
@@ -879,6 +1318,7 @@ async function performOCR() {
                     tessedit_pageseg_mode: 6
 
                 }
+
             );
 
 
@@ -887,10 +1327,16 @@ async function performOCR() {
 
 
         console.log(
-            "RAW OCR RESULT:"
+            "========== RAW OCR =========="
         );
 
+
         console.log(text);
+
+
+        console.log(
+            "=============================="
+        );
 
 
         if (
@@ -912,7 +1358,7 @@ async function performOCR() {
 
 
         /*
-         * Extract information.
+         * Extract fields.
          */
 
         extractFields(text);
@@ -925,7 +1371,23 @@ async function performOCR() {
         status.textContent =
             "Scan complete.";
 
+
+        /*
+         * Enable database button
+         * if an LRN was detected.
+         */
+
+        if (
+            lrnField.value.trim()
+        ) {
+
+            databaseButton.disabled =
+                false;
+
+        }
+
     }
+
 
     catch (error) {
 
@@ -960,29 +1422,29 @@ async function performOCR() {
 
 
 
-/* =====================================================
-   EXTRACT INFORMATION
-===================================================== */
+/* =========================================
+   EXTRACT FIELDS
+========================================= */
 
 function extractFields(text) {
 
     if (!text) {
+
         return;
+
     }
 
-
-    /*
-     * Split OCR into lines.
-     */
 
     const lines =
         text
             .split(/\r?\n/)
             .map(
-                line => line.trim()
+                line =>
+                    line.trim()
             )
             .filter(
-                line => line.length > 0
+                line =>
+                    line.length > 0
             );
 
 
@@ -1003,10 +1465,11 @@ function extractFields(text) {
     let idNumber = "";
 
 
-
-    /* =================================================
-       NAME
-    ================================================= */
+    /*
+     * ======================================
+     * NAME
+     * ======================================
+     */
 
     for (
         const line of lines
@@ -1015,10 +1478,6 @@ function extractFields(text) {
         const upper =
             line.toUpperCase();
 
-
-        /*
-         * Ignore known information lines.
-         */
 
         if (
             upper.includes("LRN") ||
@@ -1031,11 +1490,6 @@ function extractFields(text) {
 
         }
 
-
-        /*
-         * Keep letters, spaces,
-         * periods and apostrophes.
-         */
 
         const cleaned =
             line
@@ -1059,11 +1513,6 @@ function extractFields(text) {
                 );
 
 
-        /*
-         * A person's name should
-         * contain at least 2 words.
-         */
-
         if (
             words.length >= 2 &&
             cleaned.length >= 5
@@ -1079,10 +1528,11 @@ function extractFields(text) {
     }
 
 
-
-    /* =================================================
-       LRN
-    ================================================= */
+    /*
+     * ======================================
+     * LRN
+     * ======================================
+     */
 
     const lrnMatch =
         text.match(
@@ -1099,8 +1549,7 @@ function extractFields(text) {
 
 
     /*
-     * Fallback if Tesseract
-     * separates the LRN label.
+     * LRN FALLBACK
      */
 
     if (!lrn) {
@@ -1135,10 +1584,11 @@ function extractFields(text) {
     }
 
 
-
-    /* =================================================
-       ID NUMBER
-    ================================================= */
+    /*
+     * ======================================
+     * ID NUMBER
+     * ======================================
+     */
 
     const idMatch =
         text.match(
@@ -1157,10 +1607,8 @@ function extractFields(text) {
 
 
     /*
-     * Fallback for:
-
-       123456 -123
-    */
+     * ID FALLBACK
+     */
 
     if (!idNumber) {
 
@@ -1182,16 +1630,11 @@ function extractFields(text) {
     }
 
 
-
-    /* =================================================
-       GRADE + SECTION
-    ================================================= */
-
     /*
-     * Expected:
-
-       GRADE 12- ROENTGEN
-    */
+     * ======================================
+     * GRADE + SECTION
+     * ======================================
+     */
 
     const gradeMatch =
         text.match(
@@ -1224,10 +1667,9 @@ function extractFields(text) {
     }
 
 
-
-    /* =================================================
-       GRADE FALLBACK
-    ================================================= */
+    /*
+     * GRADE FALLBACK
+     */
 
     if (!grade) {
 
@@ -1247,72 +1689,405 @@ function extractFields(text) {
     }
 
 
-
-    /* =================================================
-       DISPLAY
-    ================================================= */
+    /*
+     * ======================================
+     * DISPLAY
+     * ======================================
+     */
 
     nameField.value =
         name;
 
+
     gradeField.value =
         grade;
+
 
     sectionField.value =
         section;
 
+
     lrnField.value =
         lrn;
+
 
     idField.value =
         idNumber;
 
 
-
-    /*
-     * Debug.
-     */
-
     console.log(
-        "------------------------------"
+        "EXTRACTED INFORMATION"
     );
 
+
     console.log(
-        "NAME:",
+        "Name:",
         name
     );
 
+
     console.log(
-        "GRADE:",
+        "Grade:",
         grade
     );
 
+
     console.log(
-        "SECTION:",
+        "Section:",
         section
     );
+
 
     console.log(
         "LRN:",
         lrn
     );
 
-    console.log(
-        "ID NUMBER:",
-        idNumber
-    );
 
     console.log(
-        "------------------------------"
+        "ID:",
+        idNumber
     );
 
 }
 
 
 
-/* =====================================================
+/* =========================================
+   DATABASE BUTTON
+========================================= */
+
+databaseButton.addEventListener(
+    "click",
+    checkDatabase
+);
+
+
+
+async function checkDatabase() {
+
+    const lrn =
+        lrnField.value.trim();
+
+
+    const name =
+        nameField.value.trim();
+
+
+    const idNumber =
+        idField.value.trim();
+
+
+    const grade =
+        gradeField.value.trim();
+
+
+    const section =
+        sectionField.value.trim();
+
+
+    if (!lrn) {
+
+        alert(
+            "No LRN was detected.\n\n" +
+            "Please scan the ID again."
+        );
+
+        return;
+
+    }
+
+
+    /*
+     * Make sure the URL was entered.
+     */
+
+    if (
+        DATABASE_URL.includes(
+            "PASTE_YOUR"
+        )
+    ) {
+
+        alert(
+            "You have not entered your Apps Script Web App URL yet."
+        );
+
+        return;
+
+    }
+
+
+    status.textContent =
+        "Checking Google Sheets...";
+
+
+    databaseButton.disabled =
+        true;
+
+
+    try {
+
+        /*
+         * Build URL parameters.
+         */
+
+        const params =
+            new URLSearchParams();
+
+
+        params.append(
+            "lrn",
+            lrn
+        );
+
+
+        params.append(
+            "name",
+            name
+        );
+
+
+        params.append(
+            "idNumber",
+            idNumber
+        );
+
+
+        params.append(
+            "grade",
+            grade
+        );
+
+
+        params.append(
+            "section",
+            section
+        );
+
+
+        /*
+         * Send request to Apps Script.
+         */
+
+        const response =
+            await fetch(
+
+                DATABASE_URL +
+                "?" +
+                params.toString(),
+
+                {
+
+                    method: "GET",
+
+                    redirect: "follow"
+
+                }
+
+            );
+
+
+        if (!response.ok) {
+
+            throw new Error(
+                "Server returned HTTP " +
+                response.status
+            );
+
+        }
+
+
+        const result =
+            await response.json();
+
+
+        console.log(
+            "DATABASE RESULT:",
+            result
+        );
+
+
+        /*
+         * ======================================
+         * STUDENT FOUND
+         * ======================================
+         */
+
+        if (
+            result.match === true
+        ) {
+
+            databaseResult
+                .style
+                .display =
+                "block";
+
+
+            databaseResult.className =
+                "valid";
+
+
+            databaseStatus.textContent =
+                "🟢 VALID STUDENT";
+
+
+            databaseDetails.innerHTML =
+
+                "<strong>Name:</strong> " +
+                escapeHTML(
+                    result.student.name
+                ) +
+                "<br><br>" +
+
+                "<strong>LRN:</strong> " +
+                escapeHTML(
+                    result.student.lrn
+                ) +
+                "<br><br>" +
+
+                "<strong>ID Number:</strong> " +
+                escapeHTML(
+                    result.student.idNumber
+                ) +
+                "<br><br>" +
+
+                "<strong>Grade:</strong> " +
+                escapeHTML(
+                    result.student.grade
+                ) +
+                "<br>" +
+
+                "<strong>Section:</strong> " +
+                escapeHTML(
+                    result.student.section
+                );
+
+
+            status.textContent =
+                "Student identified successfully.";
+
+        }
+
+
+        /*
+         * ======================================
+         * STUDENT NOT FOUND
+         * ======================================
+         */
+
+        else {
+
+            databaseResult
+                .style
+                .display =
+                "block";
+
+
+            databaseResult.className =
+                "invalid";
+
+
+            databaseStatus.textContent =
+                "🔴 STUDENT NOT FOUND";
+
+
+            databaseDetails.innerHTML =
+
+                "<strong>Scanned LRN:</strong> " +
+                escapeHTML(lrn) +
+                "<br><br>" +
+
+                "This LRN was not found " +
+                "in the student database.";
+
+
+            status.textContent =
+                "No matching student.";
+
+        }
+
+    }
+
+
+    catch (error) {
+
+        console.error(
+            "DATABASE ERROR:",
+            error
+        );
+
+
+        databaseResult
+            .style
+            .display =
+            "block";
+
+
+        databaseResult.className =
+            "invalid";
+
+
+        databaseStatus.textContent =
+            "⚠️ DATABASE ERROR";
+
+
+        databaseDetails.textContent =
+            error.message;
+
+
+        status.textContent =
+            "Database connection failed.";
+
+    }
+
+
+    databaseButton.disabled =
+        false;
+
+}
+
+
+
+/* =========================================
+   SECURITY
+========================================= */
+
+function escapeHTML(value) {
+
+    return String(value)
+
+        .replace(
+            /&/g,
+            "&amp;"
+        )
+
+        .replace(
+            /</g,
+            "&lt;"
+        )
+
+        .replace(
+            />/g,
+            "&gt;"
+        )
+
+        .replace(
+            /"/g,
+            "&quot;"
+        )
+
+        .replace(
+            /'/g,
+            "&#039;"
+        );
+
+}
+
+
+
+/* =========================================
    CLEANUP
-===================================================== */
+========================================= */
 
 window.addEventListener(
     "beforeunload",
@@ -1320,6 +2095,7 @@ window.addEventListener(
 );
 
 </script>
+
 
 </body>
 
