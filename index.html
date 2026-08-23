@@ -10,9 +10,7 @@
 
 <title>Student ID Scanner</title>
 
-
 <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
-
 
 <style>
 
@@ -20,46 +18,27 @@
     box-sizing: border-box;
 }
 
-
 body {
-
     margin: 0;
-
     background: #111;
-
     color: white;
-
     font-family: Arial, sans-serif;
-
     text-align: center;
-
 }
-
 
 header {
-
     padding: 15px;
-
     background: #1b1b1b;
-
 }
-
 
 header h1 {
-
     margin: 0;
-
     font-size: 22px;
-
 }
 
-
 header p {
-
     margin: 5px 0;
-
     color: #aaa;
-
 }
 
 
@@ -68,81 +47,44 @@ header p {
 ========================================= */
 
 #cameraContainer {
-
     position: relative;
-
     width: 100%;
-
     height: 60vh;
-
     min-height: 350px;
-
     background: black;
-
     overflow: hidden;
-
 }
-
 
 #video {
-
     width: 100%;
-
     height: 100%;
-
     object-fit: cover;
-
 }
-
 
 #scanGuide {
-
     position: absolute;
-
     width: 88%;
-
     max-width: 520px;
-
     aspect-ratio: 1.586 / 1;
-
     top: 50%;
-
     left: 50%;
-
     transform: translate(-50%, -50%);
-
     border: 3px solid #00ff88;
-
     border-radius: 12px;
-
     box-shadow:
-        0 0 0 9999px
-        rgba(0,0,0,0.45);
-
+        0 0 0 9999px rgba(0,0,0,0.45);
     pointer-events: none;
-
 }
 
-
 #guideText {
-
     position: absolute;
-
     top: calc(50% + 130px);
-
     left: 50%;
-
     transform: translateX(-50%);
-
     width: 100%;
-
     font-size: 14px;
-
-    text-shadow:
-        0 1px 4px black;
-
+    text-shadow: 0 1px 4px black;
     pointer-events: none;
-
 }
 
 
@@ -151,82 +93,47 @@ header p {
 ========================================= */
 
 #controls {
-
     padding: 15px;
-
     background: #1b1b1b;
-
 }
-
 
 button {
-
     border: none;
-
     border-radius: 10px;
-
     padding: 14px 20px;
-
     margin: 5px;
-
     font-size: 16px;
-
     font-weight: bold;
-
 }
-
 
 #startButton {
-
     background: #2196f3;
-
     color: white;
-
 }
-
 
 #scanButton {
-
     background: #00c853;
-
     color: white;
-
 }
-
 
 #stopButton {
-
     background: #f44336;
-
     color: white;
-
 }
-
 
 #databaseButton {
-
     background: #ff9800;
-
     color: white;
-
 }
-
 
 button:disabled {
-
     background: #555;
-
     color: #999;
-
 }
 
-
 #status {
-
     margin: 10px;
-
     color: #00ff88;
-
 }
 
 
@@ -235,34 +142,20 @@ button:disabled {
 ========================================= */
 
 #progressContainer {
-
     display: none;
-
     width: 90%;
-
     max-width: 500px;
-
     height: 10px;
-
     margin: 10px auto;
-
     background: #333;
-
     border-radius: 10px;
-
     overflow: hidden;
-
 }
 
-
 #progressBar {
-
     width: 0%;
-
     height: 100%;
-
     background: #00ff88;
-
 }
 
 
@@ -271,45 +164,26 @@ button:disabled {
 ========================================= */
 
 #results {
-
     background: #f4f4f4;
-
     color: #111;
-
     padding: 20px;
-
 }
-
 
 #processedImage {
-
     display: none;
-
     width: 100%;
-
     max-width: 700px;
-
     margin: 10px auto;
-
     border-radius: 10px;
-
 }
 
-
 #ocrResult {
-
     background: white;
-
     padding: 15px;
-
     border-radius: 10px;
-
     text-align: left;
-
     white-space: pre-wrap;
-
     word-break: break-word;
-
 }
 
 
@@ -318,47 +192,27 @@ button:disabled {
 ========================================= */
 
 .field {
-
     background: white;
-
     margin: 10px 0;
-
     padding: 12px;
-
     border-radius: 8px;
-
     text-align: left;
-
 }
-
 
 .field label {
-
     display: block;
-
     font-size: 12px;
-
     color: #777;
-
     margin-bottom: 5px;
-
 }
 
-
 .field input {
-
     width: 100%;
-
     border: none;
-
     outline: none;
-
     font-size: 17px;
-
     background: transparent;
-
     color: #111;
-
 }
 
 
@@ -367,51 +221,30 @@ button:disabled {
 ========================================= */
 
 #databaseResult {
-
     margin-top: 20px;
-
     padding: 20px;
-
     border-radius: 12px;
-
     background: white;
-
     text-align: left;
-
     display: none;
-
 }
-
 
 .valid {
-
     border: 4px solid #00c853;
-
 }
-
 
 .invalid {
-
     border: 4px solid #f44336;
-
 }
-
 
 #databaseResult h2 {
-
     margin-top: 0;
-
 }
 
-
 #databaseStatus {
-
     font-size: 20px;
-
     font-weight: bold;
-
     margin-bottom: 15px;
-
 }
 
 
@@ -420,9 +253,7 @@ button:disabled {
 ========================================= */
 
 #canvas {
-
     display: none;
-
 }
 
 
@@ -433,18 +264,12 @@ button:disabled {
 @media (max-width: 600px) {
 
     #cameraContainer {
-
         height: 60vh;
-
     }
 
-
     button {
-
         width: 90%;
-
         max-width: 400px;
-
     }
 
 }
@@ -479,14 +304,10 @@ button:disabled {
         playsinline>
     </video>
 
-
     <div id="scanGuide"></div>
 
-
     <div id="guideText">
-
         Align the entire ID inside the box
-
     </div>
 
 </div>
@@ -499,45 +320,30 @@ button:disabled {
 <div id="controls">
 
     <button id="startButton">
-
         📷 Start Camera
-
     </button>
-
 
     <button
         id="scanButton"
         disabled>
-
         🔍 Scan ID
-
     </button>
-
 
     <button
         id="stopButton"
         disabled>
-
         ⛔ Stop Camera
-
     </button>
-
 
     <button
         id="databaseButton"
         disabled>
-
         🔎 Check Database
-
     </button>
 
-
     <div id="status">
-
         Camera not started.
-
     </div>
-
 
     <div id="progressContainer">
 
@@ -554,21 +360,15 @@ button:disabled {
 
 <div id="results">
 
-
 <h2>Processed Image</h2>
-
 
 <img
     id="processedImage">
 
-
 <h2>OCR Result</h2>
 
-
 <div id="ocrResult">
-
     Nothing scanned yet.
-
 </div>
 
 
@@ -647,7 +447,6 @@ button:disabled {
 
 </div>
 
-
 </div>
 
 
@@ -659,15 +458,10 @@ button:disabled {
 
 /* =========================================
    GOOGLE APPS SCRIPT URL
-=========================================
-
-   REPLACE THIS WITH YOUR WEB APP URL.
-
 ========================================= */
 
 const DATABASE_URL =
-    "https://script.google.com/macros/s/AKfycbwq3oERBG-sxPTa45MfKwvTIvIoV5efkLLJQEYxzHQ-ei-cuiVANNSgt0RDX6esPZpP/exec";
-
+    "https://script.google.com/macros/s/AKfycbwgXtypSSIukmC4SeBNOi4CDX53UBkVuwmLJmrsO-SxyttVjsKTNjQF_lBoqGJEADS6/exec";
 
 
 /* =========================================
@@ -677,104 +471,59 @@ const DATABASE_URL =
 const video =
     document.getElementById("video");
 
-
 const canvas =
     document.getElementById("canvas");
-
 
 const startButton =
     document.getElementById("startButton");
 
-
 const scanButton =
     document.getElementById("scanButton");
-
 
 const stopButton =
     document.getElementById("stopButton");
 
-
 const databaseButton =
-    document.getElementById(
-        "databaseButton"
-    );
-
+    document.getElementById("databaseButton");
 
 const status =
     document.getElementById("status");
 
-
 const processedImage =
-    document.getElementById(
-        "processedImage"
-    );
-
+    document.getElementById("processedImage");
 
 const ocrResult =
-    document.getElementById(
-        "ocrResult"
-    );
-
+    document.getElementById("ocrResult");
 
 const progressContainer =
-    document.getElementById(
-        "progressContainer"
-    );
-
+    document.getElementById("progressContainer");
 
 const progressBar =
-    document.getElementById(
-        "progressBar"
-    );
-
+    document.getElementById("progressBar");
 
 const nameField =
-    document.getElementById(
-        "nameField"
-    );
-
+    document.getElementById("nameField");
 
 const gradeField =
-    document.getElementById(
-        "gradeField"
-    );
-
+    document.getElementById("gradeField");
 
 const sectionField =
-    document.getElementById(
-        "sectionField"
-    );
-
+    document.getElementById("sectionField");
 
 const lrnField =
-    document.getElementById(
-        "lrnField"
-    );
-
+    document.getElementById("lrnField");
 
 const idField =
-    document.getElementById(
-        "idField"
-    );
-
+    document.getElementById("idField");
 
 const databaseResult =
-    document.getElementById(
-        "databaseResult"
-    );
-
+    document.getElementById("databaseResult");
 
 const databaseStatus =
-    document.getElementById(
-        "databaseStatus"
-    );
-
+    document.getElementById("databaseStatus");
 
 const databaseDetails =
-    document.getElementById(
-        "databaseDetails"
-    );
-
+    document.getElementById("databaseDetails");
 
 
 /* =========================================
@@ -786,12 +535,10 @@ let cameraStream = null;
 let scanning = false;
 
 
-
 startButton.addEventListener(
     "click",
     startCamera
 );
-
 
 
 async function startCamera() {
@@ -803,28 +550,27 @@ async function startCamera() {
 
 
         cameraStream =
-            await navigator.mediaDevices
-                .getUserMedia({
+            await navigator.mediaDevices.getUserMedia({
 
-                    audio: false,
+                audio: false,
 
-                    video: {
+                video: {
 
-                        facingMode: {
-                            ideal: "environment"
-                        },
+                    facingMode: {
+                        ideal: "environment"
+                    },
 
-                        width: {
-                            ideal: 1920
-                        },
+                    width: {
+                        ideal: 1920
+                    },
 
-                        height: {
-                            ideal: 1080
-                        }
-
+                    height: {
+                        ideal: 1080
                     }
 
-                });
+                }
+
+            });
 
 
         video.srcObject =
@@ -841,26 +587,21 @@ async function startCamera() {
         startButton.disabled =
             true;
 
-
         scanButton.disabled =
             false;
-
 
         stopButton.disabled =
             false;
 
     }
 
-
     catch (error) {
 
         console.error(error);
 
-
         status.textContent =
             "Camera error: " +
             error.name;
-
 
         alert(
             "Camera error:\n\n" +
@@ -874,7 +615,6 @@ async function startCamera() {
 }
 
 
-
 /* =========================================
    STOP CAMERA
 ========================================= */
@@ -883,7 +623,6 @@ stopButton.addEventListener(
     "click",
     stopCamera
 );
-
 
 
 function stopCamera() {
@@ -898,32 +637,20 @@ function stopCamera() {
 
     }
 
+    cameraStream = null;
 
-    cameraStream =
-        null;
+    video.srcObject = null;
 
+    startButton.disabled = false;
 
-    video.srcObject =
-        null;
+    scanButton.disabled = true;
 
-
-    startButton.disabled =
-        false;
-
-
-    scanButton.disabled =
-        true;
-
-
-    stopButton.disabled =
-        true;
-
+    stopButton.disabled = true;
 
     status.textContent =
         "Camera stopped.";
 
 }
-
 
 
 /* =========================================
@@ -934,7 +661,6 @@ scanButton.addEventListener(
     "click",
     captureAndScan
 );
-
 
 
 async function captureAndScan() {
@@ -949,17 +675,11 @@ async function captureAndScan() {
     }
 
 
-    scanning =
-        true;
+    scanning = true;
 
+    scanButton.disabled = true;
 
-    scanButton.disabled =
-        true;
-
-
-    databaseButton.disabled =
-        true;
-
+    databaseButton.disabled = true;
 
     databaseResult.style.display =
         "none";
@@ -973,7 +693,6 @@ async function captureAndScan() {
 
         const videoWidth =
             video.videoWidth;
-
 
         const videoHeight =
             video.videoHeight;
@@ -990,10 +709,6 @@ async function captureAndScan() {
 
         }
 
-
-        /*
-         * Crop center area.
-         */
 
         const cropWidth =
             Math.floor(
@@ -1021,17 +736,11 @@ async function captureAndScan() {
             );
 
 
-        /*
-         * Upscale image.
-         */
-
-        const scale =
-            2;
+        const scale = 2;
 
 
         canvas.width =
             cropWidth * scale;
-
 
         canvas.height =
             cropHeight * scale;
@@ -1075,10 +784,6 @@ async function captureAndScan() {
         );
 
 
-        /*
-         * Show processed image.
-         */
-
         processedImage.src =
             canvas.toDataURL(
                 "image/jpeg",
@@ -1090,23 +795,16 @@ async function captureAndScan() {
             "block";
 
 
-        /*
-         * OCR
-         */
-
         await performOCR();
 
     }
-
 
     catch (error) {
 
         console.error(error);
 
-
         status.textContent =
             "Scan failed.";
-
 
         ocrResult.textContent =
             "Scan Error:\n\n" +
@@ -1115,15 +813,11 @@ async function captureAndScan() {
     }
 
 
-    scanButton.disabled =
-        false;
+    scanButton.disabled = false;
 
-
-    scanning =
-        false;
+    scanning = false;
 
 }
-
 
 
 /* =========================================
@@ -1149,26 +843,17 @@ function preprocessImage(
         imageData.data;
 
 
-    /*
-     * Grayscale.
-     */
-
     for (
         let i = 0;
         i < data.length;
         i += 4
     ) {
 
-        const r =
-            data[i];
+        const r = data[i];
 
+        const g = data[i + 1];
 
-        const g =
-            data[i + 1];
-
-
-        const b =
-            data[i + 2];
+        const b = data[i + 2];
 
 
         const gray =
@@ -1177,26 +862,16 @@ function preprocessImage(
             0.114 * b;
 
 
-        data[i] =
-            gray;
+        data[i] = gray;
 
+        data[i + 1] = gray;
 
-        data[i + 1] =
-            gray;
-
-
-        data[i + 2] =
-            gray;
+        data[i + 2] = gray;
 
     }
 
 
-    /*
-     * Contrast.
-     */
-
-    const contrast =
-        1.5;
+    const contrast = 1.5;
 
 
     for (
@@ -1227,16 +902,11 @@ function preprocessImage(
             );
 
 
-        data[i] =
-            value;
+        data[i] = value;
 
+        data[i + 1] = value;
 
-        data[i + 1] =
-            value;
-
-
-        data[i + 2] =
-            value;
+        data[i + 2] = value;
 
     }
 
@@ -1248,7 +918,6 @@ function preprocessImage(
     );
 
 }
-
 
 
 /* =========================================
@@ -1330,9 +999,7 @@ async function performOCR() {
             "========== RAW OCR =========="
         );
 
-
         console.log(text);
-
 
         console.log(
             "=============================="
@@ -1357,10 +1024,6 @@ async function performOCR() {
         }
 
 
-        /*
-         * Extract fields.
-         */
-
         extractFields(text);
 
 
@@ -1372,11 +1035,6 @@ async function performOCR() {
             "Scan complete.";
 
 
-        /*
-         * Enable database button
-         * if an LRN was detected.
-         */
-
         if (
             lrnField.value.trim()
         ) {
@@ -1387,7 +1045,6 @@ async function performOCR() {
         }
 
     }
-
 
     catch (error) {
 
@@ -1421,7 +1078,6 @@ async function performOCR() {
 }
 
 
-
 /* =========================================
    EXTRACT FIELDS
 ========================================= */
@@ -1429,9 +1085,7 @@ async function performOCR() {
 function extractFields(text) {
 
     if (!text) {
-
         return;
-
     }
 
 
@@ -1465,11 +1119,9 @@ function extractFields(text) {
     let idNumber = "";
 
 
-    /*
-     * ======================================
-     * NAME
-     * ======================================
-     */
+    /* ======================================
+       NAME
+    ====================================== */
 
     for (
         const line of lines
@@ -1528,11 +1180,9 @@ function extractFields(text) {
     }
 
 
-    /*
-     * ======================================
-     * LRN
-     * ======================================
-     */
+    /* ======================================
+       LRN
+    ====================================== */
 
     const lrnMatch =
         text.match(
@@ -1548,9 +1198,9 @@ function extractFields(text) {
     }
 
 
-    /*
-     * LRN FALLBACK
-     */
+    /* ======================================
+       LRN FALLBACK
+    ====================================== */
 
     if (!lrn) {
 
@@ -1584,11 +1234,9 @@ function extractFields(text) {
     }
 
 
-    /*
-     * ======================================
-     * ID NUMBER
-     * ======================================
-     */
+    /* ======================================
+       ID NUMBER
+    ====================================== */
 
     const idMatch =
         text.match(
@@ -1606,9 +1254,9 @@ function extractFields(text) {
     }
 
 
-    /*
-     * ID FALLBACK
-     */
+    /* ======================================
+       ID FALLBACK
+    ====================================== */
 
     if (!idNumber) {
 
@@ -1630,11 +1278,9 @@ function extractFields(text) {
     }
 
 
-    /*
-     * ======================================
-     * GRADE + SECTION
-     * ======================================
-     */
+    /* ======================================
+       GRADE + SECTION
+    ====================================== */
 
     const gradeMatch =
         text.match(
@@ -1667,9 +1313,9 @@ function extractFields(text) {
     }
 
 
-    /*
-     * GRADE FALLBACK
-     */
+    /* ======================================
+       GRADE FALLBACK
+    ====================================== */
 
     if (!grade) {
 
@@ -1689,27 +1335,21 @@ function extractFields(text) {
     }
 
 
-    /*
-     * ======================================
-     * DISPLAY
-     * ======================================
-     */
+    /* ======================================
+       DISPLAY
+    ====================================== */
 
     nameField.value =
         name;
 
-
     gradeField.value =
         grade;
-
 
     sectionField.value =
         section;
 
-
     lrnField.value =
         lrn;
-
 
     idField.value =
         idNumber;
@@ -1719,30 +1359,25 @@ function extractFields(text) {
         "EXTRACTED INFORMATION"
     );
 
-
     console.log(
         "Name:",
         name
     );
-
 
     console.log(
         "Grade:",
         grade
     );
 
-
     console.log(
         "Section:",
         section
     );
 
-
     console.log(
         "LRN:",
         lrn
     );
-
 
     console.log(
         "ID:",
@@ -1752,9 +1387,8 @@ function extractFields(text) {
 }
 
 
-
 /* =========================================
-   DATABASE BUTTON
+   DATABASE
 ========================================= */
 
 databaseButton.addEventListener(
@@ -1763,23 +1397,10 @@ databaseButton.addEventListener(
 );
 
 
-
-function checkDatabase() {
+async function checkDatabase() {
 
     const lrn =
         lrnField.value.trim();
-
-    const name =
-        nameField.value.trim();
-
-    const idNumber =
-        idField.value.trim();
-
-    const grade =
-        gradeField.value.trim();
-
-    const section =
-        sectionField.value.trim();
 
 
     if (!lrn) {
@@ -1817,243 +1438,107 @@ function checkDatabase() {
         true;
 
 
-    /*
-     * Create a unique callback name.
-     */
+    databaseResult.style.display =
+        "none";
 
-    const callbackName =
-        "studentDatabaseCallback_" +
-        Date.now();
 
+    try {
 
-    /*
-     * Create the callback function.
-     */
+        const url =
+            DATABASE_URL +
+            "?lrn=" +
+            encodeURIComponent(lrn);
 
-    window[callbackName] =
-        function(result) {
 
-            console.log(
-                "DATABASE RESULT:",
-                result
-            );
-
-
-            /*
-             * Remove callback.
-             */
-
-            delete window[callbackName];
-
-
-            /*
-             * Remove script tag.
-             */
-
-            if (script.parentNode) {
-
-                script.parentNode.removeChild(
-                    script
-                );
-
-            }
-
-
-            /*
-             * =================================
-             * STUDENT FOUND
-             * =================================
-             */
-
-            if (
-                result.match === true
-            ) {
-
-                databaseResult.style.display =
-                    "block";
-
-
-                databaseResult.className =
-                    "valid";
-
-
-                databaseStatus.textContent =
-                    "🟢 VALID STUDENT";
-
-
-                databaseDetails.innerHTML =
-
-                    "<strong>Name:</strong> " +
-                    escapeHTML(
-                        result.student.name
-                    ) +
-
-                    "<br><br>" +
-
-                    "<strong>LRN:</strong> " +
-                    escapeHTML(
-                        result.student.lrn
-                    ) +
-
-                    "<br><br>" +
-
-                    "<strong>ID Number:</strong> " +
-                    escapeHTML(
-                        result.student.idNumber
-                    ) +
-
-                    "<br><br>" +
-
-                    "<strong>Grade:</strong> " +
-                    escapeHTML(
-                        result.student.grade
-                    ) +
-
-                    "<br>" +
-
-                    "<strong>Section:</strong> " +
-                    escapeHTML(
-                        result.student.section
-                    );
-
-
-                status.textContent =
-                    "Student identified successfully.";
-
-            }
-
-
-            /*
-             * =================================
-             * STUDENT NOT FOUND
-             * =================================
-             */
-
-            else {
-
-                databaseResult.style.display =
-                    "block";
-
-
-                databaseResult.className =
-                    "invalid";
-
-
-                databaseStatus.textContent =
-                    "🔴 STUDENT NOT FOUND";
-
-
-                databaseDetails.innerHTML =
-
-                    "<strong>Scanned LRN:</strong> " +
-
-                    escapeHTML(lrn) +
-
-                    "<br><br>" +
-
-                    "This LRN was not found " +
-                    "in the student database.";
-
-
-                status.textContent =
-                    "No matching student.";
-
-            }
-
-
-            databaseButton.disabled =
-                false;
-
-        };
-
-
-    /*
-     * =================================
-     * BUILD REQUEST
-     * =================================
-     */
-
-    const params =
-        new URLSearchParams();
-
-
-    params.append(
-        "lrn",
-        lrn
-    );
-
-
-    params.append(
-        "name",
-        name
-    );
-
-
-    params.append(
-        "idNumber",
-        idNumber
-    );
-
-
-    params.append(
-        "grade",
-        grade
-    );
-
-
-    params.append(
-        "section",
-        section
-    );
-
-
-    params.append(
-        "callback",
-        callbackName
-    );
-
-
-    /*
-     * =================================
-     * CREATE SCRIPT REQUEST
-     * =================================
-     */
-
-    const script =
-        document.createElement(
-            "script"
+        console.log(
+            "DATABASE REQUEST:",
+            url
         );
 
 
-    script.src =
-        DATABASE_URL +
-        "?" +
-        params.toString();
+        const response =
+            await fetch(url);
 
 
-    /*
-     * Error handling
-     */
+        if (!response.ok) {
 
-    script.onerror =
-        function() {
-
-            console.error(
-                "Could not connect to Apps Script."
+            throw new Error(
+                "HTTP error: " +
+                response.status
             );
 
+        }
 
-            delete window[callbackName];
+
+        const result =
+            await response.json();
 
 
-            if (script.parentNode) {
+        console.log(
+            "DATABASE RESULT:",
+            result
+        );
 
-                script.parentNode.removeChild(
-                    script
+
+        if (
+            result.match === true
+        ) {
+
+            databaseResult.style.display =
+                "block";
+
+
+            databaseResult.className =
+                "valid";
+
+
+            databaseStatus.textContent =
+                "🟢 VALID STUDENT";
+
+
+            databaseDetails.innerHTML =
+
+                "<strong>Name:</strong> " +
+                escapeHTML(
+                    result.student.name
+                ) +
+
+                "<br><br>" +
+
+                "<strong>LRN:</strong> " +
+                escapeHTML(
+                    result.student.lrn
+                ) +
+
+                "<br><br>" +
+
+                "<strong>ID Number:</strong> " +
+                escapeHTML(
+                    result.student.idNumber
+                ) +
+
+                "<br><br>" +
+
+                "<strong>Grade:</strong> " +
+                escapeHTML(
+                    result.student.grade
+                ) +
+
+                "<br><br>" +
+
+                "<strong>Section:</strong> " +
+                escapeHTML(
+                    result.student.section
                 );
 
-            }
 
+            status.textContent =
+                "Student identified successfully.";
+
+        }
+
+
+        else {
 
             databaseResult.style.display =
                 "block";
@@ -2064,30 +1549,76 @@ function checkDatabase() {
 
 
             databaseStatus.textContent =
-                "⚠️ DATABASE CONNECTION FAILED";
+                "🔴 STUDENT NOT FOUND";
 
 
-            databaseDetails.textContent =
-                "Could not connect to Google Apps Script.";
+            databaseDetails.innerHTML =
+
+                "<strong>Scanned LRN:</strong> " +
+
+                escapeHTML(lrn) +
+
+                "<br><br>" +
+
+                "This LRN was not found " +
+                "in the student database.";
 
 
             status.textContent =
-                "Database connection failed.";
+                "No matching student.";
+
+        }
+
+    }
 
 
-            databaseButton.disabled =
-                false;
+    catch (error) {
 
-        };
+        console.error(
+            "DATABASE ERROR:",
+            error
+        );
 
 
-    /*
-     * Send request.
-     */
+        databaseResult.style.display =
+            "block";
 
-    document.body.appendChild(
-        script
-    );
+
+        databaseResult.className =
+            "invalid";
+
+
+        databaseStatus.textContent =
+            "⚠️ DATABASE CONNECTION FAILED";
+
+
+        databaseDetails.innerHTML =
+
+            "Could not connect to Google Apps Script." +
+
+            "<br><br>" +
+
+            "<small>" +
+
+            escapeHTML(
+                error.message
+            ) +
+
+            "</small>";
+
+
+        status.textContent =
+            "Database connection failed.";
+
+    }
+
+
+    finally {
+
+        databaseButton.disabled =
+            false;
+
+    }
 
 }
 
@@ -2128,7 +1659,6 @@ function escapeHTML(value) {
 }
 
 
-
 /* =========================================
    CLEANUP
 ========================================= */
@@ -2139,7 +1669,6 @@ window.addEventListener(
 );
 
 </script>
-
 
 </body>
 
