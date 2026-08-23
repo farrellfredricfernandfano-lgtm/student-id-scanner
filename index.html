@@ -1764,23 +1764,19 @@ databaseButton.addEventListener(
 
 
 
-async function checkDatabase() {
+function checkDatabase() {
 
     const lrn =
         lrnField.value.trim();
 
-
     const name =
         nameField.value.trim();
-
 
     const idNumber =
         idField.value.trim();
 
-
     const grade =
         gradeField.value.trim();
-
 
     const section =
         sectionField.value.trim();
@@ -1798,10 +1794,6 @@ async function checkDatabase() {
     }
 
 
-    /*
-     * Make sure the URL was entered.
-     */
-
     if (
         DATABASE_URL.includes(
             "PASTE_YOUR"
@@ -1809,7 +1801,7 @@ async function checkDatabase() {
     ) {
 
         alert(
-            "You have not entered your Apps Script Web App URL yet."
+            "Apps Script URL has not been entered."
         );
 
         return;
@@ -1825,161 +1817,245 @@ async function checkDatabase() {
         true;
 
 
-    try {
+    /*
+     * Create a unique callback name.
+     */
 
-        /*
-         * Build URL parameters.
-         */
-
-        const params =
-            new URLSearchParams();
-
-
-        params.append(
-            "lrn",
-            lrn
-        );
+    const callbackName =
+        "studentDatabaseCallback_" +
+        Date.now();
 
 
-        params.append(
-            "name",
-            name
-        );
+    /*
+     * Create the callback function.
+     */
 
+    window[callbackName] =
+        function(result) {
 
-        params.append(
-            "idNumber",
-            idNumber
-        );
-
-
-        params.append(
-            "grade",
-            grade
-        );
-
-
-        params.append(
-            "section",
-            section
-        );
-
-
-        /*
-         * Send request to Apps Script.
-         */
-
-        const response =
-            await fetch(
-
-                DATABASE_URL +
-                "?" +
-                params.toString(),
-
-                {
-
-                    method: "GET",
-
-                    redirect: "follow"
-
-                }
-
+            console.log(
+                "DATABASE RESULT:",
+                result
             );
 
 
-        if (!response.ok) {
+            /*
+             * Remove callback.
+             */
 
-            throw new Error(
-                "Server returned HTTP " +
-                response.status
-            );
-
-        }
+            delete window[callbackName];
 
 
-        const result =
-            await response.json();
+            /*
+             * Remove script tag.
+             */
 
+            if (script.parentNode) {
 
-        console.log(
-            "DATABASE RESULT:",
-            result
-        );
-
-
-        /*
-         * ======================================
-         * STUDENT FOUND
-         * ======================================
-         */
-
-        if (
-            result.match === true
-        ) {
-
-            databaseResult
-                .style
-                .display =
-                "block";
-
-
-            databaseResult.className =
-                "valid";
-
-
-            databaseStatus.textContent =
-                "🟢 VALID STUDENT";
-
-
-            databaseDetails.innerHTML =
-
-                "<strong>Name:</strong> " +
-                escapeHTML(
-                    result.student.name
-                ) +
-                "<br><br>" +
-
-                "<strong>LRN:</strong> " +
-                escapeHTML(
-                    result.student.lrn
-                ) +
-                "<br><br>" +
-
-                "<strong>ID Number:</strong> " +
-                escapeHTML(
-                    result.student.idNumber
-                ) +
-                "<br><br>" +
-
-                "<strong>Grade:</strong> " +
-                escapeHTML(
-                    result.student.grade
-                ) +
-                "<br>" +
-
-                "<strong>Section:</strong> " +
-                escapeHTML(
-                    result.student.section
+                script.parentNode.removeChild(
+                    script
                 );
 
-
-            status.textContent =
-                "Student identified successfully.";
-
-        }
+            }
 
 
-        /*
-         * ======================================
-         * STUDENT NOT FOUND
-         * ======================================
-         */
+            /*
+             * =================================
+             * STUDENT FOUND
+             * =================================
+             */
 
-        else {
+            if (
+                result.match === true
+            ) {
 
-            databaseResult
-                .style
-                .display =
+                databaseResult.style.display =
+                    "block";
+
+
+                databaseResult.className =
+                    "valid";
+
+
+                databaseStatus.textContent =
+                    "🟢 VALID STUDENT";
+
+
+                databaseDetails.innerHTML =
+
+                    "<strong>Name:</strong> " +
+                    escapeHTML(
+                        result.student.name
+                    ) +
+
+                    "<br><br>" +
+
+                    "<strong>LRN:</strong> " +
+                    escapeHTML(
+                        result.student.lrn
+                    ) +
+
+                    "<br><br>" +
+
+                    "<strong>ID Number:</strong> " +
+                    escapeHTML(
+                        result.student.idNumber
+                    ) +
+
+                    "<br><br>" +
+
+                    "<strong>Grade:</strong> " +
+                    escapeHTML(
+                        result.student.grade
+                    ) +
+
+                    "<br>" +
+
+                    "<strong>Section:</strong> " +
+                    escapeHTML(
+                        result.student.section
+                    );
+
+
+                status.textContent =
+                    "Student identified successfully.";
+
+            }
+
+
+            /*
+             * =================================
+             * STUDENT NOT FOUND
+             * =================================
+             */
+
+            else {
+
+                databaseResult.style.display =
+                    "block";
+
+
+                databaseResult.className =
+                    "invalid";
+
+
+                databaseStatus.textContent =
+                    "🔴 STUDENT NOT FOUND";
+
+
+                databaseDetails.innerHTML =
+
+                    "<strong>Scanned LRN:</strong> " +
+
+                    escapeHTML(lrn) +
+
+                    "<br><br>" +
+
+                    "This LRN was not found " +
+                    "in the student database.";
+
+
+                status.textContent =
+                    "No matching student.";
+
+            }
+
+
+            databaseButton.disabled =
+                false;
+
+        };
+
+
+    /*
+     * =================================
+     * BUILD REQUEST
+     * =================================
+     */
+
+    const params =
+        new URLSearchParams();
+
+
+    params.append(
+        "lrn",
+        lrn
+    );
+
+
+    params.append(
+        "name",
+        name
+    );
+
+
+    params.append(
+        "idNumber",
+        idNumber
+    );
+
+
+    params.append(
+        "grade",
+        grade
+    );
+
+
+    params.append(
+        "section",
+        section
+    );
+
+
+    params.append(
+        "callback",
+        callbackName
+    );
+
+
+    /*
+     * =================================
+     * CREATE SCRIPT REQUEST
+     * =================================
+     */
+
+    const script =
+        document.createElement(
+            "script"
+        );
+
+
+    script.src =
+        DATABASE_URL +
+        "?" +
+        params.toString();
+
+
+    /*
+     * Error handling
+     */
+
+    script.onerror =
+        function() {
+
+            console.error(
+                "Could not connect to Apps Script."
+            );
+
+
+            delete window[callbackName];
+
+
+            if (script.parentNode) {
+
+                script.parentNode.removeChild(
+                    script
+                );
+
+            }
+
+
+            databaseResult.style.display =
                 "block";
 
 
@@ -1988,64 +2064,32 @@ async function checkDatabase() {
 
 
             databaseStatus.textContent =
-                "🔴 STUDENT NOT FOUND";
+                "⚠️ DATABASE CONNECTION FAILED";
 
 
-            databaseDetails.innerHTML =
-
-                "<strong>Scanned LRN:</strong> " +
-                escapeHTML(lrn) +
-                "<br><br>" +
-
-                "This LRN was not found " +
-                "in the student database.";
+            databaseDetails.textContent =
+                "Could not connect to Google Apps Script.";
 
 
             status.textContent =
-                "No matching student.";
-
-        }
-
-    }
+                "Database connection failed.";
 
 
-    catch (error) {
+            databaseButton.disabled =
+                false;
 
-        console.error(
-            "DATABASE ERROR:",
-            error
-        );
+        };
 
 
-        databaseResult
-            .style
-            .display =
-            "block";
+    /*
+     * Send request.
+     */
 
-
-        databaseResult.className =
-            "invalid";
-
-
-        databaseStatus.textContent =
-            "⚠️ DATABASE ERROR";
-
-
-        databaseDetails.textContent =
-            error.message;
-
-
-        status.textContent =
-            "Database connection failed.";
-
-    }
-
-
-    databaseButton.disabled =
-        false;
+    document.body.appendChild(
+        script
+    );
 
 }
-
 
 
 /* =========================================
