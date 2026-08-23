@@ -1758,52 +1758,243 @@ async function performOCR() {
 
 function extractFields(text) {
 
-
     if (!text) {
-
         return;
+    }
+
+    /*
+        Clean the OCR result.
+    */
+
+    const lines = text
+        .split(/\r?\n/)
+        .map(line => line.trim())
+        .filter(line => line.length > 0);
+
+
+    console.log("OCR lines:", lines);
+
+
+    /*
+        Join everything together.
+
+        This helps when Tesseract puts
+        words on unexpected lines.
+    */
+
+    const fullText =
+        lines.join(" ");
+
+
+    /* =========================================
+       NAME
+    ========================================= */
+
+    let name = "";
+
+
+    /*
+        Look for:
+
+        NAME: Farrell Fano
+        Name - Farrell Fano
+        NAME Farrell Fano
+    */
+
+    const nameMatch =
+        fullText.match(
+            /(?:NAME|NAMF|NANE)\s*[:\-]?\s*([A-Z][A-Z\s.,'-]{2,})/i
+        );
+
+
+    if (nameMatch) {
+
+        name =
+            cleanValue(
+                nameMatch[1]
+            );
+
+    }
+
+
+    /* =========================================
+       GRADE
+    ========================================= */
+
+    let grade = "";
+
+
+    const gradeMatch =
+        fullText.match(
+            /(?:GRADE|GRADF|GRAPE)\s*(?:LEVEL)?\s*[:\-]?\s*(11|12|[7-9]|10)/i
+        );
+
+
+    if (gradeMatch) {
+
+        grade =
+            gradeMatch[1];
+
+    }
+
+
+    /* =========================================
+       SECTION
+    ========================================= */
+
+    let section = "";
+
+
+    const sectionMatch =
+        fullText.match(
+            /(?:SECTION|SECT|SECTlON)\s*[:\-]?\s*([A-Z0-9][A-Z0-9\s-]{1,30})/i
+        );
+
+
+    if (sectionMatch) {
+
+        section =
+            cleanValue(
+                sectionMatch[1]
+            );
+
+    }
+
+
+    /* =========================================
+       LRN / ID NUMBER
+    ========================================= */
+
+    let idNumber = "";
+
+
+    /*
+        Look for common labels.
+    */
+
+    const idMatch =
+        fullText.match(
+            /(?:LRN|ID\s*(?:NO|NUMBER)?|ID#)\s*[:\-]?\s*([0-9]{5,20})/i
+        );
+
+
+    if (idMatch) {
+
+        idNumber =
+            idMatch[1];
 
     }
 
 
     /*
-        This is intentionally basic.
-
-        We will customize this once
-        we know the exact layout of
-        your student IDs.
+        If the ID label wasn't detected,
+        look for a standalone long number.
     */
 
-    const lines =
-        text
-            .split("\n")
-            .map(
-                line =>
-                    line.trim()
-            )
-            .filter(
-                line =>
-                    line.length > 0
+    if (!idNumber) {
+
+        const numberMatch =
+            fullText.match(
+                /\b\d{8,20}\b/
             );
 
 
-    console.log(
-        "OCR lines:",
-        lines
-    );
+        if (numberMatch) {
+
+            idNumber =
+                numberMatch[0];
+
+        }
+
+    }
+
+
+    /* =========================================
+       DISPLAY RESULTS
+    ========================================= */
+
+    document.getElementById(
+        "nameField"
+    ).value =
+        name;
+
+
+    document.getElementById(
+        "gradeField"
+    ).value =
+        grade;
+
+
+    document.getElementById(
+        "sectionField"
+    ).value =
+        section;
+
+
+    document.getElementById(
+        "idField"
+    ).value =
+        idNumber;
 
 
     /*
-        For now, don't automatically
-        guess the student's name.
+        Debug information.
 
-        We don't want bad OCR to
-        silently put incorrect data
-        into your database.
+        Check your browser console if
+        something isn't being detected.
     */
+
+    console.log(
+        "========== EXTRACTED DATA =========="
+    );
+
+    console.log(
+        "Name:",
+        name
+    );
+
+    console.log(
+        "Grade:",
+        grade
+    );
+
+    console.log(
+        "Section:",
+        section
+    );
+
+    console.log(
+        "ID:",
+        idNumber
+    );
+
+    console.log(
+        "===================================="
+
+    );
 
 }
 
+
+/* =========================================
+   CLEAN OCR VALUE
+========================================= */
+
+function cleanValue(value) {
+
+    return value
+        .replace(
+            /\s+/g,
+            " "
+        )
+        .trim()
+        .replace(
+            /^[:\-]+/,
+            ""
+        )
+        .trim();
+
+}
 
 
 /* =====================================================
