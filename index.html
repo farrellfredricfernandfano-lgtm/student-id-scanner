@@ -1,1 +1,1842 @@
+<!DOCTYPE html>
+
+<html lang="en">
+
+<head>
+
+```
+<meta charset="UTF-8">
+
+<meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+
+<title>Student ID Scanner</title>
+
+<!-- Tesseract.js -->
+<script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
+
+
+<style>
+
+    * {
+        box-sizing: border-box;
+    }
+
+
+    body {
+
+        margin: 0;
+
+        padding: 0;
+
+        background: #111;
+
+        color: white;
+
+        font-family: Arial, sans-serif;
+
+        text-align: center;
+
+    }
+
+
+    /* =================================================
+       HEADER
+    ================================================= */
+
+    header {
+
+        background: #1b1b1b;
+
+        padding: 15px 10px;
+
+    }
+
+
+    header h1 {
+
+        margin: 0;
+
+        font-size: 22px;
+
+    }
+
+
+    header p {
+
+        margin: 5px 0 0;
+
+        color: #aaa;
+
+        font-size: 13px;
+
+    }
+
+
+    /* =================================================
+       CAMERA
+    ================================================= */
+
+    #cameraContainer {
+
+        position: relative;
+
+        width: 100%;
+
+        height: 65vh;
+
+        min-height: 350px;
+
+        max-height: 700px;
+
+        background: black;
+
+        overflow: hidden;
+
+    }
+
+
+    #video {
+
+        width: 100%;
+
+        height: 100%;
+
+        object-fit: cover;
+
+    }
+
+
+    /* =================================================
+       ID GUIDE
+    ================================================= */
+
+    #scanGuide {
+
+        position: absolute;
+
+        width: 88%;
+
+        max-width: 520px;
+
+        aspect-ratio: 1.586 / 1;
+
+        top: 50%;
+
+        left: 50%;
+
+        transform: translate(-50%, -50%);
+
+        border: 3px solid #00ff88;
+
+        border-radius: 12px;
+
+        box-shadow:
+
+            0 0 0 9999px rgba(0,0,0,0.45);
+
+        pointer-events: none;
+
+    }
+
+
+    #guideText {
+
+        position: absolute;
+
+        top: calc(50% + 150px);
+
+        left: 50%;
+
+        transform: translateX(-50%);
+
+        width: 100%;
+
+        color: white;
+
+        font-size: 14px;
+
+        text-shadow: 0 1px 3px black;
+
+        pointer-events: none;
+
+    }
+
+
+    /* =================================================
+       SCAN LINE
+    ================================================= */
+
+    #scanLine {
+
+        position: absolute;
+
+        width: 100%;
+
+        height: 2px;
+
+        background: #00ff88;
+
+        top: 0;
+
+        left: 0;
+
+        opacity: 0;
+
+        pointer-events: none;
+
+    }
+
+
+    #scanLine.active {
+
+        opacity: 1;
+
+        animation: scanAnimation 2s linear infinite;
+
+    }
+
+
+    @keyframes scanAnimation {
+
+        0% {
+
+            top: 0%;
+
+        }
+
+        50% {
+
+            top: 100%;
+
+        }
+
+        100% {
+
+            top: 0%;
+
+        }
+
+    }
+
+
+    /* =================================================
+       CONTROLS
+    ================================================= */
+
+    #controls {
+
+        background: #1b1b1b;
+
+        padding: 15px 10px;
+
+    }
+
+
+    button {
+
+        border: none;
+
+        border-radius: 10px;
+
+        padding: 14px 20px;
+
+        margin: 5px;
+
+        font-size: 16px;
+
+        font-weight: bold;
+
+        cursor: pointer;
+
+    }
+
+
+    #startButton {
+
+        background: #2196f3;
+
+        color: white;
+
+    }
+
+
+    #scanButton {
+
+        background: #00c853;
+
+        color: white;
+
+    }
+
+
+    #stopButton {
+
+        background: #f44336;
+
+        color: white;
+
+    }
+
+
+    button:disabled {
+
+        background: #555;
+
+        color: #999;
+
+        cursor: not-allowed;
+
+    }
+
+
+    /* =================================================
+       STATUS
+    ================================================= */
+
+    #status {
+
+        margin: 8px;
+
+        font-size: 14px;
+
+        color: #00ff88;
+
+    }
+
+
+    /* =================================================
+       OCR PROGRESS
+    ================================================= */
+
+    #progressContainer {
+
+        width: 90%;
+
+        max-width: 500px;
+
+        height: 10px;
+
+        background: #333;
+
+        border-radius: 10px;
+
+        margin: 10px auto;
+
+        overflow: hidden;
+
+        display: none;
+
+    }
+
+
+    #progressBar {
+
+        height: 100%;
+
+        width: 0%;
+
+        background: #00ff88;
+
+        transition: width 0.2s;
+
+    }
+
+
+    /* =================================================
+       RESULTS
+    ================================================= */
+
+    #results {
+
+        background: #f4f4f4;
+
+        color: #111;
+
+        padding: 20px;
+
+    }
+
+
+    #results h2 {
+
+        margin-top: 10px;
+
+    }
+
+
+    #processedImage {
+
+        width: 100%;
+
+        max-width: 700px;
+
+        border-radius: 10px;
+
+        display: none;
+
+        margin: 10px auto;
+
+    }
+
+
+    #ocrResult {
+
+        background: white;
+
+        padding: 15px;
+
+        border-radius: 10px;
+
+        text-align: left;
+
+        white-space: pre-wrap;
+
+        word-break: break-word;
+
+        min-height: 120px;
+
+        box-shadow:
+
+            0 2px 8px rgba(0,0,0,0.2);
+
+    }
+
+
+    /* =================================================
+       INFORMATION FIELDS
+    ================================================= */
+
+    .field {
+
+        background: white;
+
+        margin: 10px 0;
+
+        padding: 12px;
+
+        border-radius: 8px;
+
+        text-align: left;
+
+        box-shadow:
+
+            0 1px 5px rgba(0,0,0,0.15);
+
+    }
+
+
+    .field label {
+
+        display: block;
+
+        font-size: 12px;
+
+        color: #777;
+
+        margin-bottom: 4px;
+
+    }
+
+
+    .field input {
+
+        width: 100%;
+
+        border: none;
+
+        outline: none;
+
+        font-size: 17px;
+
+        background: transparent;
+
+    }
+
+
+    /* =================================================
+       HIDDEN CANVAS
+    ================================================= */
+
+    #canvas {
+
+        display: none;
+
+    }
+
+
+    /* =================================================
+       MOBILE
+    ================================================= */
+
+    @media (max-width: 600px) {
+
+        #cameraContainer {
+
+            height: 60vh;
+
+        }
+
+
+        button {
+
+            width: 90%;
+
+            max-width: 400px;
+
+        }
+
+
+        #guideText {
+
+            top: calc(50% + 125px);
+
+        }
+
+    }
+
+</style>
+```
+
+</head>
+
+<body>
+
+<!-- =====================================================
+     HEADER
+===================================================== -->
+
+<header>
+
+```
+<h1>Student ID Scanner</h1>
+
+<p>
+    Place the ID inside the guide
+</p>
+```
+
+</header>
+
+<!-- =====================================================
+     CAMERA
+===================================================== -->
+
+<div id="cameraContainer">
+
+```
+<video
+    id="video"
+    autoplay
+    muted
+    playsinline>
+</video>
+
+
+<div id="scanGuide"></div>
+
+
+<div id="guideText">
+
+    Align the entire ID inside the box
+
+</div>
+
+
+<div id="scanLine"></div>
+```
+
+</div>
+
+<!-- =====================================================
+     CONTROLS
+===================================================== -->
+
+<div id="controls">
+
+```
+<button
+    id="startButton">
+
+    📷 Start Camera
+
+</button>
+
+
+<button
+    id="scanButton"
+    disabled>
+
+    🔍 Scan ID
+
+</button>
+
+
+<button
+    id="stopButton"
+    disabled>
+
+    ⛔ Stop Camera
+
+</button>
+
+
+<div id="status">
+
+    Camera not started.
+
+</div>
+
+
+<div id="progressContainer">
+
+    <div id="progressBar"></div>
+
+</div>
+```
+
+</div>
+
+<!-- =====================================================
+     RESULTS
+===================================================== -->
+
+<div id="results">
+
+```
+<h2>
+    Processed Image
+</h2>
+
+
+<img
+    id="processedImage"
+    alt="Processed ID image">
+
+
+<h2>
+    OCR Result
+</h2>
+
+
+<div id="ocrResult">
+
+    Nothing scanned yet.
+
+</div>
+
+
+<!-- ================================================
+     EXTRACTED INFORMATION
+================================================= -->
+
+<h2>
+    Extracted Information
+</h2>
+
+
+<div class="field">
+
+    <label>
+        NAME
+    </label>
+
+    <input
+        id="nameField"
+        type="text"
+        placeholder="Not detected">
+
+</div>
+
+
+<div class="field">
+
+    <label>
+        GRADE LEVEL
+    </label>
+
+    <input
+        id="gradeField"
+        type="text"
+        placeholder="Not detected">
+
+</div>
+
+
+<div class="field">
+
+    <label>
+        SECTION
+    </label>
+
+    <input
+        id="sectionField"
+        type="text"
+        placeholder="Not detected">
+
+</div>
+
+
+<div class="field">
+
+    <label>
+        LRN / ID NUMBER
+    </label>
+
+    <input
+        id="idField"
+        type="text"
+        placeholder="Not detected">
+
+</div>
+```
+
+</div>
+
+<!-- =====================================================
+     CANVAS
+===================================================== -->
+
+<canvas id="canvas"></canvas>
+
+<script>
+
+
+/* =====================================================
+   ELEMENTS
+===================================================== */
+
+const video =
+    document.getElementById(
+        "video"
+    );
+
+
+const canvas =
+    document.getElementById(
+        "canvas"
+    );
+
+
+const startButton =
+    document.getElementById(
+        "startButton"
+    );
+
+
+const scanButton =
+    document.getElementById(
+        "scanButton"
+    );
+
+
+const stopButton =
+    document.getElementById(
+        "stopButton"
+    );
+
+
+const status =
+    document.getElementById(
+        "status"
+    );
+
+
+const processedImage =
+    document.getElementById(
+        "processedImage"
+    );
+
+
+const ocrResult =
+    document.getElementById(
+        "ocrResult"
+    );
+
+
+const progressContainer =
+    document.getElementById(
+        "progressContainer"
+    );
+
+
+const progressBar =
+    document.getElementById(
+        "progressBar"
+    );
+
+
+const scanLine =
+    document.getElementById(
+        "scanLine"
+    );
+
+
+const nameField =
+    document.getElementById(
+        "nameField"
+    );
+
+
+const gradeField =
+    document.getElementById(
+        "gradeField"
+    );
+
+
+const sectionField =
+    document.getElementById(
+        "sectionField"
+    );
+
+
+const idField =
+    document.getElementById(
+        "idField"
+    );
+
+
+
+/* =====================================================
+   CAMERA STATE
+===================================================== */
+
+let cameraStream = null;
+
+let scanning = false;
+
+
+
+/* =====================================================
+   CHECK CAMERA SUPPORT
+===================================================== */
+
+if (
+    !navigator.mediaDevices ||
+    !navigator.mediaDevices.getUserMedia
+) {
+
+    status.textContent =
+        "Live camera is not supported by this browser.";
+
+}
+
+
+/* =====================================================
+   START CAMERA
+===================================================== */
+
+startButton.addEventListener(
+    "click",
+    startCamera
+);
+
+
+async function startCamera() {
+
+    try {
+
+
+        status.textContent =
+            "Requesting camera...";
+
+
+        /*
+            Make sure we're running
+            over HTTPS.
+        */
+
+        if (
+            location.protocol !==
+            "https:" &&
+            location.hostname !==
+            "localhost"
+        ) {
+
+            throw new Error(
+                "Camera requires HTTPS."
+            );
+
+        }
+
+
+        /*
+            Ask specifically for
+            the rear camera.
+        */
+
+        const constraints = {
+
+            audio: false,
+
+            video: {
+
+                facingMode: {
+                    ideal: "environment"
+                },
+
+                width: {
+                    ideal: 1920
+                },
+
+                height: {
+                    ideal: 1080
+                },
+
+                frameRate: {
+                    ideal: 30
+                }
+
+            }
+
+        };
+
+
+        cameraStream =
+            await navigator
+                .mediaDevices
+                .getUserMedia(
+                    constraints
+                );
+
+
+        /*
+            Attach camera to video.
+        */
+
+        video.srcObject =
+            cameraStream;
+
+
+        await video.play();
+
+
+        /*
+            Get camera information.
+        */
+
+        const track =
+            cameraStream
+                .getVideoTracks()[0];
+
+
+        console.log(
+            "Camera:",
+            track.label
+        );
+
+
+        console.log(
+            "Camera settings:",
+            track.getSettings()
+        );
+
+
+        status.textContent =
+            "Camera ready. Align the ID.";
+
+
+        startButton.disabled =
+            true;
+
+
+        scanButton.disabled =
+            false;
+
+
+        stopButton.disabled =
+            false;
+
+
+    }
+
+    catch (error) {
+
+
+        console.error(
+            error
+        );
+
+
+        status.textContent =
+            "Camera error: " +
+            error.name;
+
+
+        /*
+            Give useful error information.
+        */
+
+        let message =
+            "";
+
+
+        if (
+            error.name ===
+            "NotAllowedError"
+        ) {
+
+            message =
+                "Camera permission was denied.\n\n" +
+                "Check Chrome's camera permission " +
+                "for this website.";
+
+        }
+
+        else if (
+            error.name ===
+            "NotFoundError"
+        ) {
+
+            message =
+                "No camera was found.";
+
+        }
+
+        else if (
+            error.name ===
+            "NotReadableError"
+        ) {
+
+            message =
+                "The camera is already being used " +
+                "by another application.";
+
+        }
+
+        else {
+
+            message =
+                error.name +
+                "\n\n" +
+                error.message;
+
+        }
+
+
+        alert(
+            message
+        );
+
+    }
+
+}
+
+
+
+/* =====================================================
+   STOP CAMERA
+===================================================== */
+
+stopButton.addEventListener(
+    "click",
+    stopCamera
+);
+
+
+function stopCamera() {
+
+
+    if (cameraStream) {
+
+        cameraStream
+            .getTracks()
+            .forEach(
+                track => track.stop()
+            );
+
+    }
+
+
+    cameraStream =
+        null;
+
+
+    video.srcObject =
+        null;
+
+
+    startButton.disabled =
+        false;
+
+
+    scanButton.disabled =
+        true;
+
+
+    stopButton.disabled =
+        true;
+
+
+    scanLine.classList.remove(
+        "active"
+    );
+
+
+    status.textContent =
+        "Camera stopped.";
+
+}
+
+
+
+/* =====================================================
+   SCAN
+===================================================== */
+
+scanButton.addEventListener(
+    "click",
+    captureAndScan
+);
+
+
+async function captureAndScan() {
+
+
+    if (
+        !cameraStream ||
+        scanning
+    ) {
+
+        return;
+
+    }
+
+
+    scanning =
+        true;
+
+
+    scanButton.disabled =
+        true;
+
+
+    scanLine.classList.add(
+        "active"
+    );
+
+
+    status.textContent =
+        "Capturing ID...";
+
+
+    /*
+        Small delay gives the
+        camera a moment to stabilize.
+    */
+
+    await sleep(200);
+
+
+    try {
+
+
+        const videoWidth =
+            video.videoWidth;
+
+
+        const videoHeight =
+            video.videoHeight;
+
+
+        if (
+            !videoWidth ||
+            !videoHeight
+        ) {
+
+            throw new Error(
+                "Camera frame is not ready."
+            );
+
+        }
+
+
+        /*
+            =================================================
+            CROP TO ID GUIDE
+            =================================================
+
+            The guide is approximately
+            the same aspect ratio as
+            a standard ID card.
+
+            We crop the center of
+            the camera image instead
+            of sending the entire
+            camera frame to Tesseract.
+        */
+
+
+        const guideWidthRatio =
+            0.88;
+
+
+        const cropWidth =
+            Math.floor(
+                videoWidth *
+                guideWidthRatio
+            );
+
+
+        const cropHeight =
+            Math.floor(
+                cropWidth /
+                1.586
+            );
+
+
+        const cropX =
+            Math.floor(
+                (videoWidth -
+                    cropWidth) / 2
+            );
+
+
+        const cropY =
+            Math.floor(
+                (videoHeight -
+                    cropHeight) / 2
+            );
+
+
+        /*
+            Use a larger canvas
+            to upscale the ID.
+        */
+
+        const scale =
+            2;
+
+
+        canvas.width =
+            cropWidth * scale;
+
+
+        canvas.height =
+            cropHeight * scale;
+
+
+        const ctx =
+            canvas.getContext(
+                "2d"
+            );
+
+
+        /*
+            Draw only the ID.
+        */
+
+        ctx.drawImage(
+
+            video,
+
+            cropX,
+            cropY,
+            cropWidth,
+            cropHeight,
+
+            0,
+            0,
+            canvas.width,
+            canvas.height
+
+        );
+
+
+        status.textContent =
+            "Preprocessing image...";
+
+
+        /*
+            Process the ID.
+        */
+
+        preprocessImage(
+            ctx,
+            canvas.width,
+            canvas.height
+        );
+
+
+        /*
+            Display processed image.
+        */
+
+        processedImage.src =
+            canvas.toDataURL(
+                "image/jpeg",
+                0.95
+            );
+
+
+        processedImage.style.display =
+            "block";
+
+
+        /*
+            OCR.
+        */
+
+        await performOCR();
+
+
+    }
+
+    catch (error) {
+
+
+        console.error(
+            error
+        );
+
+
+        status.textContent =
+            "Scan failed.";
+
+
+        ocrResult.textContent =
+            error.message;
+
+    }
+
+
+    scanLine.classList.remove(
+        "active"
+    );
+
+
+    scanButton.disabled =
+        false;
+
+
+    scanning =
+        false;
+
+}
+
+
+
+/* =====================================================
+   IMAGE PREPROCESSING
+===================================================== */
+
+function preprocessImage(
+    ctx,
+    width,
+    height
+) {
+
+
+    const imageData =
+        ctx.getImageData(
+            0,
+            0,
+            width,
+            height
+        );
+
+
+    const data =
+        imageData.data;
+
+
+    /*
+        =================================================
+        GRAYSCALE
+        =================================================
+    */
+
+    for (
+        let i = 0;
+        i < data.length;
+        i += 4
+    ) {
+
+
+        const r =
+            data[i];
+
+
+        const g =
+            data[i + 1];
+
+
+        const b =
+            data[i + 2];
+
+
+        const gray =
+            0.299 * r +
+            0.587 * g +
+            0.114 * b;
+
+
+        data[i] =
+            gray;
+
+
+        data[i + 1] =
+            gray;
+
+
+        data[i + 2] =
+            gray;
+
+    }
+
+
+    /*
+        =================================================
+        CONTRAST
+        =================================================
+    */
+
+    const contrast =
+        1.7;
+
+
+    for (
+        let i = 0;
+        i < data.length;
+        i += 4
+    ) {
+
+
+        let value =
+            data[i];
+
+
+        value =
+            (
+                (value - 128) *
+                contrast
+            ) + 128;
+
+
+        value =
+            Math.max(
+                0,
+                Math.min(
+                    255,
+                    value
+                )
+            );
+
+
+        data[i] =
+            value;
+
+
+        data[i + 1] =
+            value;
+
+
+        data[i + 2] =
+            value;
+
+    }
+
+
+    /*
+        =================================================
+        SHARPEN
+        =================================================
+    */
+
+    const original =
+        new Uint8ClampedArray(
+            data
+        );
+
+
+    const strength =
+        0.3;
+
+
+    for (
+        let y = 1;
+        y < height - 1;
+        y++
+    ) {
+
+
+        for (
+            let x = 1;
+            x < width - 1;
+            x++
+        ) {
+
+
+            const index =
+                (
+                    y * width +
+                    x
+                ) * 4;
+
+
+            const center =
+                original[index];
+
+
+            const top =
+                original[
+                    (
+                        (y - 1) *
+                        width +
+                        x
+                    ) * 4
+                ];
+
+
+            const bottom =
+                original[
+                    (
+                        (y + 1) *
+                        width +
+                        x
+                    ) * 4
+                ];
+
+
+            const left =
+                original[
+                    (
+                        y *
+                        width +
+                        x -
+                        1
+                    ) * 4
+                ];
+
+
+            const right =
+                original[
+                    (
+                        y *
+                        width +
+                        x +
+                        1
+                    ) * 4
+                ];
+
+
+            let value =
+                center *
+                (
+                    1 +
+                    4 * strength
+                )
+                -
+                strength *
+                (
+                    top +
+                    bottom +
+                    left +
+                    right
+                );
+
+
+            value =
+                Math.max(
+                    0,
+                    Math.min(
+                        255,
+                        value
+                    )
+                );
+
+
+            data[index] =
+                value;
+
+
+            data[index + 1] =
+                value;
+
+
+            data[index + 2] =
+                value;
+
+        }
+
+    }
+
+
+    /*
+        Put processed image
+        back on canvas.
+    */
+
+    ctx.putImageData(
+        imageData,
+        0,
+        0
+    );
+
+}
+
+
+
+/* =====================================================
+   OCR
+===================================================== */
+
+async function performOCR() {
+
+
+    status.textContent =
+        "Starting OCR...";
+
+
+    ocrResult.textContent =
+        "Reading ID...";
+
+
+    progressContainer.style.display =
+        "block";
+
+
+    progressBar.style.width =
+        "0%";
+
+
+    try {
+
+
+        const result =
+            await Tesseract.recognize(
+
+                canvas,
+
+                "eng",
+
+                {
+
+                    logger:
+                        function(info) {
+
+
+                            console.log(
+                                info
+                            );
+
+
+                            if (
+                                info.status ===
+                                "recognizing text"
+                            ) {
+
+
+                                const percent =
+                                    Math.round(
+                                        info.progress *
+                                        100
+                                    );
+
+
+                                progressBar.style.width =
+                                    percent + "%";
+
+
+                                status.textContent =
+                                    "Reading ID: " +
+                                    percent +
+                                    "%";
+
+                            }
+
+                        },
+
+
+                    /*
+                        Page segmentation mode.
+
+                        6 = assume a single
+                        uniform block of text.
+                    */
+
+                    tessedit_pageseg_mode:
+                        "6"
+
+                }
+
+            );
+
+
+        const text =
+            result.data.text;
+
+
+        console.log(
+            "========== OCR RESULT =========="
+        );
+
+
+        console.log(
+            text
+        );
+
+
+        console.log(
+            "================================="
+        );
+
+
+        if (
+            text &&
+            text.trim()
+        ) {
+
+            ocrResult.textContent =
+                text.trim();
+
+        }
+
+        else {
+
+            ocrResult.textContent =
+                "No readable text detected.";
+
+        }
+
+
+        /*
+            Try basic field extraction.
+        */
+
+        extractFields(
+            text
+        );
+
+
+        progressBar.style.width =
+            "100%";
+
+
+        status.textContent =
+            "Scan complete.";
+
+    }
+
+    catch (error) {
+
+
+        console.error(
+            error
+        );
+
+
+        status.textContent =
+            "OCR failed.";
+
+
+        ocrResult.textContent =
+            "OCR Error:\n\n" +
+            error.message;
+
+    }
+
+
+    setTimeout(
+        function() {
+
+            progressContainer.style.display =
+                "none";
+
+        },
+        1000
+    );
+
+}
+
+
+
+/* =====================================================
+   BASIC FIELD EXTRACTION
+===================================================== */
+
+function extractFields(text) {
+
+
+    if (!text) {
+
+        return;
+
+    }
+
+
+    /*
+        This is intentionally basic.
+
+        We will customize this once
+        we know the exact layout of
+        your student IDs.
+    */
+
+    const lines =
+        text
+            .split("\n")
+            .map(
+                line =>
+                    line.trim()
+            )
+            .filter(
+                line =>
+                    line.length > 0
+            );
+
+
+    console.log(
+        "OCR lines:",
+        lines
+    );
+
+
+    /*
+        For now, don't automatically
+        guess the student's name.
+
+        We don't want bad OCR to
+        silently put incorrect data
+        into your database.
+    */
+
+}
+
+
+
+/* =====================================================
+   UTILITY
+===================================================== */
+
+function sleep(ms) {
+
+    return new Promise(
+        resolve =>
+            setTimeout(
+                resolve,
+                ms
+            )
+    );
+
+}
+
+
+
+/* =====================================================
+   CLEANUP
+===================================================== */
+
+window.addEventListener(
+    "beforeunload",
+    stopCamera
+);
+
+
+</script>
+
+</body>
+
+</html>
 
