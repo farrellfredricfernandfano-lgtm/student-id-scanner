@@ -4,760 +4,330 @@
 
 <head>
 
-```
 <meta charset="UTF-8">
 
-<meta
-    name="viewport"
-    content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="viewport"
+   content="width=device-width, initial-scale=1.0">
 
 <title>Student ID Scanner</title>
 
-
-<!-- =================================================
-     TESSERACT.JS
-================================================== -->
-
 <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
-
 
 <style>
 
-    /* =================================================
-       GLOBAL
-    ================================================= */
+* {
+    box-sizing: border-box;
+}
 
-    * {
-        box-sizing: border-box;
-    }
+body {
+    margin: 0;
+    background: #111;
+    color: white;
+    font-family: Arial, sans-serif;
+    text-align: center;
+}
 
+header {
+    padding: 15px;
+    background: #1b1b1b;
+}
 
-    body {
+header h1 {
+    margin: 0;
+    font-size: 22px;
+}
 
-        margin: 0;
+header p {
+    margin: 5px 0 0;
+    color: #aaa;
+}
 
-        padding: 0;
+#cameraContainer {
+    position: relative;
+    width: 100%;
+    height: 60vh;
+    min-height: 350px;
+    background: black;
+    overflow: hidden;
+}
 
-        background: #111;
+#video {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
 
-        color: white;
+#scanGuide {
+    position: absolute;
+    width: 88%;
+    max-width: 520px;
+    aspect-ratio: 1.586 / 1;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    border: 3px solid #00ff88;
+    border-radius: 12px;
+    box-shadow: 0 0 0 9999px rgba(0,0,0,0.45);
+    pointer-events: none;
+}
 
-        font-family: Arial, sans-serif;
+#guideText {
+    position: absolute;
+    top: calc(50% + 130px);
+    left: 50%;
+    transform: translateX(-50%);
+    width: 100%;
+    font-size: 14px;
+    text-shadow: 0 1px 4px black;
+    pointer-events: none;
+}
 
-        text-align: center;
+#controls {
+    padding: 15px;
+    background: #1b1b1b;
+}
 
-    }
+button {
+    border: none;
+    border-radius: 10px;
+    padding: 14px 20px;
+    margin: 5px;
+    font-size: 16px;
+    font-weight: bold;
+}
 
+#startButton {
+    background: #2196f3;
+    color: white;
+}
 
-    /* =================================================
-       HEADER
-    ================================================= */
+#scanButton {
+    background: #00c853;
+    color: white;
+}
 
-    header {
+#stopButton {
+    background: #f44336;
+    color: white;
+}
 
-        background: #1b1b1b;
+button:disabled {
+    background: #555;
+    color: #999;
+}
 
-        padding: 15px 10px;
+#status {
+    margin: 10px;
+    color: #00ff88;
+}
 
-    }
+#progressContainer {
+    display: none;
+    width: 90%;
+    max-width: 500px;
+    height: 10px;
+    margin: 10px auto;
+    background: #333;
+    border-radius: 10px;
+    overflow: hidden;
+}
 
+#progressBar {
+    width: 0%;
+    height: 100%;
+    background: #00ff88;
+}
 
-    header h1 {
+#results {
+    background: #f4f4f4;
+    color: #111;
+    padding: 20px;
+}
 
-        margin: 0;
+#processedImage {
+    display: none;
+    width: 100%;
+    max-width: 700px;
+    margin: 10px auto;
+    border-radius: 10px;
+}
 
-        font-size: 22px;
+#ocrResult {
+    background: white;
+    padding: 15px;
+    border-radius: 10px;
+    text-align: left;
+    white-space: pre-wrap;
+    word-break: break-word;
+}
 
-    }
+.field {
+    background: white;
+    margin: 10px 0;
+    padding: 12px;
+    border-radius: 8px;
+    text-align: left;
+}
 
+.field label {
+    display: block;
+    font-size: 12px;
+    color: #777;
+    margin-bottom: 5px;
+}
 
-    header p {
+.field input {
+    width: 100%;
+    border: none;
+    outline: none;
+    font-size: 17px;
+    background: transparent;
+    color: #111;
+}
 
-        margin: 5px 0 0;
+#canvas {
+    display: none;
+}
 
-        color: #aaa;
-
-        font-size: 13px;
-
-    }
-
-
-    /* =================================================
-       CAMERA CONTAINER
-    ================================================= */
+@media (max-width: 600px) {
 
     #cameraContainer {
-
-        position: relative;
-
-        width: 100%;
-
-        height: 65vh;
-
-        min-height: 350px;
-
-        max-height: 700px;
-
-        background: black;
-
-        overflow: hidden;
-
+        height: 60vh;
     }
-
-
-    #video {
-
-        width: 100%;
-
-        height: 100%;
-
-        object-fit: cover;
-
-    }
-
-
-    /* =================================================
-       ID GUIDE
-    ================================================= */
-
-    #scanGuide {
-
-        position: absolute;
-
-        width: 88%;
-
-        max-width: 520px;
-
-        aspect-ratio: 1.586 / 1;
-
-        top: 50%;
-
-        left: 50%;
-
-        transform: translate(-50%, -50%);
-
-        border: 3px solid #00ff88;
-
-        border-radius: 12px;
-
-        box-shadow:
-
-            0 0 0 9999px rgba(0, 0, 0, 0.45);
-
-        pointer-events: none;
-
-    }
-
-
-    #guideText {
-
-        position: absolute;
-
-        top: calc(50% + 145px);
-
-        left: 50%;
-
-        transform: translateX(-50%);
-
-        width: 100%;
-
-        color: white;
-
-        font-size: 14px;
-
-        text-shadow:
-
-            0 1px 3px black;
-
-        pointer-events: none;
-
-    }
-
-
-    /* =================================================
-       SCAN LINE
-    ================================================= */
-
-    #scanLine {
-
-        position: absolute;
-
-        width: 100%;
-
-        height: 2px;
-
-        background: #00ff88;
-
-        top: 0;
-
-        left: 0;
-
-        opacity: 0;
-
-        pointer-events: none;
-
-    }
-
-
-    #scanLine.active {
-
-        opacity: 1;
-
-        animation:
-
-            scanAnimation 2s
-            linear
-            infinite;
-
-    }
-
-
-    @keyframes scanAnimation {
-
-        0% {
-
-            top: 0%;
-
-        }
-
-        50% {
-
-            top: 100%;
-
-        }
-
-        100% {
-
-            top: 0%;
-
-        }
-
-    }
-
-
-    /* =================================================
-       CONTROLS
-    ================================================= */
-
-    #controls {
-
-        background: #1b1b1b;
-
-        padding: 15px 10px;
-
-    }
-
 
     button {
-
-        border: none;
-
-        border-radius: 10px;
-
-        padding: 14px 20px;
-
-        margin: 5px;
-
-        font-size: 16px;
-
-        font-weight: bold;
-
-        cursor: pointer;
-
-    }
-
-
-    #startButton {
-
-        background: #2196f3;
-
-        color: white;
-
-    }
-
-
-    #scanButton {
-
-        background: #00c853;
-
-        color: white;
-
-    }
-
-
-    #stopButton {
-
-        background: #f44336;
-
-        color: white;
-
-    }
-
-
-    button:disabled {
-
-        background: #555;
-
-        color: #999;
-
-        cursor: not-allowed;
-
-    }
-
-
-    /* =================================================
-       STATUS
-    ================================================= */
-
-    #status {
-
-        margin: 8px;
-
-        font-size: 14px;
-
-        color: #00ff88;
-
-    }
-
-
-    /* =================================================
-       PROGRESS
-    ================================================= */
-
-    #progressContainer {
-
         width: 90%;
-
-        max-width: 500px;
-
-        height: 10px;
-
-        background: #333;
-
-        border-radius: 10px;
-
-        margin: 10px auto;
-
-        overflow: hidden;
-
-        display: none;
-
+        max-width: 400px;
     }
 
-
-    #progressBar {
-
-        height: 100%;
-
-        width: 0%;
-
-        background: #00ff88;
-
-        transition: width 0.2s;
-
-    }
-
-
-    /* =================================================
-       RESULTS
-    ================================================= */
-
-    #results {
-
-        background: #f4f4f4;
-
-        color: #111;
-
-        padding: 20px;
-
-    }
-
-
-    #results h2 {
-
-        margin-top: 10px;
-
-    }
-
-
-    /* =================================================
-       PROCESSED IMAGE
-    ================================================= */
-
-    #processedImage {
-
-        width: 100%;
-
-        max-width: 700px;
-
-        border-radius: 10px;
-
-        display: none;
-
-        margin: 10px auto;
-
-    }
-
-
-    /* =================================================
-       OCR RESULT
-    ================================================= */
-
-    #ocrResult {
-
-        background: white;
-
-        padding: 15px;
-
-        border-radius: 10px;
-
-        text-align: left;
-
-        white-space: pre-wrap;
-
-        word-break: break-word;
-
-        min-height: 120px;
-
-        box-shadow:
-
-            0 2px 8px rgba(0,0,0,0.2);
-
-    }
-
-
-    /* =================================================
-       EXTRACTED FIELDS
-    ================================================= */
-
-    .field {
-
-        background: white;
-
-        margin: 10px 0;
-
-        padding: 12px;
-
-        border-radius: 8px;
-
-        text-align: left;
-
-        box-shadow:
-
-            0 1px 5px rgba(0,0,0,0.15);
-
-    }
-
-
-    .field label {
-
-        display: block;
-
-        font-size: 12px;
-
-        color: #777;
-
-        margin-bottom: 5px;
-
-    }
-
-
-    .field input {
-
-        width: 100%;
-
-        border: none;
-
-        outline: none;
-
-        font-size: 17px;
-
-        background: transparent;
-
-        color: #111;
-
-    }
-
-
-    /* =================================================
-       CANVAS
-    ================================================= */
-
-    #canvas {
-
-        display: none;
-
-    }
-
-
-    /* =================================================
-       MOBILE
-    ================================================= */
-
-    @media (max-width: 600px) {
-
-        #cameraContainer {
-
-            height: 60vh;
-
-        }
-
-
-        button {
-
-            width: 90%;
-
-            max-width: 400px;
-
-        }
-
-
-        #guideText {
-
-            top: calc(50% + 125px);
-
-        }
-
-    }
+}
 
 </style>
-```
 
 </head>
 
 <body>
 
-<!-- =====================================================
-     HEADER
-===================================================== -->
-
 <header>
 
-```
-<h1>
-    Student ID Scanner
-</h1>
+<h1>Student ID Scanner</h1>
 
-<p>
-    Place the ID inside the guide
-</p>
-```
+<p>Place the ID inside the guide</p>
 
 </header>
 
-<!-- =====================================================
-     LIVE CAMERA
-===================================================== -->
-
 <div id="cameraContainer">
 
-```
 <video
-    id="video"
-    autoplay
-    muted
-    playsinline>
-</video>
-
+ id="video"
+ autoplay
+ muted
+ playsinline> </video>
 
 <div id="scanGuide"></div>
 
-
 <div id="guideText">
-
     Align the entire ID inside the box
-
 </div>
 
-
-<div id="scanLine"></div>
-```
-
 </div>
-
-<!-- =====================================================
-     CONTROLS
-===================================================== -->
 
 <div id="controls">
 
-```
-<button
-    id="startButton">
-
+<button id="startButton">
     📷 Start Camera
-
 </button>
 
-
-<button
-    id="scanButton"
-    disabled>
-
+<button id="scanButton" disabled>
     🔍 Scan ID
-
 </button>
 
-
-<button
-    id="stopButton"
-    disabled>
-
+<button id="stopButton" disabled>
     ⛔ Stop Camera
-
 </button>
-
 
 <div id="status">
-
     Camera not started.
-
 </div>
-
 
 <div id="progressContainer">
 
-    <div id="progressBar"></div>
-
-</div>
-```
+<div id="progressBar"></div>
 
 </div>
 
-<!-- =====================================================
-     RESULTS
-===================================================== -->
+</div>
 
 <div id="results">
 
-```
-<!-- PROCESSED IMAGE -->
+<h2>Processed Image</h2>
 
-<h2>
-    Processed Image
-</h2>
+<img id="processedImage">
 
-
-<img
-    id="processedImage"
-    alt="Processed ID image">
-
-
-
-<!-- RAW OCR -->
-
-<h2>
-    OCR Result
-</h2>
-
+<h2>OCR Result</h2>
 
 <div id="ocrResult">
-
     Nothing scanned yet.
-
 </div>
 
-
-
-<!-- =================================================
-     EXTRACTED INFORMATION
-================================================== -->
-
-<h2>
-    Extracted Information
-</h2>
-
-
-
-<!-- NAME -->
+<h2>Extracted Information</h2>
 
 <div class="field">
 
-    <label>
-        NAME
-    </label>
+<label>NAME</label>
 
-    <input
-        id="nameField"
-        type="text"
-        placeholder="Not detected">
+<input
+ id="nameField"
+ type="text"
+ placeholder="Not detected">
 
 </div>
-
-
-
-<!-- GRADE -->
 
 <div class="field">
 
-    <label>
-        GRADE LEVEL
-    </label>
+<label>GRADE LEVEL</label>
 
-    <input
-        id="gradeField"
-        type="text"
-        placeholder="Not detected">
+<input
+ id="gradeField"
+ type="text"
+ placeholder="Not detected">
 
 </div>
-
-
-
-<!-- SECTION -->
 
 <div class="field">
 
-    <label>
-        SECTION
-    </label>
+<label>SECTION</label>
 
-    <input
-        id="sectionField"
-        type="text"
-        placeholder="Not detected">
+<input
+ id="sectionField"
+ type="text"
+ placeholder="Not detected">
 
 </div>
-
-
-
-<!-- LRN -->
 
 <div class="field">
 
-    <label>
-        LRN
-    </label>
+<label>LRN</label>
 
-    <input
-        id="lrnField"
-        type="text"
-        placeholder="Not detected">
+<input
+ id="lrnField"
+ type="text"
+ placeholder="Not detected">
 
 </div>
-
-
-
-<!-- ID NUMBER -->
 
 <div class="field">
 
-    <label>
-        ID NUMBER
-    </label>
+<label>ID NUMBER</label>
 
-    <input
-        id="idField"
-        type="text"
-        placeholder="Not detected">
-
-</div>
-```
+<input
+ id="idField"
+ type="text"
+ placeholder="Not detected">
 
 </div>
 
-<!-- =====================================================
-     CANVAS
-===================================================== -->
+</div>
 
 <canvas id="canvas"></canvas>
 
@@ -765,138 +335,65 @@
 
 
 /* =====================================================
-   ELEMENT REFERENCES
+   ELEMENTS
 ===================================================== */
 
 const video =
-    document.getElementById(
-        "video"
-    );
-
+    document.getElementById("video");
 
 const canvas =
-    document.getElementById(
-        "canvas"
-    );
-
+    document.getElementById("canvas");
 
 const startButton =
-    document.getElementById(
-        "startButton"
-    );
-
+    document.getElementById("startButton");
 
 const scanButton =
-    document.getElementById(
-        "scanButton"
-    );
-
+    document.getElementById("scanButton");
 
 const stopButton =
-    document.getElementById(
-        "stopButton"
-    );
-
+    document.getElementById("stopButton");
 
 const status =
-    document.getElementById(
-        "status"
-    );
-
+    document.getElementById("status");
 
 const processedImage =
-    document.getElementById(
-        "processedImage"
-    );
-
+    document.getElementById("processedImage");
 
 const ocrResult =
-    document.getElementById(
-        "ocrResult"
-    );
-
+    document.getElementById("ocrResult");
 
 const progressContainer =
-    document.getElementById(
-        "progressContainer"
-    );
-
+    document.getElementById("progressContainer");
 
 const progressBar =
-    document.getElementById(
-        "progressBar"
-    );
-
-
-const scanLine =
-    document.getElementById(
-        "scanLine"
-    );
-
+    document.getElementById("progressBar");
 
 const nameField =
-    document.getElementById(
-        "nameField"
-    );
-
+    document.getElementById("nameField");
 
 const gradeField =
-    document.getElementById(
-        "gradeField"
-    );
-
+    document.getElementById("gradeField");
 
 const sectionField =
-    document.getElementById(
-        "sectionField"
-    );
-
+    document.getElementById("sectionField");
 
 const lrnField =
-    document.getElementById(
-        "lrnField"
-    );
-
+    document.getElementById("lrnField");
 
 const idField =
-    document.getElementById(
-        "idField"
-    );
+    document.getElementById("idField");
 
 
 
 /* =====================================================
-   CAMERA STATE
+   CAMERA
 ===================================================== */
 
-let cameraStream =
-    null;
+let cameraStream = null;
+
+let scanning = false;
 
 
-let scanning =
-    false;
-
-
-
-/* =====================================================
-   CAMERA SUPPORT CHECK
-===================================================== */
-
-if (
-    !navigator.mediaDevices ||
-    !navigator.mediaDevices.getUserMedia
-) {
-
-    status.textContent =
-        "Live camera is not supported by this browser.";
-
-}
-
-
-
-/* =====================================================
-   START CAMERA
-===================================================== */
 
 startButton.addEventListener(
     "click",
@@ -904,112 +401,44 @@ startButton.addEventListener(
 );
 
 
+
 async function startCamera() {
 
     try {
-
 
         status.textContent =
             "Requesting camera permission...";
 
 
-        /*
-            GitHub Pages should use HTTPS.
-        */
+        cameraStream =
+            await navigator.mediaDevices.getUserMedia({
 
-        if (
-            location.protocol !== "https:" &&
-            location.hostname !== "localhost"
-        ) {
+                audio: false,
 
-            throw new Error(
-                "Camera requires HTTPS."
-            );
+                video: {
 
-        }
+                    facingMode: {
+                        ideal: "environment"
+                    },
 
+                    width: {
+                        ideal: 1920
+                    },
 
-        /*
-            Request rear camera.
-        */
-
-        const constraints = {
-
-            audio: false,
-
-            video: {
-
-                facingMode: {
-
-                    ideal:
-                        "environment"
-
-                },
-
-                width: {
-
-                    ideal:
-                        1920
-
-                },
-
-                height: {
-
-                    ideal:
-                        1080
-
-                },
-
-                frameRate: {
-
-                    ideal:
-                        30
+                    height: {
+                        ideal: 1080
+                    }
 
                 }
 
-            }
+            });
 
-        };
-
-
-        cameraStream =
-            await navigator
-                .mediaDevices
-                .getUserMedia(
-                    constraints
-                );
-
-
-        /*
-            Attach stream.
-        */
 
         video.srcObject =
             cameraStream;
 
 
         await video.play();
-
-
-        /*
-            Camera information.
-        */
-
-        const track =
-            cameraStream
-                .getVideoTracks()[0];
-
-
-        console.log(
-            "Camera:",
-            track.label
-        );
-
-
-        console.log(
-            "Camera settings:",
-            track.getSettings()
-        );
 
 
         status.textContent =
@@ -1019,10 +448,8 @@ async function startCamera() {
         startButton.disabled =
             true;
 
-
         scanButton.disabled =
             false;
-
 
         stopButton.disabled =
             false;
@@ -1032,69 +459,18 @@ async function startCamera() {
 
     catch (error) {
 
-
-        console.error(
-            error
-        );
-
+        console.error(error);
 
         status.textContent =
             "Camera error: " +
             error.name;
 
 
-        let message =
-            "";
-
-
-        if (
-            error.name ===
-            "NotAllowedError"
-        ) {
-
-            message =
-                "Camera permission was denied.\n\n" +
-                "Check Chrome's camera permission " +
-                "for this GitHub Pages website.";
-
-        }
-
-
-        else if (
-            error.name ===
-            "NotFoundError"
-        ) {
-
-            message =
-                "No camera was found.";
-
-        }
-
-
-        else if (
-            error.name ===
-            "NotReadableError"
-        ) {
-
-            message =
-                "The camera is already being used " +
-                "by another application.";
-
-        }
-
-
-        else {
-
-            message =
-                error.name +
-                "\n\n" +
-                error.message;
-
-        }
-
-
         alert(
-            message
+            "Camera error:\n\n" +
+            error.name +
+            "\n\n" +
+            error.message
         );
 
     }
@@ -1113,16 +489,15 @@ stopButton.addEventListener(
 );
 
 
-function stopCamera() {
 
+function stopCamera() {
 
     if (cameraStream) {
 
         cameraStream
             .getTracks()
             .forEach(
-                track =>
-                    track.stop()
+                track => track.stop()
             );
 
     }
@@ -1131,7 +506,6 @@ function stopCamera() {
     cameraStream =
         null;
 
-
     video.srcObject =
         null;
 
@@ -1139,18 +513,11 @@ function stopCamera() {
     startButton.disabled =
         false;
 
-
     scanButton.disabled =
         true;
 
-
     stopButton.disabled =
         true;
-
-
-    scanLine.classList.remove(
-        "active"
-    );
 
 
     status.textContent =
@@ -1161,7 +528,7 @@ function stopCamera() {
 
 
 /* =====================================================
-   CAPTURE + SCAN
+   SCAN BUTTON
 ===================================================== */
 
 scanButton.addEventListener(
@@ -1170,50 +537,30 @@ scanButton.addEventListener(
 );
 
 
-async function captureAndScan() {
 
+async function captureAndScan() {
 
     if (
         !cameraStream ||
         scanning
     ) {
-
         return;
-
     }
 
 
-    scanning =
-        true;
+    scanning = true;
 
-
-    scanButton.disabled =
-        true;
-
-
-    scanLine.classList.add(
-        "active"
-    );
+    scanButton.disabled = true;
 
 
     status.textContent =
-        "Capturing ID...";
-
-
-    /*
-        Give camera a moment
-        to stabilize.
-    */
-
-    await sleep(200);
+        "Capturing image...";
 
 
     try {
 
-
         const videoWidth =
             video.videoWidth;
-
 
         const videoHeight =
             video.videoHeight;
@@ -1225,82 +572,58 @@ async function captureAndScan() {
         ) {
 
             throw new Error(
-                "Camera frame is not ready."
+                "Camera image is not ready."
             );
 
         }
 
 
         /*
-            =============================================
-            CROP TO GREEN GUIDE
-            =============================================
-        */
-
-
-        const guideWidthRatio =
-            0.88;
-
+         * Crop the center area
+         * where the green guide is.
+         */
 
         const cropWidth =
             Math.floor(
-                videoWidth *
-                guideWidthRatio
+                videoWidth * 0.88
             );
 
 
         const cropHeight =
             Math.floor(
-                cropWidth /
-                1.586
+                cropWidth / 1.586
             );
 
 
         const cropX =
             Math.floor(
-                (
-                    videoWidth -
-                    cropWidth
-                ) / 2
+                (videoWidth - cropWidth) / 2
             );
 
 
         const cropY =
             Math.floor(
-                (
-                    videoHeight -
-                    cropHeight
-                ) / 2
+                (videoHeight - cropHeight) / 2
             );
 
 
         /*
-            Upscale image.
-        */
+         * Upscale.
+         */
 
-        const scale =
-            2;
+        const scale = 2;
 
 
         canvas.width =
-            cropWidth *
-            scale;
-
+            cropWidth * scale;
 
         canvas.height =
-            cropHeight *
-            scale;
+            cropHeight * scale;
 
 
         const ctx =
-            canvas.getContext(
-                "2d"
-            );
+            canvas.getContext("2d");
 
-
-        /*
-            Draw ID.
-        */
 
         ctx.drawImage(
 
@@ -1322,12 +645,8 @@ async function captureAndScan() {
 
 
         status.textContent =
-            "Preprocessing image...";
+            "Improving image...";
 
-
-        /*
-            Preprocess.
-        */
 
         preprocessImage(
             ctx,
@@ -1337,8 +656,8 @@ async function captureAndScan() {
 
 
         /*
-            Display processed image.
-        */
+         * Show processed image.
+         */
 
         processedImage.src =
             canvas.toDataURL(
@@ -1346,46 +665,34 @@ async function captureAndScan() {
                 0.95
             );
 
-
         processedImage.style.display =
             "block";
 
 
         /*
-            OCR.
-        */
+         * Start OCR.
+         */
 
         await performOCR();
-
 
     }
 
     catch (error) {
 
-
-        console.error(
-            error
-        );
-
+        console.error(error);
 
         status.textContent =
             "Scan failed.";
 
-
         ocrResult.textContent =
+            "Scan Error:\n\n" +
             error.message;
 
     }
 
 
-    scanLine.classList.remove(
-        "active"
-    );
-
-
     scanButton.disabled =
         false;
-
 
     scanning =
         false;
@@ -1404,7 +711,6 @@ function preprocessImage(
     height
 ) {
 
-
     const imageData =
         ctx.getImageData(
             0,
@@ -1418,10 +724,9 @@ function preprocessImage(
         imageData.data;
 
 
-
-    /* =================================================
-       GRAYSCALE
-    ================================================= */
+    /*
+     * Grayscale
+     */
 
     for (
         let i = 0;
@@ -1429,34 +734,24 @@ function preprocessImage(
         i += 4
     ) {
 
+        const r = data[i];
 
-        const r =
-            data[i];
+        const g = data[i + 1];
 
-
-        const g =
-            data[i + 1];
-
-
-        const b =
-            data[i + 2];
+        const b = data[i + 2];
 
 
         const gray =
-            (
-                0.299 * r +
-                0.587 * g +
-                0.114 * b
-            );
+            0.299 * r +
+            0.587 * g +
+            0.114 * b;
 
 
         data[i] =
             gray;
 
-
         data[i + 1] =
             gray;
-
 
         data[i + 2] =
             gray;
@@ -1464,13 +759,11 @@ function preprocessImage(
     }
 
 
+    /*
+     * Contrast
+     */
 
-    /* =================================================
-       CONTRAST
-    ================================================= */
-
-    const contrast =
-        1.7;
+    const contrast = 1.5;
 
 
     for (
@@ -1479,16 +772,16 @@ function preprocessImage(
         i += 4
     ) {
 
-
         let value =
             data[i];
 
 
         value =
             (
-                (value - 128) *
-                contrast
-            ) + 128;
+                value - 128
+            ) *
+            contrast +
+            128;
 
 
         value =
@@ -1504,144 +797,14 @@ function preprocessImage(
         data[i] =
             value;
 
-
         data[i + 1] =
             value;
-
 
         data[i + 2] =
             value;
 
     }
 
-
-
-    /* =================================================
-       SHARPENING
-    ================================================= */
-
-    const original =
-        new Uint8ClampedArray(
-            data
-        );
-
-
-    const strength =
-        0.3;
-
-
-    for (
-        let y = 1;
-        y < height - 1;
-        y++
-    ) {
-
-
-        for (
-            let x = 1;
-            x < width - 1;
-            x++
-        ) {
-
-
-            const index =
-                (
-                    y * width +
-                    x
-                ) * 4;
-
-
-            const center =
-                original[index];
-
-
-            const top =
-                original[
-                    (
-                        (y - 1) *
-                        width +
-                        x
-                    ) * 4
-                ];
-
-
-            const bottom =
-                original[
-                    (
-                        (y + 1) *
-                        width +
-                        x
-                    ) * 4
-                ];
-
-
-            const left =
-                original[
-                    (
-                        y *
-                        width +
-                        x -
-                        1
-                    ) * 4
-                ];
-
-
-            const right =
-                original[
-                    (
-                        y *
-                        width +
-                        x +
-                        1
-                    ) * 4
-                ];
-
-
-            let value =
-                center *
-                (
-                    1 +
-                    4 * strength
-                )
-                -
-                strength *
-                (
-                    top +
-                    bottom +
-                    left +
-                    right
-                );
-
-
-            value =
-                Math.max(
-                    0,
-                    Math.min(
-                        255,
-                        value
-                    )
-                );
-
-
-            data[index] =
-                value;
-
-
-            data[index + 1] =
-                value;
-
-
-            data[index + 2] =
-                value;
-
-        }
-
-    }
-
-
-    /*
-        Save processed image.
-    */
 
     ctx.putImageData(
         imageData,
@@ -1658,7 +821,6 @@ function preprocessImage(
 ===================================================== */
 
 async function performOCR() {
-
 
     status.textContent =
         "Starting OCR...";
@@ -1678,64 +840,45 @@ async function performOCR() {
 
     try {
 
-
         const result =
             await Tesseract.recognize(
-
                 canvas,
-
                 "eng",
-
                 {
 
-                    logger:
-                        function(info) {
+                    logger: function(info) {
+
+                        console.log(info);
 
 
-                            console.log(
-                                info
-                            );
+                        if (
+                            info.status ===
+                            "recognizing text"
+                        ) {
+
+                            const percent =
+                                Math.round(
+                                    info.progress *
+                                    100
+                                );
 
 
-                            if (
-                                info.status ===
-                                "recognizing text"
-                            ) {
+                            progressBar.style.width =
+                                percent + "%";
 
 
-                                const percent =
-                                    Math.round(
-                                        info.progress *
-                                        100
-                                    );
+                            status.textContent =
+                                "Reading ID: " +
+                                percent +
+                                "%";
 
+                        }
 
-                                progressBar.style.width =
-                                    percent + "%";
+                    },
 
-
-                                status.textContent =
-                                    "Reading ID: " +
-                                    percent +
-                                    "%";
-
-                            }
-
-                        },
-
-
-                    /*
-                        PSM 6:
-
-                        Treat image as a
-                        uniform block of text.
-                    */
-
-                    tessedit_pageseg_mode:
-                        "6"
+                    tessedit_pageseg_mode: 6
 
                 }
-
             );
 
 
@@ -1744,27 +887,15 @@ async function performOCR() {
 
 
         console.log(
-            "========== RAW OCR =========="
+            "RAW OCR RESULT:"
         );
 
+        console.log(text);
 
-        console.log(
-            text
-        );
-
-
-        console.log(
-            "=============================="
-        );
-
-
-        /*
-            Display raw OCR.
-        */
 
         if (
             text &&
-            text.trim()
+            text.trim().length > 0
         ) {
 
             ocrResult.textContent =
@@ -1775,18 +906,16 @@ async function performOCR() {
         else {
 
             ocrResult.textContent =
-                "No readable text detected.";
+                "No text detected.";
 
         }
 
 
         /*
-            Extract fields.
-        */
+         * Extract information.
+         */
 
-        extractFields(
-            text
-        );
+        extractFields(text);
 
 
         progressBar.style.width =
@@ -1800,8 +929,8 @@ async function performOCR() {
 
     catch (error) {
 
-
         console.error(
+            "OCR ERROR:",
             error
         );
 
@@ -1832,37 +961,28 @@ async function performOCR() {
 
 
 /* =====================================================
-   EXTRACT STUDENT INFORMATION
+   EXTRACT INFORMATION
 ===================================================== */
 
-function extractFields(
-    text
-) {
-
+function extractFields(text) {
 
     if (!text) {
-
         return;
-
     }
 
 
     /*
-        =============================================
-        SPLIT OCR INTO LINES
-        =============================================
-    */
+     * Split OCR into lines.
+     */
 
     const lines =
         text
             .split(/\r?\n/)
             .map(
-                line =>
-                    line.trim()
+                line => line.trim()
             )
             .filter(
-                line =>
-                    line.length > 0
+                line => line.length > 0
             );
 
 
@@ -1871,12 +991,6 @@ function extractFields(
         lines
     );
 
-
-    /*
-        =============================================
-        VARIABLES
-        =============================================
-    */
 
     let name = "";
 
@@ -1892,28 +1006,19 @@ function extractFields(
 
     /* =================================================
        NAME
-       =================================================
-
-       Expected:
-
-       FARRELL FREDRIC FERNAND F. FANO
-
-       We assume the first meaningful
-       non-label line is the name.
-    */
+    ================================================= */
 
     for (
-        let line of lines
+        const line of lines
     ) {
-
 
         const upper =
             line.toUpperCase();
 
 
         /*
-            Ignore known fields.
-        */
+         * Ignore known information lines.
+         */
 
         if (
             upper.includes("LRN") ||
@@ -1928,8 +1033,9 @@ function extractFields(
 
 
         /*
-            Remove weird OCR symbols.
-        */
+         * Keep letters, spaces,
+         * periods and apostrophes.
+         */
 
         const cleaned =
             line
@@ -1944,10 +1050,6 @@ function extractFields(
                 .trim();
 
 
-        /*
-            Count words.
-        */
-
         const words =
             cleaned
                 .split(/\s+/)
@@ -1958,9 +1060,9 @@ function extractFields(
 
 
         /*
-            Student name should
-            have at least two words.
-        */
+         * A person's name should
+         * contain at least 2 words.
+         */
 
         if (
             words.length >= 2 &&
@@ -1980,12 +1082,7 @@ function extractFields(
 
     /* =================================================
        LRN
-       =================================================
-
-       Expected:
-
-       LRN: 123456789012
-    */
+    ================================================= */
 
     const lrnMatch =
         text.match(
@@ -2001,25 +1098,20 @@ function extractFields(
     }
 
 
-
     /*
-        FALLBACK:
-
-        If OCR misses the colon or label.
-    */
+     * Fallback if Tesseract
+     * separates the LRN label.
+     */
 
     if (!lrn) {
 
-
         for (
-            let line of lines
+            const line of lines
         ) {
-
 
             if (
                 /LRN/i.test(line)
             ) {
-
 
                 const number =
                     line.match(
@@ -2046,12 +1138,7 @@ function extractFields(
 
     /* =================================================
        ID NUMBER
-       =================================================
-
-       Expected:
-
-       ID NO: 123456 -123
-    */
+    ================================================= */
 
     const idMatch =
         text.match(
@@ -2069,17 +1156,13 @@ function extractFields(
     }
 
 
-
     /*
-        FALLBACK ID NUMBER
+     * Fallback for:
 
-        Example:
-
-        123456 -123
+       123456 -123
     */
 
     if (!idNumber) {
-
 
         const generalID =
             text.match(
@@ -2102,16 +1185,12 @@ function extractFields(
 
     /* =================================================
        GRADE + SECTION
-       =================================================
+    ================================================= */
 
-       Expected:
+    /*
+     * Expected:
 
        GRADE 12- ROENTGEN
-
-       Result:
-
-       Grade = 12
-       Section = ROENTGEN
     */
 
     const gradeMatch =
@@ -2122,7 +1201,6 @@ function extractFields(
 
     if (gradeMatch) {
 
-
         grade =
             gradeMatch[1];
 
@@ -2131,10 +1209,6 @@ function extractFields(
             gradeMatch[2]
                 .trim();
 
-
-        /*
-            Remove trailing junk.
-        */
 
         section =
             section
@@ -2153,10 +1227,9 @@ function extractFields(
 
     /* =================================================
        GRADE FALLBACK
-       ================================================= */
+    ================================================= */
 
     if (!grade) {
-
 
         const gradeOnly =
             text.match(
@@ -2176,115 +1249,61 @@ function extractFields(
 
 
     /* =================================================
-       SECTION CLEANUP
-       ================================================= */
-
-    if (section) {
-
-
-        section =
-            section
-                .replace(
-                    /^[^A-Za-z0-9]+/,
-                    ""
-                )
-                .trim();
-
-    }
-
-
-
-    /* =================================================
        DISPLAY
-       ================================================= */
+    ================================================= */
 
     nameField.value =
         name;
 
-
     gradeField.value =
         grade;
-
 
     sectionField.value =
         section;
 
-
     lrnField.value =
         lrn;
-
 
     idField.value =
         idNumber;
 
 
 
-    /* =================================================
-       DEBUG
-       ================================================= */
+    /*
+     * Debug.
+     */
 
     console.log(
-        "================================"
+        "------------------------------"
     );
-
-
-    console.log(
-        "EXTRACTED STUDENT INFORMATION"
-    );
-
 
     console.log(
         "NAME:",
         name
     );
 
-
     console.log(
         "GRADE:",
         grade
     );
-
 
     console.log(
         "SECTION:",
         section
     );
 
-
     console.log(
         "LRN:",
         lrn
     );
-
 
     console.log(
         "ID NUMBER:",
         idNumber
     );
 
-
     console.log(
-        "================================"
-    );
-
-}
-
-
-
-/* =====================================================
-   UTILITY
-===================================================== */
-
-function sleep(
-    ms
-) {
-
-    return new Promise(
-        resolve =>
-            setTimeout(
-                resolve,
-                ms
-            )
+        "------------------------------"
     );
 
 }
@@ -2299,7 +1318,6 @@ window.addEventListener(
     "beforeunload",
     stopCamera
 );
-
 
 </script>
 
