@@ -323,12 +323,11 @@ button:disabled {
         📷 Start Camera
     </button>
 
-    <button
-        id="scanButton"
-        disabled>
-        🔍 Scan ID
-    </button>
-
+   <button
+    id="scanButton"
+    disabled>
+    🔍 Scan & Verify
+</button>
     <button
         id="stopButton"
         disabled>
@@ -1035,12 +1034,18 @@ async function performOCR() {
             "Scan complete.";
 
 
-        if (
-            lrnField.value.trim()
-        ) {
+       if (lrnField.value.trim()) {
+    status.textContent =
+        "OCR complete. Checking database...";
 
-            databaseButton.disabled =
-                false;
+    databaseButton.disabled = true;
+
+    await checkDatabase();
+
+} else {
+    status.textContent =
+        "OCR complete, but LRN was not detected.";
+}
 
         }
 
