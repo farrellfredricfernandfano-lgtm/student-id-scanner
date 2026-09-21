@@ -1,59 +1,4 @@
-```html
 <!DOCTYPE html>
-<html lang="en">
-
-<head>
-
-<meta charset="UTF-8">
-
-<meta
-    name="viewport"
-    content="width=device-width, initial-scale=1.0"
->
-
-<title>Student ID Scanner</title>
-
-<script
-    src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js">
-</script>
-
-<style>
-
-/* =========================================================
-   GENERAL
-========================================================= */
-
-* {
-    box-sizing: border-box;
-}
-
-body {
-
-    font-family: Arial, sans-serif;
-
-    text-align: center;
-
-    margin: 0;
-
-    padding: 20px;
-
-    background: #f5f5f5;
-
-    color: #222;
-
-}
-
-h1 {
-
-    margin-top: 5px;
-
-    margin-bottom: 5px;
-
-}
-
-.subtitle {
-
-    color: #666;<!DOCTYPE html>
 <html lang="en">
 
 <head>
@@ -352,25 +297,36 @@ h1 {
 
         <button
             id="startButton">
+
             📷 Start Camera
+
         </button>
+
 
         <button
             id="scanButton"
             disabled>
+
             🔍 Scan & Verify
+
         </button>
+
 
         <button
             id="stopButton"
             disabled>
+
             ⛔ Stop Camera
+
         </button>
+
 
         <button
             id="databaseButton"
             disabled>
+
             🔎 Check Database
+
         </button>
 
     </div>
@@ -607,15 +563,18 @@ startButton.addEventListener(
     startCamera
 );
 
+
 stopButton.addEventListener(
     "click",
     stopCamera
 );
 
+
 scanButton.addEventListener(
     "click",
     captureAndScan
 );
+
 
 databaseButton.addEventListener(
     "click",
@@ -804,7 +763,9 @@ async function performOCR() {
         "Processing image...";
 
 
-    /* ID CARD RATIO */
+    /* =====================================================
+       CAMERA DIMENSIONS
+    ===================================================== */
 
     const videoWidth =
         video.videoWidth;
@@ -825,28 +786,36 @@ async function performOCR() {
     }
 
 
-    /* CROP */
+    /* =====================================================
+       ORIGINAL CENTER CROP
+    ===================================================== */
 
     const cropWidth =
         videoWidth * 0.88;
 
+
     const cropHeight =
         cropWidth / 1.586;
 
+
     const cropX =
         (videoWidth - cropWidth) / 2;
+
 
     const cropY =
         (videoHeight - cropHeight) / 2;
 
 
-    /* UPSCALE */
+    /* =====================================================
+       UPSCALE
+    ===================================================== */
 
     const scale = 2;
 
 
     canvas.width =
         cropWidth * scale;
+
 
     canvas.height =
         cropHeight * scale;
@@ -856,7 +825,9 @@ async function performOCR() {
         canvas.getContext("2d");
 
 
-    /* DRAW CAMERA IMAGE */
+    /* =====================================================
+       DRAW CAMERA IMAGE
+    ===================================================== */
 
     ctx.drawImage(
 
@@ -880,7 +851,7 @@ async function performOCR() {
 
 
     /* =====================================================
-       PREPROCESSING
+       ORIGINAL GRAYSCALE + CONTRAST
     ===================================================== */
 
     const imageData =
@@ -921,15 +892,11 @@ async function performOCR() {
             data[i + 2];
 
 
-        /* GRAYSCALE */
-
         let gray =
             0.299 * r +
             0.587 * g +
             0.114 * b;
 
-
-        /* CONTRAST */
 
         gray =
             factor *
@@ -966,12 +933,15 @@ async function performOCR() {
     );
 
 
-    /* SHOW PROCESSED IMAGE */
+    /* =====================================================
+       SHOW PROCESSED IMAGE
+    ===================================================== */
 
     processedImage.src =
         canvas.toDataURL(
             "image/png"
         );
+
 
     processedImage.style.display =
         "block";
@@ -1036,7 +1006,9 @@ async function performOCR() {
         "100%";
 
 
-    /* RAW OCR TEXT */
+    /* =====================================================
+       RAW OCR
+    ===================================================== */
 
     const text =
         result.data.text;
@@ -1053,13 +1025,18 @@ async function performOCR() {
         "Tesseract returned no text.";
 
 
-    /* PARSE OCR */
+    /* =====================================================
+       PARSE OCR
+    ===================================================== */
 
     parseOCR(text);
 
 
     /* =====================================================
-       AUTOMATIC DATABASE CHECK
+       DATABASE
+
+       ONLY AUTOMATICALLY CHECK IF
+       LRN HAS EXACTLY 12 DIGITS
     ===================================================== */
 
     if (
@@ -1070,13 +1047,8 @@ async function performOCR() {
             lrnField.value.trim();
 
 
-        /*
-           ONLY CHECK DATABASE IF
-           LRN HAS EXACTLY 12 DIGITS
-        */
-
         if (
-            lrn.length === 12
+            /^\d{12}$/.test(lrn)
         ) {
 
             status.textContent =
@@ -1093,19 +1065,14 @@ async function performOCR() {
 
         else {
 
+            databaseButton.disabled =
+                false;
+
+
             status.textContent =
                 "OCR complete. LRN detected (" +
                 lrn.length +
                 "/12 digits).";
-
-            /*
-               Allow manual checking button,
-               but checkDatabase() will prevent
-               lookup until 12 digits exist.
-            */
-
-            databaseButton.disabled =
-                false;
 
         }
 
@@ -1123,15 +1090,13 @@ async function performOCR() {
 
 /* =========================================================
    OCR DIGIT CLEANING
+
+   Converts common OCR mistakes into digits.
 ========================================================= */
 
 function cleanOCRDigits(str) {
 
     return str
-
-        /*
-           Common OCR mistakes
-        */
 
         .replace(
             /[OoQq]/g,
@@ -1163,11 +1128,6 @@ function cleanOCRDigits(str) {
             "6"
         )
 
-        /*
-           Remove everything that
-           is not a digit
-        */
-
         .replace(
             /\D/g,
             ""
@@ -1182,10 +1142,6 @@ function cleanOCRDigits(str) {
 
 function parseOCR(text) {
 
-    /*
-       Normalize line breaks
-    */
-
     const lines =
         text
             .split(/\r?\n/)
@@ -1199,9 +1155,9 @@ function parseOCR(text) {
             );
 
 
-    /*
-       Clear previous values
-    */
+    /* =====================================================
+       CLEAR OLD VALUES
+    ===================================================== */
 
     nameField.value =
         "";
@@ -1228,23 +1184,26 @@ function parseOCR(text) {
 
     /*
        METHOD 1
-       Look for an LRN label.
 
-       This is more tolerant of OCR errors
-       and spaces between digits.
+       Look for the LRN label.
+
+       Allows OCR mistakes in digits and
+       spaces between digits.
     */
 
-    let lrnLabelMatch =
+    let lrnMatch =
         text.match(
             /LRN\s*[:\-]?\s*([0-9OoQqIiLl|ZzSsBbGg\s]{1,30})/i
         );
 
 
-    if (lrnLabelMatch) {
+    if (
+        lrnMatch
+    ) {
 
         lrn =
             cleanOCRDigits(
-                lrnLabelMatch[1]
+                lrnMatch[1]
             );
 
     }
@@ -1252,8 +1211,8 @@ function parseOCR(text) {
 
     /*
        METHOD 2
-       Look line-by-line for something
-       containing LRN.
+
+       Search line-by-line for LRN.
     */
 
     if (!lrn) {
@@ -1267,7 +1226,9 @@ function parseOCR(text) {
             ) {
 
                 const cleaned =
-                    cleanOCRDigits(line);
+                    cleanOCRDigits(
+                        line
+                    );
 
 
                 if (
@@ -1290,7 +1251,8 @@ function parseOCR(text) {
 
     /*
        METHOD 3
-       Normalize spaces between digits.
+
+       Handle spaces between digits.
 
        Example:
 
@@ -1332,10 +1294,13 @@ function parseOCR(text) {
 
     /*
        METHOD 4
-       Look for any number sequence.
 
-       This helps when Tesseract completely
-       misses the "LRN:" label.
+       If Tesseract completely misses
+       "LRN", search for numeric candidates.
+
+       We use at least 3 digits here so
+       ordinary single-digit values such as
+       Grade 12 are less likely to be selected.
     */
 
     if (!lrn) {
@@ -1361,14 +1326,6 @@ function parseOCR(text) {
                     );
 
 
-                /*
-                   Ignore very short numbers
-                   when searching the entire
-                   OCR text because they are
-                   more likely to be grade numbers
-                   or other small values.
-                */
-
                 if (
                     cleaned.length >= 3
                 ) {
@@ -1388,26 +1345,32 @@ function parseOCR(text) {
 
 
     /*
-       MAXIMUM = 12 DIGITS
+       =====================================================
+       MAXIMUM 12 DIGITS
+       =====================================================
 
-       This is the important change.
+       This is the revision you requested.
 
-       If OCR sees:
+       Less than 12:
+           KEEP IT
 
-       134111140044999
+       Exactly 12:
+           KEEP IT
 
-       the textbox gets:
-
-       134111140044
+       More than 12:
+           CUT TO 12
     */
 
-    if (lrn) {
+    if (
+        lrn
+    ) {
 
         lrn =
             lrn.substring(
                 0,
                 12
             );
+
 
         lrnField.value =
             lrn;
@@ -1427,7 +1390,9 @@ function parseOCR(text) {
         );
 
 
-    if (idMatch) {
+    if (
+        idMatch
+    ) {
 
         idField.value =
             idMatch[1] +
@@ -1437,10 +1402,6 @@ function parseOCR(text) {
     }
 
     else {
-
-        /*
-           General number-number fallback
-        */
 
         const fallbackID =
             text.match(
@@ -1474,10 +1435,13 @@ function parseOCR(text) {
         );
 
 
-    if (gradeMatch) {
+    if (
+        gradeMatch
+    ) {
 
         gradeField.value =
             gradeMatch[1];
+
 
         sectionField.value =
             gradeMatch[2]
@@ -1490,11 +1454,6 @@ function parseOCR(text) {
        NAME
     ===================================================== */
 
-    /*
-       Find the first line that looks like
-       a person's name.
-    */
-
     for (
         const line of lines
     ) {
@@ -1504,7 +1463,7 @@ function parseOCR(text) {
 
 
         /*
-           Skip known labels
+           Skip known ID labels.
         */
 
         if (
@@ -1519,10 +1478,6 @@ function parseOCR(text) {
 
         }
 
-
-        /*
-           Clean OCR characters
-        */
 
         const cleaned =
             line
@@ -1548,11 +1503,6 @@ function parseOCR(text) {
                         word.length > 0
                 );
 
-
-        /*
-           A name should have
-           at least two words.
-        */
 
         if (
             words.length >= 2 &&
@@ -1617,9 +1567,9 @@ async function checkDatabase() {
             .trim();
 
 
-    /*
-       No LRN
-    */
+    /* =====================================================
+       NO LRN
+    ===================================================== */
 
     if (!lrn) {
 
@@ -1634,15 +1584,9 @@ async function checkDatabase() {
     }
 
 
-    /*
-       IMPORTANT:
-
-       Database lookup requires
-       EXACTLY 12 digits.
-
-       Shorter OCR results are still
-       shown in the textbox.
-    */
+    /* =====================================================
+       LRN MUST BE EXACTLY 12 DIGITS
+    ===================================================== */
 
     if (
         !/^\d{12}$/.test(lrn)
@@ -1650,6 +1594,7 @@ async function checkDatabase() {
 
         databaseResult.style.display =
             "block";
+
 
         databaseResult.className =
             "database-result invalid";
@@ -1690,10 +1635,15 @@ async function checkDatabase() {
         databaseButton.disabled =
             false;
 
+
         return;
 
     }
 
+
+    /* =====================================================
+       DATABASE URL CHECK
+    ===================================================== */
 
     if (
         DATABASE_URL.includes(
@@ -1705,8 +1655,10 @@ async function checkDatabase() {
             "Apps Script URL has not been entered."
         );
 
+
         databaseButton.disabled =
             false;
+
 
         return;
 
@@ -1745,7 +1697,9 @@ async function checkDatabase() {
             await fetch(url);
 
 
-        if (!response.ok) {
+        if (
+            !response.ok
+        ) {
 
             throw new Error(
                 "HTTP error: " +
@@ -1775,6 +1729,7 @@ async function checkDatabase() {
 
             databaseResult.style.display =
                 "block";
+
 
             databaseResult.className =
                 "database-result valid";
@@ -1840,6 +1795,7 @@ async function checkDatabase() {
             databaseResult.style.display =
                 "block";
 
+
             databaseResult.className =
                 "database-result invalid";
 
@@ -1880,6 +1836,7 @@ async function checkDatabase() {
 
         databaseResult.style.display =
             "block";
+
 
         databaseResult.className =
             "database-result invalid";
