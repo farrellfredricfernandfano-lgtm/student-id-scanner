@@ -821,6 +821,17 @@ async function performOCR() {
         canvas.getContext("2d");
 
 
+    /*
+       Improve image scaling quality.
+    */
+
+    ctx.imageSmoothingEnabled =
+        true;
+
+    ctx.imageSmoothingQuality =
+        "high";
+
+
     ctx.drawImage(
 
         video,
@@ -842,9 +853,9 @@ async function performOCR() {
         "Enhancing image...";
 
 
-    /*
-       GRAYSCALE + CONTRAST
-    */
+    /* =====================================================
+       IMAGE PREPROCESSING
+    ===================================================== */
 
     const imageData =
         ctx.getImageData(
@@ -858,6 +869,14 @@ async function performOCR() {
     const data =
         imageData.data;
 
+
+    /*
+       STEP 1
+       Grayscale + contrast.
+
+       This keeps the same basic enhancement
+       from your previous working version.
+    */
 
     const contrast =
         1.5;
@@ -926,6 +945,598 @@ async function performOCR() {
 
 
     /*
+       STEP 2
+       LIGHT NOISE REDUCTION
+
+       A small 3x3 averaging filter is used.
+
+       This helps reduce tiny camera noise without
+       destroying larger characters.
+    */
+
+    const sourceData =
+        ctx.getImageData(
+            0,
+            0,
+            canvas.width,
+            canvas.height
+        );
+
+
+    const source =
+        sourceData.data;
+
+
+    const filteredData =
+        new ImageData(
+            canvas.width,
+            canvas.height
+        );
+
+
+    const filtered =
+        filteredData.data;
+
+
+    const width =
+        canvas.width;
+
+    const height =
+        canvas.height;
+
+
+    for (
+        let y = 1;
+        y < height - 1;
+        y++
+    ) {
+
+        for (
+            let x = 1;
+            x < width - 1;
+            x++
+        ) {
+
+            const center =
+                (y * width + x) * 4;
+
+
+            /*
+               Weighted blur.
+
+               Center pixel gets more weight so
+               text edges are not excessively blurred.
+            */
+
+            let total =
+                source[center] * 4;
+
+
+            total +=
+                source[
+                    ((y - 1) * width + x) * 4
+                ];
+
+
+            total +=
+                source[
+                    ((y + 1) * width + x) * 4
+                ];
+
+
+            total +=
+                source[
+                    (y * width + x - 1) * 4
+                ];
+
+
+            total +=
+                source[
+                    (y * width + x + 1) * 4
+                ];
+
+
+            const value =
+                total / 8;
+
+
+            filtered[center] =
+                value;
+
+            filtered[center + 1] =
+                value;
+
+            filtered[center + 2] =
+                value;
+
+            filtered[center + 3] =
+                255;
+
+        }
+
+    }
+
+
+    /*
+       Preserve the outside border.
+    */
+
+    for (
+        let x = 0;
+        x < width;
+        x++
+    ) {
+
+        let top =
+            x * 4;
+
+        let bottom =
+            ((height - 1) * width + x) * 4;
+
+
+        filtered[top] =
+            source[top];
+
+        filtered[top + 1] =
+            source[top + 1];
+
+        filtered[top + 2] =
+            source[top + 2];
+
+        filtered[top + 3] =
+            255;
+
+
+        filtered[bottom] =
+            source[bottom];
+
+        filtered[bottom + 1] =
+            source[bottom + 1];
+
+        filtered[bottom + 2] =
+            source[bottom + 2];
+
+        filtered[bottom + 3] =
+            255;
+
+    }
+
+
+    for (
+        let y = 0;
+        y < height;
+        y++
+    ) {
+
+        const left =
+            (y * width) * 4;
+
+        const right =
+            (y * width + width - 1) * 4;
+
+
+        filtered[left] =
+            source[left];
+
+        filtered[left + 1] =
+            source[left + 1];
+
+        filtered[left + 2] =
+            source[left + 2];
+
+        filtered[left + 3] =
+            255;
+
+
+        filtered[right] =
+            source[right];
+
+        filtered[right + 1] =
+            source[right + 1];
+
+        filtered[right + 2] =
+            source[right + 2];
+
+        filtered[right + 3] =
+            255;
+
+    }
+
+
+    ctx.putImageData(
+        filteredData,
+        0,
+        0
+    );
+
+
+    /*
+       STEP 3
+       SHARPENING
+
+       This makes character edges more distinct.
+
+       It is intentionally kept moderate so that
+       small letters do not become noisy.
+    */
+
+    const sharpenSource =
+        ctx.getImageData(
+            0,
+            0,
+            width,
+            height
+        );
+
+
+    const sharpenInput =
+        sharpenSource.data;
+
+
+    const sharpened =
+        new ImageData(
+            width,
+            height
+        );
+
+
+    const sharpenOutput =
+        sharpened.data;
+
+
+    /*
+       Sharpening kernel:
+
+           0  -1   0
+          -1   5  -1
+           0  -1   0
+
+       This increases edge definition.
+    */
+
+    for (
+        let y = 1;
+        y < height - 1;
+        y++
+    ) {
+
+        for (
+            let x = 1;
+            x < width - 1;
+            x++
+        ) {
+
+            const index =
+                (y * width + x) * 4;
+
+
+            const top =
+                ((y - 1) * width + x) * 4;
+
+            const bottom =
+                ((y + 1) * width + x) * 4;
+
+            const left =
+                (y * width + x - 1) * 4;
+
+            const right =
+                (y * width + x + 1) * 4;
+
+
+            let value =
+                sharpenInput[index] * 5
+                -
+                sharpenInput[top]
+                -
+                sharpenInput[bottom]
+                -
+                sharpenInput[left]
+                -
+                sharpenInput[right];
+
+
+            value =
+                Math.max(
+                    0,
+                    Math.min(
+                        255,
+                        value
+                    )
+                );
+
+
+            sharpenOutput[index] =
+                value;
+
+            sharpenOutput[index + 1] =
+                value;
+
+            sharpenOutput[index + 2] =
+                value;
+
+            sharpenOutput[index + 3] =
+                255;
+
+        }
+
+    }
+
+
+    /*
+       Preserve borders.
+    */
+
+    for (
+        let x = 0;
+        x < width;
+        x++
+    ) {
+
+        const top =
+            x * 4;
+
+        const bottom =
+            ((height - 1) * width + x) * 4;
+
+
+        sharpenOutput[top] =
+            sharpenInput[top];
+
+        sharpenOutput[top + 1] =
+            sharpenInput[top + 1];
+
+        sharpenOutput[top + 2] =
+            sharpenInput[top + 2];
+
+        sharpenOutput[top + 3] =
+            255;
+
+
+        sharpenOutput[bottom] =
+            sharpenInput[bottom];
+
+        sharpenOutput[bottom + 1] =
+            sharpenInput[bottom + 1];
+
+        sharpenOutput[bottom + 2] =
+            sharpenInput[bottom + 2];
+
+        sharpenOutput[bottom + 3] =
+            255;
+
+    }
+
+
+    for (
+        let y = 0;
+        y < height;
+        y++
+    ) {
+
+        const left =
+            (y * width) * 4;
+
+        const right =
+            (y * width + width - 1) * 4;
+
+
+        sharpenOutput[left] =
+            sharpenInput[left];
+
+        sharpenOutput[left + 1] =
+            sharpenInput[left + 1];
+
+        sharpenOutput[left + 2] =
+            sharpenInput[left + 2];
+
+        sharpenOutput[left + 3] =
+            255;
+
+
+        sharpenOutput[right] =
+            sharpenInput[right];
+
+        sharpenOutput[right + 1] =
+            sharpenInput[right + 1];
+
+        sharpenOutput[right + 2] =
+            sharpenInput[right + 2];
+
+        sharpenOutput[right + 3] =
+            255;
+
+    }
+
+
+    ctx.putImageData(
+        sharpened,
+        0,
+        0
+    );
+
+
+    /*
+       STEP 4
+       ADAPTIVE-STYLE THRESHOLDING
+
+       Instead of using one global brightness
+       threshold for the entire ID, each pixel
+       is compared with the average brightness
+       around it.
+
+       This helps when one part of the ID is
+       brighter or darker than another part.
+    */
+
+    const thresholdSource =
+        ctx.getImageData(
+            0,
+            0,
+            width,
+            height
+        );
+
+
+    const thresholdInput =
+        thresholdSource.data;
+
+
+    const thresholdOutput =
+        new ImageData(
+            width,
+            height
+        );
+
+
+    const thresholdData =
+        thresholdOutput.data;
+
+
+    /*
+       Small radius keeps character details.
+
+       We do not use an excessively large window
+       because student ID text can be small.
+    */
+
+    const radius =
+        7;
+
+
+    const offset =
+        12;
+
+
+    for (
+        let y = 0;
+        y < height;
+        y++
+    ) {
+
+        for (
+            let x = 0;
+            x < width;
+            x++
+        ) {
+
+            let sum =
+                0;
+
+            let count =
+                0;
+
+
+            const startY =
+                Math.max(
+                    0,
+                    y - radius
+                );
+
+            const endY =
+                Math.min(
+                    height - 1,
+                    y + radius
+                );
+
+
+            const startX =
+                Math.max(
+                    0,
+                    x - radius
+                );
+
+            const endX =
+                Math.min(
+                    width - 1,
+                    x + radius
+                );
+
+
+            for (
+                let yy = startY;
+                yy <= endY;
+                yy++
+            ) {
+
+                for (
+                    let xx = startX;
+                    xx <= endX;
+                    xx++
+                ) {
+
+                    const index =
+                        (yy * width + xx) * 4;
+
+
+                    sum +=
+                        thresholdInput[index];
+
+                    count++;
+
+                }
+
+            }
+
+
+            const average =
+                sum / count;
+
+
+            const currentIndex =
+                (y * width + x) * 4;
+
+
+            const current =
+                thresholdInput[
+                    currentIndex
+                ];
+
+
+            /*
+               Dark text becomes black.
+               Bright background becomes white.
+            */
+
+            const value =
+                current <
+                average - offset
+                    ? 0
+                    : 255;
+
+
+            thresholdData[
+                currentIndex
+            ] =
+                value;
+
+            thresholdData[
+                currentIndex + 1
+            ] =
+                value;
+
+            thresholdData[
+                currentIndex + 2
+            ] =
+                value;
+
+            thresholdData[
+                currentIndex + 3
+            ] =
+                255;
+
+        }
+
+    }
+
+
+    ctx.putImageData(
+        thresholdOutput,
+        0,
+        0
+    );
+
+
+    /*
        SHOW PROCESSED IMAGE
     */
 
@@ -942,9 +1553,9 @@ async function performOCR() {
         "Running OCR...";
 
 
-    /*
+    /* =====================================================
        TESSERACT
-    */
+    ===================================================== */
 
     const result =
         await Tesseract.recognize(
