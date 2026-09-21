@@ -63,424 +63,570 @@
 
         .scan-guide {
             position: absolute;
-            width: 88%;
-            aspect-ratio: 1.586 / 1;
-            left: 50%;
-            top: 50%;
-            transform: translate(-50%, -50%);
+            width: 88%;<!DOCTYPE html>
 
-            border: 3px solid #00ff66;
-            border-radius: 10px;
+<html lang="en">
 
-            box-shadow:
-                0 0 10px #00ff66,
-                inset 0 0 10px rgba(0,255,102,0.2);
+<head>
 
-            pointer-events: none;
-        }
+<meta charset="UTF-8">
 
-        .scan-guide::after {
-            content: "ALIGN ID CARD HERE";
-            position: absolute;
-            top: -30px;
-            left: 50%;
-            transform: translateX(-50%);
+<meta
+name="viewport"
+content="width=device-width, initial-scale=1.0"
 
-            font-size: 13px;
-            color: #00ff66;
-            white-space: nowrap;
-        }
+>
 
-        .controls {
-            max-width: 700px;
-            margin: 20px auto;
-            display: flex;
-            flex-wrap: wrap;
-            justify-content: center;
-            gap: 10px;
-        }
+<title>Student ID Scanner</title>
 
-        button {
-            padding: 12px 18px;
-            border: none;
-            border-radius: 8px;
-            font-size: 15px;
-            font-weight: bold;
-            cursor: pointer;
-        }
+<script
+    src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js">
+</script>
 
-        button:disabled {
-            opacity: 0.4;
-            cursor: not-allowed;
-        }
+<style>
 
-        #startButton {
-            background: #00c853;
-            color: white;
-        }
+* {
+    box-sizing: border-box;
+}
 
-        #scanButton {
-            background: #2196f3;
-            color: white;
-        }
+body {
+    margin: 0;
+    padding: 20px;
+    font-family: Arial, sans-serif;
+    background: #111;
+    color: white;
+    text-align: center;
+}
 
-        #stopButton {
-            background: #f44336;
-            color: white;
-        }
+h1 {
+    margin-bottom: 5px;
+}
 
-        #databaseButton {
-            background: #9c27b0;
-            color: white;
-        }
+.subtitle {
+    color: #aaa;
+    margin-bottom: 20px;
+}
 
-        .status {
-            max-width: 700px;
-            margin: 15px auto;
-            padding: 12px;
-            background: #222;
-            border-radius: 8px;
-            color: #ddd;
-        }
+.camera-container {
+    position: relative;
+    width: 100%;
+    max-width: 700px;
+    margin: auto;
+    background: black;
+    overflow: hidden;
+    border-radius: 12px;
+}
 
-        .progress-container {
-            max-width: 700px;
-            margin: 15px auto;
-            background: #333;
-            border-radius: 10px;
-            overflow: hidden;
-            height: 12px;
-        }
+video {
+    display: block;
+    width: 100%;
+    height: auto;
+}
 
-        .progress-bar {
-            width: 0%;
-            height: 100%;
-            background: #00ff66;
-            transition: width 0.2s;
-        }
+.scan-guide {
+    position: absolute;
 
-        .image-container {
-            max-width: 700px;
-            margin: 20px auto;
-        }
+    width: 88%;
+    aspect-ratio: 1.586 / 1;
 
-        .image-container h3 {
-            margin-bottom: 10px;
-        }
+    left: 50%;
+    top: 50%;
 
-        #processedImage {
-            max-width: 100%;
-            border-radius: 8px;
-            display: none;
-        }
+    transform: translate(-50%, -50%);
 
-        .results {
-            max-width: 700px;
-            margin: 20px auto;
-            text-align: left;
-        }
+    border: 3px solid #00ff66;
+    border-radius: 10px;
 
-        .results h2 {
-            text-align: center;
-        }
+    box-shadow:
+        0 0 10px #00ff66,
+        inset 0 0 10px rgba(0,255,102,0.2);
 
-        .field {
-            margin: 10px 0;
-        }
+    pointer-events: none;
+}
 
-        .field label {
-            display: block;
-            color: #aaa;
-            font-size: 13px;
-            margin-bottom: 4px;
-        }
+.scan-guide::after {
+    content: "ALIGN RED ID AREA HERE";
 
-        .field input {
-            width: 100%;
-            padding: 11px;
-            background: #222;
-            color: white;
-            border: 1px solid #444;
-            border-radius: 6px;
-            font-size: 15px;
-        }
+    position: absolute;
 
-        .database-result {
-            display: none;
-            margin-top: 20px;
-            padding: 20px;
-            border-radius: 10px;
-            text-align: center;
-        }
+    top: -30px;
+    left: 50%;
 
-        .database-result.valid {
-            background: #123d20;
-            border: 2px solid #00c853;
-        }
+    transform: translateX(-50%);
 
-        .database-result.invalid {
-            background: #421414;
-            border: 2px solid #f44336;
-        }
+    font-size: 13px;
+    color: #00ff66;
 
-        #databaseStatus {
-            font-size: 22px;
-            font-weight: bold;
-            margin-bottom: 15px;
-        }
+    white-space: nowrap;
+}
 
-        #databaseDetails {
-            text-align: left;
-            line-height: 1.5;
-        }
+.controls {
+    max-width: 700px;
+    margin: 20px auto;
 
-        /* OCR DEBUG */
+    display: flex;
+    flex-wrap: wrap;
 
-        .ocr-debug {
-            max-width: 700px;
-            margin: 20px auto;
-            text-align: left;
-        }
+    justify-content: center;
 
-        .ocr-debug h3 {
-            text-align: center;
-        }
+    gap: 10px;
+}
 
-        #rawOCR {
-            width: 100%;
-            min-height: 150px;
-            padding: 12px;
+button {
+    padding: 12px 18px;
 
-            background: #080808;
-            color: #00ff66;
+    border: none;
+    border-radius: 8px;
 
-            border: 1px solid #333;
-            border-radius: 8px;
+    font-size: 15px;
+    font-weight: bold;
 
-            font-family: monospace;
-            font-size: 14px;
+    cursor: pointer;
+}
 
-            white-space: pre-wrap;
-            overflow-wrap: break-word;
-        }
+button:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+}
 
-    </style>
+#startButton {
+    background: #00c853;
+    color: white;
+}
+
+#scanButton {
+    background: #2196f3;
+    color: white;
+}
+
+#stopButton {
+    background: #f44336;
+    color: white;
+}
+
+#databaseButton {
+    background: #9c27b0;
+    color: white;
+}
+
+.status {
+    max-width: 700px;
+    margin: 15px auto;
+
+    padding: 12px;
+
+    background: #222;
+
+    border-radius: 8px;
+
+    color: #ddd;
+}
+
+.progress-container {
+    max-width: 700px;
+    margin: 15px auto;
+
+    background: #333;
+
+    border-radius: 10px;
+
+    overflow: hidden;
+
+    height: 12px;
+}
+
+.progress-bar {
+    width: 0%;
+    height: 100%;
+
+    background: #00ff66;
+
+    transition: width 0.2s;
+}
+
+.image-container {
+    max-width: 700px;
+    margin: 20px auto;
+}
+
+.image-container h3 {
+    margin-bottom: 10px;
+}
+
+#processedImage {
+    max-width: 100%;
+
+    border-radius: 8px;
+
+    display: none;
+}
+
+.results {
+    max-width: 700px;
+
+    margin: 20px auto;
+
+    text-align: left;
+}
+
+.results h2 {
+    text-align: center;
+}
+
+.field {
+    margin: 10px 0;
+}
+
+.field label {
+    display: block;
+
+    color: #aaa;
+
+    font-size: 13px;
+
+    margin-bottom: 4px;
+}
+
+.field input {
+    width: 100%;
+
+    padding: 11px;
+
+    background: #222;
+
+    color: white;
+
+    border: 1px solid #444;
+
+    border-radius: 6px;
+
+    font-size: 15px;
+}
+
+.database-result {
+    display: none;
+
+    max-width: 700px;
+
+    margin: 20px auto;
+
+    padding: 20px;
+
+    border-radius: 10px;
+
+    text-align: center;
+}
+
+.database-result.valid {
+    background: #123d20;
+    border: 2px solid #00c853;
+}
+
+.database-result.invalid {
+    background: #421414;
+    border: 2px solid #f44336;
+}
+
+#databaseStatus {
+    font-size: 22px;
+
+    font-weight: bold;
+
+    margin-bottom: 15px;
+}
+
+#databaseDetails {
+    text-align: left;
+
+    line-height: 1.5;
+}
+
+.ocr-debug {
+    max-width: 700px;
+
+    margin: 20px auto;
+
+    text-align: left;
+}
+
+.ocr-debug h3 {
+    text-align: center;
+}
+
+#rawOCR {
+    width: 100%;
+
+    min-height: 150px;
+
+    padding: 12px;
+
+    background: #080808;
+
+    color: #00ff66;
+
+    border: 1px solid #333;
+
+    border-radius: 8px;
+
+    font-family: monospace;
+
+    font-size: 14px;
+
+    white-space: pre-wrap;
+
+    overflow-wrap: break-word;
+}
+
+</style>
 
 </head>
 
 <body>
 
-    <h1>Student ID Scanner</h1>
+<h1>Student ID Scanner</h1>
 
-    <div class="subtitle">
-        OCR-Based Student Identification System
-    </div>
+<div class="subtitle">
+    OCR-Based Student Identification System
+</div>
 
+<!-- =====================================================
+     CAMERA
+===================================================== -->
 
-    <!-- CAMERA -->
+<div class="camera-container">
 
-    <div class="camera-container">
+```
+<video
+    id="video"
+    autoplay
+    playsinline>
+</video>
 
-        <video
-            id="video"
-            autoplay
-            playsinline>
-        </video>
+<div class="scan-guide"></div>
+```
 
-        <div class="scan-guide"></div>
+</div>
 
-    </div>
+<!-- =====================================================
+     CONTROLS
+===================================================== -->
 
+<div class="controls">
 
-    <!-- CONTROLS -->
+```
+<button
+    id="startButton">
 
-    <div class="controls">
+    📷 Start Camera
 
-        <button
-            id="startButton">
+</button>
 
-            📷 Start Camera
 
-        </button>
+<button
+    id="scanButton"
+    disabled>
 
+    🔍 Scan & Verify
 
-        <button
-            id="scanButton"
-            disabled>
+</button>
 
-            🔍 Scan & Verify
 
-        </button>
+<button
+    id="stopButton"
+    disabled>
 
+    ⛔ Stop Camera
 
-        <button
-            id="stopButton"
-            disabled>
+</button>
 
-            ⛔ Stop Camera
 
-        </button>
+<button
+    id="databaseButton"
+    disabled>
 
+    🔎 Check Database
 
-        <button
-            id="databaseButton"
-            disabled>
+</button>
+```
 
-            🔎 Check Database
+</div>
 
-        </button>
+<!-- =====================================================
+     STATUS
+===================================================== -->
 
-    </div>
+<div
+    class="status"
+    id="status">
 
+```
+Camera not started.
+```
 
-    <!-- STATUS -->
+</div>
 
-    <div
-        class="status"
-        id="status">
+<!-- =====================================================
+     PROGRESS
+===================================================== -->
 
-        Camera not started.
+<div class="progress-container">
 
-    </div>
+```
+<div
+    class="progress-bar"
+    id="progressBar">
+</div>
+```
 
+</div>
 
-    <!-- PROGRESS -->
+<!-- =====================================================
+     PROCESSED IMAGE
+===================================================== -->
 
-    <div class="progress-container">
+<div class="image-container">
 
-        <div
-            class="progress-bar"
-            id="progressBar">
-        </div>
+```
+<h3>Processed Image</h3>
 
-    </div>
+<img
+    id="processedImage"
+    alt="Processed ID">
+```
 
+</div>
 
-    <!-- PROCESSED IMAGE -->
+<!-- =====================================================
+     RESULTS
+===================================================== -->
 
-    <div class="image-container">
+<div class="results">
 
-        <h3>Processed Image</h3>
+```
+<h2>Scanned Information</h2>
 
-        <img
-            id="processedImage"
-            alt="Processed ID">
 
-    </div>
+<div class="field">
 
+    <label>
+        NAME
+    </label>
 
-    <!-- RESULTS -->
+    <input
+        id="nameField"
+        type="text"
+        readonly>
 
-    <div class="results">
+</div>
 
-        <h2>Scanned Information</h2>
 
+<div class="field">
 
-        <div class="field">
+    <label>
+        GRADE LEVEL
+    </label>
 
-            <label>
-                NAME
-            </label>
+    <input
+        id="gradeField"
+        type="text"
+        readonly>
 
-            <input
-                id="nameField"
-                type="text"
-                readonly>
+</div>
 
-        </div>
 
+<div class="field">
 
-        <div class="field">
+    <label>
+        SECTION
+    </label>
 
-            <label>
-                GRADE LEVEL
-            </label>
+    <input
+        id="sectionField"
+        type="text"
+        readonly>
 
-            <input
-                id="gradeField"
-                type="text"
-                readonly>
+</div>
 
-        </div>
 
+<div class="field">
 
-        <div class="field">
+    <label>
+        LRN
+    </label>
 
-            <label>
-                SECTION
-            </label>
+    <input
+        id="lrnField"
+        type="text"
+        readonly>
 
-            <input
-                id="sectionField"
-                type="text"
-                readonly>
+</div>
 
-        </div>
 
+<div class="field">
 
-        <div class="field">
+    <label>
+        ID NUMBER
+    </label>
 
-            <label>
-                LRN
-            </label>
+    <input
+        id="idField"
+        type="text"
+        readonly>
 
-            <input
-                id="lrnField"
-                type="text"
-                readonly>
+</div>
+```
 
-        </div>
+</div>
 
+<!-- =====================================================
+     DATABASE RESULT
+===================================================== -->
 
-        <div class="field">
+<div
+    class="database-result"
+    id="databaseResult">
 
-            <label>
-                ID NUMBER
-            </label>
+```
+<div id="databaseStatus"></div>
 
-            <input
-                id="idField"
-                type="text"
-                readonly>
+<div id="databaseDetails"></div>
+```
 
-        </div>
+</div>
 
-    </div>
+<!-- =====================================================
+     RAW OCR
+===================================================== -->
 
+<div class="ocr-debug">
 
-    <!-- DATABASE RESULT -->
+```
+<h3>Raw OCR Result</h3>
 
-    <div
-        class="database-result"
-        id="databaseResult">
+<div id="rawOCR">
+    No OCR result yet.
+</div>
+```
 
-        <div id="databaseStatus"></div>
+</div>
 
-        <div id="databaseDetails"></div>
+<!-- =====================================================
+     HIDDEN CANVASES
+===================================================== -->
 
-    </div>
+<canvas
+ id="canvas"
+ style="display:none;"> </canvas>
 
+<canvas
+ id="lrnCanvas"
+ style="display:none;"> </canvas>
 
-    <!-- OCR DEBUG -->
+<!-- Canvas used internally for red detection -->
 
-    <div class="ocr-debug">
-
-        <h3>Raw OCR Result</h3>
-
-        <div id="rawOCR">
-            No OCR result yet.
-        </div>
-
-    </div>
-
-
-    <!-- HIDDEN CANVAS -->
-
-    <canvas
-        id="canvas"
-        style="display:none;">
-    </canvas>
-
+<canvas
+ id="redDetectionCanvas"
+ style="display:none;"> </canvas>
 
 <script>
 
@@ -494,6 +640,12 @@ const video =
 
 const canvas =
     document.getElementById("canvas");
+
+const lrnCanvas =
+    document.getElementById("lrnCanvas");
+
+const redDetectionCanvas =
+    document.getElementById("redDetectionCanvas");
 
 const processedImage =
     document.getElementById("processedImage");
@@ -545,7 +697,7 @@ const rawOCR =
 
 
 /* =========================================================
-   GOOGLE APPS SCRIPT DATABASE URL
+   GOOGLE APPS SCRIPT
 ========================================================= */
 
 const DATABASE_URL =
@@ -564,18 +716,15 @@ startButton.addEventListener(
     startCamera
 );
 
-
 stopButton.addEventListener(
     "click",
     stopCamera
 );
 
-
 scanButton.addEventListener(
     "click",
     captureAndScan
 );
-
 
 databaseButton.addEventListener(
     "click",
@@ -594,6 +743,7 @@ async function startCamera() {
         status.textContent =
             "Starting camera...";
 
+
         cameraStream =
             await navigator.mediaDevices.getUserMedia({
 
@@ -611,6 +761,10 @@ async function startCamera() {
 
                     height: {
                         ideal: 1080
+                    },
+
+                    frameRate: {
+                        ideal: 30
                     }
 
                 }
@@ -620,6 +774,35 @@ async function startCamera() {
 
         video.srcObject =
             cameraStream;
+
+
+        const track =
+            cameraStream.getVideoTracks()[0];
+
+        try {
+
+            await track.applyConstraints({
+
+                width: {
+                    ideal: 1920
+                },
+
+                height: {
+                    ideal: 1080
+                }
+
+            });
+
+        }
+
+        catch (constraintError) {
+
+            console.log(
+                "Could not apply extra camera constraints:",
+                constraintError
+            );
+
+        }
 
 
         startButton.disabled =
@@ -633,7 +816,7 @@ async function startCamera() {
 
 
         status.textContent =
-            "Camera ready. Align the ID inside the green guide.";
+            "Camera ready. Place the red ID area inside the green guide.";
 
     }
 
@@ -672,7 +855,8 @@ function stopCamera() {
     }
 
 
-    video.srcObject = null;
+    video.srcObject =
+        null;
 
 
     startButton.disabled =
@@ -692,7 +876,7 @@ function stopCamera() {
 
 
 /* =========================================================
-   CAPTURE + OCR
+   CAPTURE + SCAN
 ========================================================= */
 
 async function captureAndScan() {
@@ -754,38 +938,732 @@ async function captureAndScan() {
 
 
 /* =========================================================
-   OCR
+   AUTOMATIC RED ID DETECTION
 ========================================================= */
 
-async function performOCR() {
+/*
+ * This function searches ONLY inside the normal
+ * green guide area.
+ *
+ * It looks for the largest connected region of
+ * strong red pixels.
+ *
+ * That means small red objects/noise elsewhere
+ * in the camera frame should not control the crop.
+ *
+ * It returns coordinates in the ORIGINAL camera
+ * resolution.
+ */
 
-    status.textContent =
-        "Processing image...";
+function detectRedIDArea(
+    sourceCanvas
+) {
+
+    const sourceWidth =
+        sourceCanvas.width;
+
+    const sourceHeight =
+        sourceCanvas.height;
 
 
-    const videoWidth =
-        video.videoWidth;
+    /*
+     * Work on a much smaller image.
+     *
+     * This makes detection fast enough
+     * for an Android phone.
+     */
 
-    const videoHeight =
-        video.videoHeight;
+    const detectionWidth =
+        240;
+
+    const detectionHeight =
+        Math.round(
+            sourceHeight *
+            (detectionWidth / sourceWidth)
+        );
 
 
-    if (
-        !videoWidth ||
-        !videoHeight
+    redDetectionCanvas.width =
+        detectionWidth;
+
+    redDetectionCanvas.height =
+        detectionHeight;
+
+
+    const detectionCtx =
+        redDetectionCanvas.getContext(
+            "2d",
+            {
+                willReadFrequently: true
+            }
+        );
+
+
+    detectionCtx.drawImage(
+        sourceCanvas,
+
+        0,
+        0,
+        sourceWidth,
+        sourceHeight,
+
+        0,
+        0,
+        detectionWidth,
+        detectionHeight
+    );
+
+
+    const imageData =
+        detectionCtx.getImageData(
+            0,
+            0,
+            detectionWidth,
+            detectionHeight
+        );
+
+
+    const data =
+        imageData.data;
+
+
+    /*
+     * The green guide corresponds to
+     * approximately the middle 88% of
+     * the camera width.
+     *
+     * We also restrict the height to
+     * approximately the ID-card area.
+     */
+
+    const guideLeft =
+        Math.round(
+            detectionWidth * 0.06
+        );
+
+    const guideRight =
+        Math.round(
+            detectionWidth * 0.94
+        );
+
+
+    const guideWidth =
+        guideRight - guideLeft;
+
+
+    const guideHeight =
+        guideWidth / 1.586;
+
+
+    const guideTop =
+        Math.round(
+            (detectionHeight - guideHeight) / 2
+        );
+
+
+    const guideBottom =
+        Math.round(
+            guideTop + guideHeight
+        );
+
+
+    /*
+     * Create a binary red mask.
+     *
+     * A pixel is considered red when:
+     *
+     * R is reasonably bright
+     * R is substantially stronger than G
+     * R is substantially stronger than B
+     *
+     * This works with many shades of red,
+     * including darker red ID backgrounds.
+     */
+
+    const mask =
+        new Uint8Array(
+            detectionWidth *
+            detectionHeight
+        );
+
+
+    for (
+        let y = guideTop;
+        y < guideBottom;
+        y++
     ) {
 
-        throw new Error(
-            "Camera image is not ready."
-        );
+        for (
+            let x = guideLeft;
+            x < guideRight;
+            x++
+        ) {
+
+            const index =
+                (
+                    y *
+                    detectionWidth +
+                    x
+                ) * 4;
+
+
+            const r =
+                data[index];
+
+            const g =
+                data[index + 1];
+
+            const b =
+                data[index + 2];
+
+
+            /*
+             * Red detection.
+             *
+             * The thresholds are deliberately
+             * somewhat tolerant because phone
+             * cameras can change the appearance
+             * of red depending on lighting.
+             */
+
+            const isRed =
+                r > 80 &&
+                r > g * 1.25 &&
+                r > b * 1.25 &&
+                (r - g) > 25 &&
+                (r - b) > 25;
+
+
+            if (isRed) {
+
+                mask[
+                    y *
+                    detectionWidth +
+                    x
+                ] = 1;
+
+            }
+
+        }
 
     }
 
 
     /*
-       ID CARD CROP
-       Same basic crop as your working version.
-    */
+     * =====================================================
+     * CONNECTED COMPONENT SEARCH
+     * =====================================================
+     *
+     * Instead of simply taking every red pixel,
+     * find actual connected red regions.
+     */
+
+    const visited =
+        new Uint8Array(
+            detectionWidth *
+            detectionHeight
+        );
+
+
+    let largestComponent =
+        null;
+
+
+    const neighbors = [
+
+        [-1, -1],
+        [ 0, -1],
+        [ 1, -1],
+
+        [-1,  0],
+        [ 1,  0],
+
+        [-1,  1],
+        [ 0,  1],
+        [ 1,  1]
+
+    ];
+
+
+    for (
+        let startY = guideTop;
+        startY < guideBottom;
+        startY++
+    ) {
+
+        for (
+            let startX = guideLeft;
+            startX < guideRight;
+            startX++
+        ) {
+
+            const startIndex =
+                startY *
+                detectionWidth +
+                startX;
+
+
+            if (
+                !mask[startIndex] ||
+                visited[startIndex]
+            ) {
+
+                continue;
+
+            }
+
+
+            /*
+             * Breadth-first search.
+             */
+
+            const queue = [
+                [startX, startY]
+            ];
+
+            visited[startIndex] =
+                1;
+
+
+            let queueIndex =
+                0;
+
+
+            let pixelCount =
+                0;
+
+
+            let minX =
+                startX;
+
+            let maxX =
+                startX;
+
+            let minY =
+                startY;
+
+            let maxY =
+                startY;
+
+
+            while (
+                queueIndex <
+                queue.length
+            ) {
+
+                const [
+                    currentX,
+                    currentY
+                ] =
+                    queue[queueIndex++];
+
+
+                pixelCount++;
+
+
+                minX =
+                    Math.min(
+                        minX,
+                        currentX
+                    );
+
+                maxX =
+                    Math.max(
+                        maxX,
+                        currentX
+                    );
+
+                minY =
+                    Math.min(
+                        minY,
+                        currentY
+                    );
+
+                maxY =
+                    Math.max(
+                        maxY,
+                        currentY
+                    );
+
+
+                for (
+                    const [
+                        offsetX,
+                        offsetY
+                    ]
+                    of neighbors
+                ) {
+
+                    const nextX =
+                        currentX +
+                        offsetX;
+
+                    const nextY =
+                        currentY +
+                        offsetY;
+
+
+                    if (
+                        nextX < guideLeft ||
+                        nextX >= guideRight ||
+                        nextY < guideTop ||
+                        nextY >= guideBottom
+                    ) {
+
+                        continue;
+
+                    }
+
+
+                    const nextIndex =
+                        nextY *
+                        detectionWidth +
+                        nextX;
+
+
+                    if (
+                        mask[nextIndex] &&
+                        !visited[nextIndex]
+                    ) {
+
+                        visited[nextIndex] =
+                            1;
+
+                        queue.push([
+                            nextX,
+                            nextY
+                        ]);
+
+                    }
+
+                }
+
+            }
+
+
+            /*
+             * Save the largest red component.
+             */
+
+            if (
+                !largestComponent ||
+                pixelCount >
+                largestComponent.pixelCount
+            ) {
+
+                largestComponent = {
+
+                    pixelCount,
+
+                    minX,
+                    maxX,
+                    minY,
+                    maxY
+
+                };
+
+            }
+
+        }
+
+    }
+
+
+    /*
+     * =====================================================
+     * VALIDATE RED REGION
+     * =====================================================
+     */
+
+    if (!largestComponent) {
+
+        console.log(
+            "No red region detected."
+        );
+
+        return null;
+
+    }
+
+
+    const detectedWidth =
+        largestComponent.maxX -
+        largestComponent.minX +
+        1;
+
+
+    const detectedHeight =
+        largestComponent.maxY -
+        largestComponent.minY +
+        1;
+
+
+    const detectedArea =
+        detectedWidth *
+        detectedHeight;
+
+
+    /*
+     * Reject tiny red objects.
+     *
+     * The actual ID should occupy a
+     * meaningful portion of the guide.
+     */
+
+    const guideArea =
+        guideWidth *
+        guideHeight;
+
+
+    const areaRatio =
+        detectedArea /
+        guideArea;
+
+
+    console.log(
+        "Red component:",
+        largestComponent
+    );
+
+    console.log(
+        "Red area ratio:",
+        areaRatio
+    );
+
+
+    /*
+     * If the detected region is extremely
+     * small, assume red detection failed.
+     */
+
+    if (
+        areaRatio < 0.08
+    ) {
+
+        console.log(
+            "Detected red area is too small."
+        );
+
+        return null;
+
+    }
+
+
+    /*
+     * =====================================================
+     * ADD PADDING
+     * =====================================================
+     *
+     * We don't want the crop to touch the
+     * red region exactly.
+     *
+     * Extra surrounding area is useful because
+     * text can extend slightly outside the red
+     * background.
+     */
+
+    const paddingX =
+        detectedWidth *
+        0.12;
+
+    const paddingY =
+        detectedHeight *
+        0.12;
+
+
+    let x =
+        largestComponent.minX -
+        paddingX;
+
+    let y =
+        largestComponent.minY -
+        paddingY;
+
+    let width =
+        detectedWidth +
+        paddingX * 2;
+
+    let height =
+        detectedHeight +
+        paddingY * 2;
+
+
+    /*
+     * Convert detection-canvas coordinates
+     * back to original camera coordinates.
+     */
+
+    const scaleX =
+        sourceWidth /
+        detectionWidth;
+
+    const scaleY =
+        sourceHeight /
+        detectionHeight;
+
+
+    x *= scaleX;
+    y *= scaleY;
+    width *= scaleX;
+    height *= scaleY;
+
+
+    /*
+     * =====================================================
+     * CARD SHAPE CORRECTION
+     * =====================================================
+     *
+     * Your ID is approximately 1.586 : 1.
+     *
+     * If red detection catches most of the ID,
+     * use the detected region but expand it
+     * toward the correct card ratio.
+     */
+
+    const targetRatio =
+        1.586;
+
+
+    let targetWidth =
+        width;
+
+    let targetHeight =
+        height;
+
+
+    const detectedRatio =
+        width /
+        height;
+
+
+    if (
+        detectedRatio >
+        targetRatio
+    ) {
+
+        /*
+         * Region is too wide.
+         * Increase height.
+         */
+
+        targetHeight =
+            width /
+            targetRatio;
+
+    }
+
+    else {
+
+        /*
+         * Region is too tall.
+         * Increase width.
+         */
+
+        targetWidth =
+            height *
+            targetRatio;
+
+    }
+
+
+    /*
+     * Center the corrected crop
+     * around the detected region.
+     */
+
+    x -=
+        (
+            targetWidth -
+            width
+        ) / 2;
+
+    y -=
+        (
+            targetHeight -
+            height
+        ) / 2;
+
+    width =
+        targetWidth;
+
+    height =
+        targetHeight;
+
+
+    /*
+     * Keep crop inside the camera image.
+     */
+
+    if (x < 0) {
+
+        width += x;
+        x = 0;
+
+    }
+
+    if (y < 0) {
+
+        height += y;
+        y = 0;
+
+    }
+
+
+    if (
+        x + width >
+        sourceWidth
+    ) {
+
+        width =
+            sourceWidth -
+            x;
+
+    }
+
+
+    if (
+        y + height >
+        sourceHeight
+    ) {
+
+        height =
+            sourceHeight -
+            y;
+
+    }
+
+
+    /*
+     * Return final crop.
+     */
+
+    return {
+
+        x: Math.round(x),
+        y: Math.round(y),
+        width: Math.round(width),
+        height: Math.round(height),
+
+        detected: true
+
+    };
+
+}
+
+
+/* =========================================================
+   FALLBACK FIXED CARD CROP
+========================================================= */
+
+function getFallbackCardCrop(
+    videoWidth,
+    videoHeight
+) {
+
+    /*
+     * This is essentially your previous
+     * fixed 88% crop.
+     */
 
     const cropWidth =
         videoWidth * 0.88;
@@ -795,63 +1673,84 @@ async function performOCR() {
         cropWidth / 1.586;
 
 
+    let finalCropWidth =
+        cropWidth;
+
+    let finalCropHeight =
+        cropHeight;
+
+
+    if (
+        finalCropHeight >
+        videoHeight * 0.92
+    ) {
+
+        finalCropHeight =
+            videoHeight * 0.92;
+
+        finalCropWidth =
+            finalCropHeight * 1.586;
+
+    }
+
+
     const cropX =
-        (videoWidth - cropWidth) / 2;
+        (
+            videoWidth -
+            finalCropWidth
+        ) / 2;
 
 
     const cropY =
-        (videoHeight - cropHeight) / 2;
+        (
+            videoHeight -
+            finalCropHeight
+        ) / 2;
 
 
-    /*
-       UPSCALE
-    */
+    return {
 
-    const scale = 2;
+        x: Math.round(cropX),
+
+        y: Math.round(cropY),
+
+        width:
+            Math.round(finalCropWidth),
+
+        height:
+            Math.round(finalCropHeight),
+
+        detected: false
+
+    };
+
+}
 
 
-    canvas.width =
-        cropWidth * scale;
+/* =========================================================
+   IMAGE PREPROCESSING
+========================================================= */
 
-    canvas.height =
-        cropHeight * scale;
-
+function preprocessCanvas(
+    sourceCanvas,
+    contrast = 1.35
+) {
 
     const ctx =
-        canvas.getContext("2d");
+        sourceCanvas.getContext(
+            "2d",
+            {
+                willReadFrequently: true
+            }
+        );
 
-
-    ctx.drawImage(
-
-        video,
-
-        cropX,
-        cropY,
-        cropWidth,
-        cropHeight,
-
-        0,
-        0,
-        canvas.width,
-        canvas.height
-
-    );
-
-
-    status.textContent =
-        "Enhancing image...";
-
-
-    /*
-       GRAYSCALE + CONTRAST
-    */
 
     const imageData =
         ctx.getImageData(
             0,
             0,
-            canvas.width,
-            canvas.height
+            sourceCanvas.width,
+            sourceCanvas.height
         );
 
 
@@ -859,13 +1758,15 @@ async function performOCR() {
         imageData.data;
 
 
-    const contrast =
-        1.5;
-
-
     const factor =
-        (259 * (contrast + 255)) /
-        (255 * (259 - contrast));
+        (
+            259 *
+            (contrast + 255)
+        ) /
+        (
+            255 *
+            (259 - contrast)
+        );
 
 
     for (
@@ -884,11 +1785,19 @@ async function performOCR() {
             data[i + 2];
 
 
+        /*
+         * Grayscale
+         */
+
         let gray =
             0.299 * r +
             0.587 * g +
             0.114 * b;
 
+
+        /*
+         * Contrast
+         */
 
         gray =
             factor *
@@ -924,10 +1833,206 @@ async function performOCR() {
         0
     );
 
+}
+
+
+/* =========================================================
+   MAIN OCR
+========================================================= */
+
+async function performOCR() {
+
+    status.textContent =
+        "Preparing ID image...";
+
+
+    const videoWidth =
+        video.videoWidth;
+
+    const videoHeight =
+        video.videoHeight;
+
+
+    if (
+        !videoWidth ||
+        !videoHeight
+    ) {
+
+        throw new Error(
+            "Camera image is not ready."
+        );
+
+    }
+
 
     /*
-       SHOW PROCESSED IMAGE
-    */
+     * =====================================================
+     * CAPTURE FULL CAMERA FRAME
+     * =====================================================
+     *
+     * We first capture the entire camera frame.
+     *
+     * This lets the red detector decide where
+     * the actual ID is.
+     */
+
+    const fullFrameCanvas =
+        document.createElement("canvas");
+
+
+    fullFrameCanvas.width =
+        videoWidth;
+
+    fullFrameCanvas.height =
+        videoHeight;
+
+
+    const fullFrameCtx =
+        fullFrameCanvas.getContext("2d");
+
+
+    fullFrameCtx.drawImage(
+        video,
+
+        0,
+        0,
+        videoWidth,
+        videoHeight
+    );
+
+
+    status.textContent =
+        "Detecting red ID area...";
+
+
+    /*
+     * =====================================================
+     * AUTOMATIC RED DETECTION
+     * =====================================================
+     */
+
+    let detectedCrop =
+        detectRedIDArea(
+            fullFrameCanvas
+        );
+
+
+    /*
+     * =====================================================
+     * FALLBACK
+     * =====================================================
+     *
+     * If no reliable red region is found,
+     * use the old fixed crop.
+     */
+
+    if (!detectedCrop) {
+
+        detectedCrop =
+            getFallbackCardCrop(
+                videoWidth,
+                videoHeight
+            );
+
+
+        status.textContent =
+            "Red area not clear. Using normal ID crop...";
+
+    }
+
+    else {
+
+        status.textContent =
+            "Red ID area detected automatically.";
+
+    }
+
+
+    console.log(
+        "FINAL ID CROP:",
+        detectedCrop
+    );
+
+
+    /*
+     * =====================================================
+     * UPSCALE
+     * =====================================================
+     */
+
+    const scale =
+        2;
+
+
+    canvas.width =
+        Math.round(
+            detectedCrop.width *
+            scale
+        );
+
+
+    canvas.height =
+        Math.round(
+            detectedCrop.height *
+            scale
+        );
+
+
+    const ctx =
+        canvas.getContext("2d");
+
+
+    ctx.imageSmoothingEnabled =
+        true;
+
+    ctx.imageSmoothingQuality =
+        "high";
+
+
+    /*
+     * Draw ONLY the automatically detected
+     * red ID area.
+     */
+
+    ctx.drawImage(
+
+        fullFrameCanvas,
+
+        detectedCrop.x,
+        detectedCrop.y,
+
+        detectedCrop.width,
+        detectedCrop.height,
+
+        0,
+        0,
+
+        canvas.width,
+        canvas.height
+
+    );
+
+
+    status.textContent =
+        "Enhancing image...";
+
+
+    /*
+     * Grayscale + moderate contrast.
+     *
+     * Same general preprocessing as
+     * your previous working version.
+     */
+
+    preprocessCanvas(
+        canvas,
+        1.35
+    );
+
+
+    /*
+     * Display processed image.
+     */
 
     processedImage.src =
         canvas.toDataURL(
@@ -938,13 +2043,13 @@ async function performOCR() {
         "block";
 
 
+    /* =====================================================
+       MAIN OCR
+    ===================================================== */
+
     status.textContent =
-        "Running OCR...";
+        "Reading ID information...";
 
-
-    /*
-       TESSERACT
-    */
 
     const result =
         await Tesseract.recognize(
@@ -969,7 +2074,8 @@ async function performOCR() {
 
                         progressBar.style.width =
                             (
-                                info.progress * 100
+                                info.progress *
+                                80
                             ) + "%";
 
                     }
@@ -986,27 +2092,21 @@ async function performOCR() {
 
                 },
 
-                tessedit_pageseg_mode: 6
+                tessedit_pageseg_mode: 6,
+
+                preserve_interword_spaces: 1
 
             }
 
         );
 
 
-    progressBar.style.width =
-        "100%";
-
-
-    /*
-       RAW OCR
-    */
-
     const text =
         result.data.text;
 
 
     console.log(
-        "OCR RESULT:",
+        "MAIN OCR RESULT:",
         text
     );
 
@@ -1017,26 +2117,71 @@ async function performOCR() {
 
 
     /*
-       PARSE OCR
-    */
+     * Parse all fields.
+     */
 
     parseOCR(text);
 
 
+    /* =====================================================
+       TARGETED LRN OCR
+    ===================================================== */
+
     /*
-       AUTOMATIC DATABASE CHECK
-    */
+     * Only run the extra LRN OCR when
+     * the main OCR failed to obtain a
+     * valid 12-digit LRN.
+     */
 
     if (
-        lrnField.value.trim()
+        !isValidLRN(
+            lrnField.value
+        )
+    ) {
+
+        status.textContent =
+            "Improving LRN recognition...";
+
+
+        const targetedLRN =
+            await performTargetedLRNOCR(
+                canvas
+            );
+
+
+        if (
+            isValidLRN(targetedLRN)
+        ) {
+
+            lrnField.value =
+                targetedLRN;
+
+
+            rawOCR.textContent +=
+                "\n\n[Targeted LRN OCR]\n" +
+                targetedLRN;
+
+        }
+
+    }
+
+
+    progressBar.style.width =
+        "100%";
+
+
+    /* =====================================================
+       DATABASE
+    ===================================================== */
+
+    if (
+        isValidLRN(
+            lrnField.value
+        )
     ) {
 
         status.textContent =
             "OCR complete. Checking database...";
-
-
-        databaseButton.disabled =
-            true;
 
 
         await checkDatabase();
@@ -1046,9 +2191,174 @@ async function performOCR() {
     else {
 
         status.textContent =
-            "OCR complete, but LRN was not detected.";
+            "OCR complete. LRN could not be confidently detected.";
+
+        databaseButton.disabled =
+            false;
 
     }
+
+}
+
+
+/* =========================================================
+   TARGETED LRN OCR
+========================================================= */
+
+async function performTargetedLRNOCR(
+    fullCanvas
+) {
+
+    /*
+     * The LRN is normally the second
+     * line on the ID.
+     */
+
+    const width =
+        fullCanvas.width;
+
+    const height =
+        fullCanvas.height;
+
+
+    /*
+     * Approximate LRN region.
+     */
+
+    const x =
+        width * 0.05;
+
+
+    const y =
+        height * 0.25;
+
+
+    const cropWidth =
+        width * 0.90;
+
+
+    const cropHeight =
+        height * 0.18;
+
+
+    /*
+     * Extra enlargement for digits.
+     */
+
+    const scale =
+        3;
+
+
+    lrnCanvas.width =
+        Math.round(
+            cropWidth *
+            scale
+        );
+
+
+    lrnCanvas.height =
+        Math.round(
+            cropHeight *
+            scale
+        );
+
+
+    const ctx =
+        lrnCanvas.getContext("2d");
+
+
+    ctx.imageSmoothingEnabled =
+        true;
+
+    ctx.imageSmoothingQuality =
+        "high";
+
+
+    ctx.drawImage(
+
+        fullCanvas,
+
+        x,
+        y,
+
+        cropWidth,
+        cropHeight,
+
+        0,
+        0,
+
+        lrnCanvas.width,
+        lrnCanvas.height
+
+    );
+
+
+    /*
+     * Stronger contrast specifically
+     * for the LRN.
+     */
+
+    preprocessCanvas(
+        lrnCanvas,
+        1.6
+    );
+
+
+    console.log(
+        "Running targeted LRN OCR..."
+    );
+
+
+    const result =
+        await Tesseract.recognize(
+
+            lrnCanvas,
+
+            "eng",
+
+            {
+
+                logger: function(info) {
+
+                    console.log(
+                        "LRN OCR:",
+                        info
+                    );
+
+                },
+
+                /*
+                 * Single line.
+                 */
+
+                tessedit_pageseg_mode: 7,
+
+                /*
+                 * LRN consists of digits
+                 * plus the LRN label.
+                 */
+
+                tessedit_char_whitelist:
+                    "LRN:0123456789"
+
+            }
+
+        );
+
+
+    const text =
+        result.data.text;
+
+
+    console.log(
+        "TARGETED LRN RESULT:",
+        text
+    );
+
+
+    return extractBestLRN(
+        text
+    );
 
 }
 
@@ -1059,22 +2369,9 @@ async function performOCR() {
 
 function parseOCR(text) {
 
-    const lines =
-        text
-            .split(/\r?\n/)
-            .map(
-                line =>
-                    line.trim()
-            )
-            .filter(
-                line =>
-                    line.length > 0
-            );
-
-
     /*
-       CLEAR PREVIOUS VALUES
-    */
+     * Clear fields.
+     */
 
     nameField.value =
         "";
@@ -1092,127 +2389,33 @@ function parseOCR(text) {
         "";
 
 
+    const lines =
+        text
+            .split(/\r?\n/)
+            .map(
+                line =>
+                    line.trim()
+            )
+            .filter(
+                line =>
+                    line.length > 0
+            );
+
+
     /* =====================================================
        LRN
     ===================================================== */
 
-    /*
-       OCR commonly confuses:
+    const lrn =
+        extractBestLRN(text);
 
-       O / o -> 0
-       I / l -> 1
-       S -> 5
-       B -> 8
-       G -> 6
-       Z -> 2
-    */
-
-    const correctedText =
-        text
-            .replace(/[Oo]/g, "0")
-            .replace(/[IiLl]/g, "1")
-            .replace(/S/g, "5")
-            .replace(/s/g, "5")
-            .replace(/B/g, "8")
-            .replace(/G/g, "6")
-            .replace(/Z/g, "2");
-
-
-    /*
-       Look specifically after LRN.
-
-       IMPORTANT:
-       Exactly 12 digits are accepted.
-    */
-
-    let lrnMatch =
-        correctedText.match(
-
-            /LRN\s*[:#\-]?\s*([0-9](?:[\s.-]*[0-9]){11})/i
-
-        );
-
-
-    if (lrnMatch) {
-
-        const lrnDigits =
-            lrnMatch[1]
-                .replace(
-                    /[^0-9]/g,
-                    ""
-                );
-
-
-        /*
-           HARD LIMIT:
-           Exactly 12 digits.
-        */
-
-        if (
-            lrnDigits.length === 12
-        ) {
-
-            lrnField.value =
-                lrnDigits;
-
-        }
-
-    }
-
-
-    /*
-       FALLBACK LRN DETECTION
-       Used when OCR fails to recognize
-       the word "LRN".
-    */
 
     if (
-        !lrnField.value
+        isValidLRN(lrn)
     ) {
 
-        for (
-            const line of lines
-        ) {
-
-            const correctedLine =
-                line
-                    .replace(/[Oo]/g, "0")
-                    .replace(/[IiLl]/g, "1")
-                    .replace(/S/g, "5")
-                    .replace(/s/g, "5")
-                    .replace(/B/g, "8")
-                    .replace(/G/g, "6")
-                    .replace(/Z/g, "2");
-
-
-            const digits =
-                correctedLine.replace(
-                    /[^0-9]/g,
-                    ""
-                );
-
-
-            /*
-               Only accept exactly 12 digits.
-            */
-
-            if (
-                digits.length === 12
-            ) {
-
-                /*
-                   LRN is normally a long
-                   12-digit number.
-                */
-
-                lrnField.value =
-                    digits;
-
-                break;
-
-            }
-
-        }
+        lrnField.value =
+            lrn;
 
     }
 
@@ -1222,191 +2425,74 @@ function parseOCR(text) {
     ===================================================== */
 
     /*
-       First try the proper label.
-
-       Expected examples:
-
-       ID NO.: 305015-410-SHS
-       ID NO. 305015-410-SHS
-       ID NUMBER: 305015-410-SHS
-    */
+     * Normal format:
+     *
+     * ID NO.: 305015-410-SHS
+     */
 
     let idMatch =
         text.match(
 
-            /ID\s*(?:NO\.?|NUMBER)\s*[:#\-]?\s*([0-9]{3,})\s*[-–—]\s*([0-9]{2,})\s*[-–—]\s*([A-Za-z]{2,})/i
+            /ID\s*(?:NO|NUMBER)?\s*[:#.\-]?\s*([0-9]{3,})\s*[-–—]\s*([0-9]{2,})\s*[-–—]?\s*([A-Za-z]{0,5})/i
 
         );
 
 
     if (idMatch) {
 
-        idField.value =
+        let id =
             idMatch[1] +
             "-" +
-            idMatch[2] +
-            "-" +
-            idMatch[3].toUpperCase();
-
-    }
+            idMatch[2];
 
 
-    /*
-       SECOND ID FALLBACK
-
-       Handles OCR such as:
-
-       ID NO.: 305015 410 SHS
-
-       or:
-
-       ID NO.: 305015-410 SHS
-    */
-
-    if (
-        !idField.value
-    ) {
-
-        idMatch =
-            text.match(
-
-                /ID\s*(?:NO\.?|NUMBER)?\s*[:#\-]?\s*([0-9]{3,})\s*[-–—\s]+([0-9]{2,})\s*[-–—\s]+([A-Za-z]{2,})/i
-
-            );
-
-
-        if (idMatch) {
-
-            idField.value =
-                idMatch[1] +
-                "-" +
-                idMatch[2] +
-                "-" +
-                idMatch[3].toUpperCase();
-
-        }
-
-    }
-
-
-    /*
-       THIRD ID FALLBACK
-
-       Search individual OCR lines.
-
-       This is useful when Tesseract places
-       the label and number on separate lines.
-    */
-
-    if (
-        !idField.value
-    ) {
-
-        for (
-            let i = 0;
-            i < lines.length;
-            i++
+        if (
+            idMatch[3]
         ) {
 
-            const line =
-                lines[i];
-
-
-            /*
-               Look for an ID-like pattern.
-            */
-
-            const candidate =
-                line.match(
-
-                    /\b([0-9]{3,})\s*[-–—\s]\s*([0-9]{2,})\s*[-–—\s]\s*([A-Za-z]{2,})\b/i
-
-                );
-
-
-            if (candidate) {
-
-                /*
-                   Avoid accidentally using
-                   other text.
-
-                   ID numbers in this project
-                   normally contain SHS.
-                */
-
-                const suffix =
-                    candidate[3]
-                        .toUpperCase();
-
-
-                if (
-                    suffix === "SHS" ||
-                    suffix === "JHS"
-                ) {
-
-                    idField.value =
-                        candidate[1] +
-                        "-" +
-                        candidate[2] +
-                        "-" +
-                        suffix;
-
-                    break;
-
-                }
-
-            }
+            id +=
+                "-" +
+                idMatch[3]
+                    .toUpperCase();
 
         }
 
+
+        idField.value =
+            id;
+
     }
 
+    else {
 
-    /*
-       FOURTH ID FALLBACK
+        /*
+         * More tolerant fallback.
+         */
 
-       OCR may recognize:
-
-       305015-410-SH5
-
-       Correct the common S/H/S digit
-       confusion when the surrounding
-       pattern looks like an ID.
-    */
-
-    if (
-        !idField.value
-    ) {
-
-        const idFallback =
+        const fallbackID =
             text.match(
 
-                /\b([0-9]{3,})\s*[-–—]\s*([0-9]{2,})\s*[-–—]\s*([A-Za-z0-9]{2,})\b/i
+                /\b([0-9]{5,})\s*[-–—]\s*([0-9]{2,})\s*[-–—]?\s*(SHS|JHS)?\b/i
 
             );
 
 
-        if (idFallback) {
+        if (fallbackID) {
 
-            let suffix =
-                idFallback[3]
-                    .toUpperCase()
-                    .replace(
-                        /5/g,
-                        "S"
-                    );
+            idField.value =
+                fallbackID[1] +
+                "-" +
+                fallbackID[2];
 
 
             if (
-                suffix.length >= 2
+                fallbackID[3]
             ) {
 
-                idField.value =
-                    idFallback[1] +
+                idField.value +=
                     "-" +
-                    idFallback[2] +
-                    "-" +
-                    suffix;
+                    fallbackID[3]
+                        .toUpperCase();
 
             }
 
@@ -1432,43 +2518,45 @@ function parseOCR(text) {
         gradeField.value =
             gradeMatch[1];
 
+
         sectionField.value =
-            gradeMatch[2]
-                .trim();
+            cleanSection(
+                gradeMatch[2]
+            );
 
     }
 
 
     /*
-       GRADE FALLBACK
-
-       Handles OCR such as:
-
-       GIRADDE 12-ROENTGEN
-       GRADEE 12-ROENTGEN
-       GRADE 12 ROENTGEN
-    */
+     * Fallback for OCR mistakes such as:
+     *
+     * GRADEE
+     * GIRADDE
+     * GRADE2
+     */
 
     if (
         !gradeField.value
     ) {
 
-        const gradeFallback =
+        const fallbackGrade =
             text.match(
 
-                /G[A-Z]*R[A-Z]*D[A-Z]*E[A-Z]*\s*(7|8|9|10|11|12)\s*[-–—:]?\s*([A-Za-z0-9][A-Za-z0-9 .'-]*)/i
+                /\b(?:G[A-Z]*R[A-Z]*D[A-Z]*E?)\s*[^0-9]{0,3}(7|8|9|10|11|12)\s*[-–—:]?\s*([A-Za-z0-9 .'-]+)/i
 
             );
 
 
-        if (gradeFallback) {
+        if (fallbackGrade) {
 
             gradeField.value =
-                gradeFallback[1];
+                fallbackGrade[1];
+
 
             sectionField.value =
-                gradeFallback[2]
-                    .trim();
+                cleanSection(
+                    fallbackGrade[2]
+                );
 
         }
 
@@ -1480,9 +2568,9 @@ function parseOCR(text) {
     ===================================================== */
 
     /*
-       Find the first line that looks like
-       a person's name.
-    */
+     * The name is normally the first
+     * substantial line before LRN.
+     */
 
     for (
         const line of lines
@@ -1491,10 +2579,6 @@ function parseOCR(text) {
         const upper =
             line.toUpperCase();
 
-
-        /*
-           Skip known information lines.
-        */
 
         if (
             upper.includes("LRN") ||
@@ -1510,19 +2594,22 @@ function parseOCR(text) {
 
 
         /*
-           Clean OCR characters.
-        */
+         * Remove obvious OCR garbage.
+         */
 
         const cleaned =
             line
+
                 .replace(
                     /[^A-Za-zÀ-ÿ.' -]/g,
                     ""
                 )
+
                 .replace(
                     /\s+/g,
                     " "
                 )
+
                 .trim();
 
 
@@ -1536,9 +2623,9 @@ function parseOCR(text) {
 
 
         /*
-           A name should have
-           at least two words.
-        */
+         * Names usually contain
+         * at least two words.
+         */
 
         if (
             words.length >= 2 &&
@@ -1554,10 +2641,6 @@ function parseOCR(text) {
 
     }
 
-
-    /*
-       DEBUG
-    */
 
     console.log(
         "PARSED NAME:",
@@ -1588,6 +2671,199 @@ function parseOCR(text) {
 
 
 /* =========================================================
+   LRN EXTRACTION
+========================================================= */
+
+function extractBestLRN(text) {
+
+    /*
+     * First try the normal LRN pattern.
+     */
+
+    let match =
+        text.match(
+
+            /LRN\s*[:#=\-]?\s*([0-9][0-9\s]{10,18})/i
+
+        );
+
+
+    if (match) {
+
+        const digits =
+            cleanDigits(
+                match[1]
+            );
+
+
+        if (
+            isValidLRN(digits)
+        ) {
+
+            return digits;
+
+        }
+
+    }
+
+
+    /*
+     * OCR sometimes reads:
+     *
+     * LRN -> TRN
+     * LRN -> RNN
+     * LRN -> LNN
+     */
+
+    match =
+        text.match(
+
+            /\b[A-Z]{2,4}\s*[:#=\-]?\s*([0-9][0-9\s]{10,18})\b/i
+
+        );
+
+
+    if (match) {
+
+        const digits =
+            cleanDigits(
+                match[1]
+            );
+
+
+        if (
+            isValidLRN(digits)
+        ) {
+
+            return digits;
+
+        }
+
+    }
+
+
+    /*
+     * Last fallback:
+     *
+     * Look for any 12-digit sequence.
+     */
+
+    const digitGroups =
+        text.match(
+            /[0-9][0-9\s]{10,18}/g
+        );
+
+
+    if (
+        digitGroups
+    ) {
+
+        for (
+            const group of digitGroups
+        ) {
+
+            const digits =
+                cleanDigits(
+                    group
+                );
+
+
+            if (
+                isValidLRN(digits)
+            ) {
+
+                return digits;
+
+            }
+
+        }
+
+    }
+
+
+    return "";
+
+}
+
+
+/* =========================================================
+   CLEAN LRN
+========================================================= */
+
+function cleanDigits(value) {
+
+    return String(value)
+
+        .replace(
+            /[OoQq]/g,
+            "0"
+        )
+
+        .replace(
+            /[IiLl|]/g,
+            "1"
+        )
+
+        .replace(
+            /[Ss]/g,
+            "5"
+        )
+
+        .replace(
+            /[Bb]/g,
+            "8"
+        )
+
+        .replace(
+            /[Gg]/g,
+            "6"
+        )
+
+        .replace(
+            /[^0-9]/g,
+            ""
+        );
+
+}
+
+
+/* =========================================================
+   LRN VALIDATION
+========================================================= */
+
+function isValidLRN(lrn) {
+
+    return /^\d{12}$/.test(
+        String(lrn).trim()
+    );
+
+}
+
+
+/* =========================================================
+   CLEAN SECTION
+========================================================= */
+
+function cleanSection(section) {
+
+    return String(section)
+
+        .replace(
+            /\s+/g,
+            " "
+        )
+
+        .replace(
+            /^[\-–—:\s]+/,
+            ""
+        )
+
+        .trim();
+
+}
+
+
+/* =========================================================
    DATABASE CHECK
 ========================================================= */
 
@@ -1598,30 +2874,12 @@ async function checkDatabase() {
             .trim();
 
 
-    if (!lrn) {
-
-        status.textContent =
-            "No LRN was detected.";
-
-        databaseButton.disabled =
-            false;
-
-        return;
-
-    }
-
-
-    /*
-       Safety check:
-       Only send exactly 12 digits.
-    */
-
     if (
-        !/^\d{12}$/.test(lrn)
+        !isValidLRN(lrn)
     ) {
 
         status.textContent =
-            "Invalid LRN. A valid LRN must contain exactly 12 digits.";
+            "No valid 12-digit LRN was detected.";
 
         databaseButton.disabled =
             false;
@@ -1702,8 +2960,8 @@ async function checkDatabase() {
 
 
         /*
-           STUDENT FOUND
-        */
+         * STUDENT FOUND
+         */
 
         if (
             result.match === true
@@ -1763,8 +3021,8 @@ async function checkDatabase() {
 
 
         /*
-           STUDENT NOT FOUND
-        */
+         * STUDENT NOT FOUND
+         */
 
         else {
 
@@ -1891,4 +3149,3 @@ function escapeHTML(value) {
 </body>
 
 </html>
-```
