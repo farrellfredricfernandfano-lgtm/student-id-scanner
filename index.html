@@ -1,5 +1,7 @@
+```html
 <!DOCTYPE html>
 <html lang="en">
+
 
 <head>
 
@@ -265,7 +267,6 @@
     </style>
 
 </head>
-
 
 <body>
 
@@ -593,7 +594,6 @@ async function startCamera() {
         status.textContent =
             "Starting camera...";
 
-
         cameraStream =
             await navigator.mediaDevices.getUserMedia({
 
@@ -763,10 +763,6 @@ async function performOCR() {
         "Processing image...";
 
 
-    /* =====================================================
-       CAMERA DIMENSIONS
-    ===================================================== */
-
     const videoWidth =
         video.videoWidth;
 
@@ -786,9 +782,10 @@ async function performOCR() {
     }
 
 
-    /* =====================================================
-       ORIGINAL CENTER CROP
-    ===================================================== */
+    /*
+       ID CARD CROP
+       Same basic crop as your working version.
+    */
 
     const cropWidth =
         videoWidth * 0.88;
@@ -806,16 +803,15 @@ async function performOCR() {
         (videoHeight - cropHeight) / 2;
 
 
-    /* =====================================================
+    /*
        UPSCALE
-    ===================================================== */
+    */
 
     const scale = 2;
 
 
     canvas.width =
         cropWidth * scale;
-
 
     canvas.height =
         cropHeight * scale;
@@ -824,10 +820,6 @@ async function performOCR() {
     const ctx =
         canvas.getContext("2d");
 
-
-    /* =====================================================
-       DRAW CAMERA IMAGE
-    ===================================================== */
 
     ctx.drawImage(
 
@@ -850,9 +842,9 @@ async function performOCR() {
         "Enhancing image...";
 
 
-    /* =====================================================
-       ORIGINAL GRAYSCALE + CONTRAST
-    ===================================================== */
+    /*
+       GRAYSCALE + CONTRAST
+    */
 
     const imageData =
         ctx.getImageData(
@@ -933,15 +925,14 @@ async function performOCR() {
     );
 
 
-    /* =====================================================
+    /*
        SHOW PROCESSED IMAGE
-    ===================================================== */
+    */
 
     processedImage.src =
         canvas.toDataURL(
             "image/png"
         );
-
 
     processedImage.style.display =
         "block";
@@ -951,9 +942,9 @@ async function performOCR() {
         "Running OCR...";
 
 
-    /* =====================================================
-       TESSERACT OCR
-    ===================================================== */
+    /*
+       TESSERACT
+    */
 
     const result =
         await Tesseract.recognize(
@@ -1006,9 +997,9 @@ async function performOCR() {
         "100%";
 
 
-    /* =====================================================
+    /*
        RAW OCR
-    ===================================================== */
+    */
 
     const text =
         result.data.text;
@@ -1025,56 +1016,30 @@ async function performOCR() {
         "Tesseract returned no text.";
 
 
-    /* =====================================================
+    /*
        PARSE OCR
-    ===================================================== */
+    */
 
     parseOCR(text);
 
 
-    /* =====================================================
-       DATABASE
-
-       ONLY AUTOMATICALLY CHECK IF
-       LRN HAS EXACTLY 12 DIGITS
-    ===================================================== */
+    /*
+       AUTOMATIC DATABASE CHECK
+    */
 
     if (
         lrnField.value.trim()
     ) {
 
-        const lrn =
-            lrnField.value.trim();
+        status.textContent =
+            "OCR complete. Checking database...";
 
 
-        if (
-            /^\d{12}$/.test(lrn)
-        ) {
-
-            status.textContent =
-                "OCR complete. Checking database...";
+        databaseButton.disabled =
+            true;
 
 
-            databaseButton.disabled =
-                true;
-
-
-            await checkDatabase();
-
-        }
-
-        else {
-
-            databaseButton.disabled =
-                false;
-
-
-            status.textContent =
-                "OCR complete. LRN detected (" +
-                lrn.length +
-                "/12 digits).";
-
-        }
+        await checkDatabase();
 
     }
 
@@ -1084,54 +1049,6 @@ async function performOCR() {
             "OCR complete, but LRN was not detected.";
 
     }
-
-}
-
-
-/* =========================================================
-   OCR DIGIT CLEANING
-
-   Converts common OCR mistakes into digits.
-========================================================= */
-
-function cleanOCRDigits(str) {
-
-    return str
-
-        .replace(
-            /[OoQq]/g,
-            "0"
-        )
-
-        .replace(
-            /[IiLl|]/g,
-            "1"
-        )
-
-        .replace(
-            /[Zz]/g,
-            "2"
-        )
-
-        .replace(
-            /[Ss]/g,
-            "5"
-        )
-
-        .replace(
-            /[Bb]/g,
-            "8"
-        )
-
-        .replace(
-            /[Gg]/g,
-            "6"
-        )
-
-        .replace(
-            /\D/g,
-            ""
-        );
 
 }
 
@@ -1155,9 +1072,9 @@ function parseOCR(text) {
             );
 
 
-    /* =====================================================
-       CLEAR OLD VALUES
-    ===================================================== */
+    /*
+       CLEAR PREVIOUS VALUES
+    */
 
     nameField.value =
         "";
@@ -1179,201 +1096,123 @@ function parseOCR(text) {
        LRN
     ===================================================== */
 
-    let lrn = "";
+    /*
+       OCR commonly confuses:
+
+       O / o -> 0
+       I / l -> 1
+       S -> 5
+       B -> 8
+       G -> 6
+       Z -> 2
+    */
+
+    const correctedText =
+        text
+            .replace(/[Oo]/g, "0")
+            .replace(/[IiLl]/g, "1")
+            .replace(/S/g, "5")
+            .replace(/s/g, "5")
+            .replace(/B/g, "8")
+            .replace(/G/g, "6")
+            .replace(/Z/g, "2");
 
 
     /*
-       METHOD 1
+       Look specifically after LRN.
 
-       Look for the LRN label.
-
-       Allows OCR mistakes in digits and
-       spaces between digits.
+       IMPORTANT:
+       Exactly 12 digits are accepted.
     */
 
     let lrnMatch =
-        text.match(
-            /LRN\s*[:\-]?\s*([0-9OoQqIiLl|ZzSsBbGg\s]{1,30})/i
+        correctedText.match(
+
+            /LRN\s*[:#\-]?\s*([0-9](?:[\s.-]*[0-9]){11})/i
+
         );
 
 
-    if (
-        lrnMatch
-    ) {
+    if (lrnMatch) {
 
-        lrn =
-            cleanOCRDigits(
-                lrnMatch[1]
-            );
+        const lrnDigits =
+            lrnMatch[1]
+                .replace(
+                    /[^0-9]/g,
+                    ""
+                );
+
+
+        /*
+           HARD LIMIT:
+           Exactly 12 digits.
+        */
+
+        if (
+            lrnDigits.length === 12
+        ) {
+
+            lrnField.value =
+                lrnDigits;
+
+        }
 
     }
 
 
     /*
-       METHOD 2
-
-       Search line-by-line for LRN.
+       FALLBACK LRN DETECTION
+       Used when OCR fails to recognize
+       the word "LRN".
     */
 
-    if (!lrn) {
+    if (
+        !lrnField.value
+    ) {
 
         for (
             const line of lines
         ) {
 
-            if (
-                /LRN/i.test(line)
-            ) {
-
-                const cleaned =
-                    cleanOCRDigits(
-                        line
-                    );
-
-
-                if (
-                    cleaned.length > 0
-                ) {
-
-                    lrn =
-                        cleaned;
-
-                    break;
-
-                }
-
-            }
-
-        }
-
-    }
+            const correctedLine =
+                line
+                    .replace(/[Oo]/g, "0")
+                    .replace(/[IiLl]/g, "1")
+                    .replace(/S/g, "5")
+                    .replace(/s/g, "5")
+                    .replace(/B/g, "8")
+                    .replace(/G/g, "6")
+                    .replace(/Z/g, "2");
 
 
-    /*
-       METHOD 3
-
-       Handle spaces between digits.
-
-       Example:
-
-       134 111 140 044
-
-       becomes:
-
-       134111140044
-    */
-
-    if (!lrn) {
-
-        const normalizedText =
-            text.replace(
-                /(\d)\s+(?=\d)/g,
-                "$1"
-            );
-
-
-        const normalizedMatch =
-            normalizedText.match(
-                /LRN\s*[:\-]?\s*([0-9\s]{1,30})/i
-            );
-
-
-        if (
-            normalizedMatch
-        ) {
-
-            lrn =
-                cleanOCRDigits(
-                    normalizedMatch[1]
+            const digits =
+                correctedLine.replace(
+                    /[^0-9]/g,
+                    ""
                 );
 
-        }
 
-    }
+            /*
+               Only accept exactly 12 digits.
+            */
 
-
-    /*
-       METHOD 4
-
-       If Tesseract completely misses
-       "LRN", search for numeric candidates.
-
-       We use at least 3 digits here so
-       ordinary single-digit values such as
-       Grade 12 are less likely to be selected.
-    */
-
-    if (!lrn) {
-
-        const numberCandidates =
-            text.match(
-                /[0-9OoQqIiLl|ZzSsBbGg][0-9OoQqIiLl|ZzSsBbGg\s]{0,25}/g
-            );
-
-
-        if (
-            numberCandidates
-        ) {
-
-            for (
-                const candidate
-                of numberCandidates
+            if (
+                digits.length === 12
             ) {
 
-                const cleaned =
-                    cleanOCRDigits(
-                        candidate
-                    );
+                /*
+                   LRN is normally a long
+                   12-digit number.
+                */
 
+                lrnField.value =
+                    digits;
 
-                if (
-                    cleaned.length >= 3
-                ) {
-
-                    lrn =
-                        cleaned;
-
-                    break;
-
-                }
+                break;
 
             }
 
         }
-
-    }
-
-
-    /*
-       =====================================================
-       MAXIMUM 12 DIGITS
-       =====================================================
-
-       This is the revision you requested.
-
-       Less than 12:
-           KEEP IT
-
-       Exactly 12:
-           KEEP IT
-
-       More than 12:
-           CUT TO 12
-    */
-
-    if (
-        lrn
-    ) {
-
-        lrn =
-            lrn.substring(
-                0,
-                12
-            );
-
-
-        lrnField.value =
-            lrn;
 
     }
 
@@ -1382,41 +1221,194 @@ function parseOCR(text) {
        ID NUMBER
     ===================================================== */
 
+    /*
+       First try the proper label.
+
+       Expected examples:
+
+       ID NO.: 305015-410-SHS
+       ID NO. 305015-410-SHS
+       ID NUMBER: 305015-410-SHS
+    */
+
     let idMatch =
         text.match(
 
-            /ID\s*(?:NO|NUMBER)?\s*[:#\-]?\s*([0-9]+)\s*[-–—]\s*([0-9]+)/i
+            /ID\s*(?:NO\.?|NUMBER)\s*[:#\-]?\s*([0-9]{3,})\s*[-–—]\s*([0-9]{2,})\s*[-–—]\s*([A-Za-z]{2,})/i
 
         );
 
 
-    if (
-        idMatch
-    ) {
+    if (idMatch) {
 
         idField.value =
             idMatch[1] +
             "-" +
-            idMatch[2];
+            idMatch[2] +
+            "-" +
+            idMatch[3].toUpperCase();
 
     }
 
-    else {
 
-        const fallbackID =
+    /*
+       SECOND ID FALLBACK
+
+       Handles OCR such as:
+
+       ID NO.: 305015 410 SHS
+
+       or:
+
+       ID NO.: 305015-410 SHS
+    */
+
+    if (
+        !idField.value
+    ) {
+
+        idMatch =
             text.match(
-                /\b([0-9]{3,})\s*[-–—]\s*([0-9]{2,})\b/
+
+                /ID\s*(?:NO\.?|NUMBER)?\s*[:#\-]?\s*([0-9]{3,})\s*[-–—\s]+([0-9]{2,})\s*[-–—\s]+([A-Za-z]{2,})/i
+
             );
 
 
-        if (
-            fallbackID
-        ) {
+        if (idMatch) {
 
             idField.value =
-                fallbackID[1] +
+                idMatch[1] +
                 "-" +
-                fallbackID[2];
+                idMatch[2] +
+                "-" +
+                idMatch[3].toUpperCase();
+
+        }
+
+    }
+
+
+    /*
+       THIRD ID FALLBACK
+
+       Search individual OCR lines.
+
+       This is useful when Tesseract places
+       the label and number on separate lines.
+    */
+
+    if (
+        !idField.value
+    ) {
+
+        for (
+            let i = 0;
+            i < lines.length;
+            i++
+        ) {
+
+            const line =
+                lines[i];
+
+
+            /*
+               Look for an ID-like pattern.
+            */
+
+            const candidate =
+                line.match(
+
+                    /\b([0-9]{3,})\s*[-–—\s]\s*([0-9]{2,})\s*[-–—\s]\s*([A-Za-z]{2,})\b/i
+
+                );
+
+
+            if (candidate) {
+
+                /*
+                   Avoid accidentally using
+                   other text.
+
+                   ID numbers in this project
+                   normally contain SHS.
+                */
+
+                const suffix =
+                    candidate[3]
+                        .toUpperCase();
+
+
+                if (
+                    suffix === "SHS" ||
+                    suffix === "JHS"
+                ) {
+
+                    idField.value =
+                        candidate[1] +
+                        "-" +
+                        candidate[2] +
+                        "-" +
+                        suffix;
+
+                    break;
+
+                }
+
+            }
+
+        }
+
+    }
+
+
+    /*
+       FOURTH ID FALLBACK
+
+       OCR may recognize:
+
+       305015-410-SH5
+
+       Correct the common S/H/S digit
+       confusion when the surrounding
+       pattern looks like an ID.
+    */
+
+    if (
+        !idField.value
+    ) {
+
+        const idFallback =
+            text.match(
+
+                /\b([0-9]{3,})\s*[-–—]\s*([0-9]{2,})\s*[-–—]\s*([A-Za-z0-9]{2,})\b/i
+
+            );
+
+
+        if (idFallback) {
+
+            let suffix =
+                idFallback[3]
+                    .toUpperCase()
+                    .replace(
+                        /5/g,
+                        "S"
+                    );
+
+
+            if (
+                suffix.length >= 2
+            ) {
+
+                idField.value =
+                    idFallback[1] +
+                    "-" +
+                    idFallback[2] +
+                    "-" +
+                    suffix;
+
+            }
 
         }
 
@@ -1435,13 +1427,10 @@ function parseOCR(text) {
         );
 
 
-    if (
-        gradeMatch
-    ) {
+    if (gradeMatch) {
 
         gradeField.value =
             gradeMatch[1];
-
 
         sectionField.value =
             gradeMatch[2]
@@ -1450,9 +1439,50 @@ function parseOCR(text) {
     }
 
 
+    /*
+       GRADE FALLBACK
+
+       Handles OCR such as:
+
+       GIRADDE 12-ROENTGEN
+       GRADEE 12-ROENTGEN
+       GRADE 12 ROENTGEN
+    */
+
+    if (
+        !gradeField.value
+    ) {
+
+        const gradeFallback =
+            text.match(
+
+                /G[A-Z]*R[A-Z]*D[A-Z]*E[A-Z]*\s*(7|8|9|10|11|12)\s*[-–—:]?\s*([A-Za-z0-9][A-Za-z0-9 .'-]*)/i
+
+            );
+
+
+        if (gradeFallback) {
+
+            gradeField.value =
+                gradeFallback[1];
+
+            sectionField.value =
+                gradeFallback[2]
+                    .trim();
+
+        }
+
+    }
+
+
     /* =====================================================
        NAME
     ===================================================== */
+
+    /*
+       Find the first line that looks like
+       a person's name.
+    */
 
     for (
         const line of lines
@@ -1463,7 +1493,7 @@ function parseOCR(text) {
 
 
         /*
-           Skip known ID labels.
+           Skip known information lines.
         */
 
         if (
@@ -1479,19 +1509,20 @@ function parseOCR(text) {
         }
 
 
+        /*
+           Clean OCR characters.
+        */
+
         const cleaned =
             line
-
                 .replace(
                     /[^A-Za-zÀ-ÿ.' -]/g,
                     ""
                 )
-
                 .replace(
                     /\s+/g,
                     " "
                 )
-
                 .trim();
 
 
@@ -1503,6 +1534,11 @@ function parseOCR(text) {
                         word.length > 0
                 );
 
+
+        /*
+           A name should have
+           at least two words.
+        */
 
         if (
             words.length >= 2 &&
@@ -1519,9 +1555,9 @@ function parseOCR(text) {
     }
 
 
-    /* =====================================================
+    /*
        DEBUG
-    ===================================================== */
+    */
 
     console.log(
         "PARSED NAME:",
@@ -1544,11 +1580,6 @@ function parseOCR(text) {
     );
 
     console.log(
-        "LRN DIGIT COUNT:",
-        lrnField.value.length
-    );
-
-    console.log(
         "PARSED ID:",
         idField.value
     );
@@ -1567,10 +1598,6 @@ async function checkDatabase() {
             .trim();
 
 
-    /* =====================================================
-       NO LRN
-    ===================================================== */
-
     if (!lrn) {
 
         status.textContent =
@@ -1584,66 +1611,25 @@ async function checkDatabase() {
     }
 
 
-    /* =====================================================
-       LRN MUST BE EXACTLY 12 DIGITS
-    ===================================================== */
+    /*
+       Safety check:
+       Only send exactly 12 digits.
+    */
 
     if (
         !/^\d{12}$/.test(lrn)
     ) {
 
-        databaseResult.style.display =
-            "block";
-
-
-        databaseResult.className =
-            "database-result invalid";
-
-
-        databaseStatus.textContent =
-            "⚠️ INCOMPLETE LRN";
-
-
-        databaseDetails.innerHTML =
-
-            "<strong>Scanned LRN:</strong> " +
-
-            escapeHTML(
-                lrn
-            ) +
-
-            "<br><br>" +
-
-            "<strong>Digits detected:</strong> " +
-
-            lrn.length +
-
-            " / 12" +
-
-            "<br><br>" +
-
-            "The LRN must contain exactly 12 digits " +
-            "before the student database can be checked.";
-
-
         status.textContent =
-            "LRN is incomplete (" +
-            lrn.length +
-            "/12 digits).";
-
+            "Invalid LRN. A valid LRN must contain exactly 12 digits.";
 
         databaseButton.disabled =
             false;
-
 
         return;
 
     }
 
-
-    /* =====================================================
-       DATABASE URL CHECK
-    ===================================================== */
 
     if (
         DATABASE_URL.includes(
@@ -1655,10 +1641,8 @@ async function checkDatabase() {
             "Apps Script URL has not been entered."
         );
 
-
         databaseButton.disabled =
             false;
-
 
         return;
 
@@ -1697,9 +1681,7 @@ async function checkDatabase() {
             await fetch(url);
 
 
-        if (
-            !response.ok
-        ) {
+        if (!response.ok) {
 
             throw new Error(
                 "HTTP error: " +
@@ -1719,9 +1701,9 @@ async function checkDatabase() {
         );
 
 
-        /* =================================================
+        /*
            STUDENT FOUND
-        ================================================= */
+        */
 
         if (
             result.match === true
@@ -1729,7 +1711,6 @@ async function checkDatabase() {
 
             databaseResult.style.display =
                 "block";
-
 
             databaseResult.className =
                 "database-result valid";
@@ -1742,7 +1723,6 @@ async function checkDatabase() {
             databaseDetails.innerHTML =
 
                 "<strong>Name:</strong> " +
-
                 escapeHTML(
                     result.student.name
                 ) +
@@ -1750,7 +1730,6 @@ async function checkDatabase() {
                 "<br><br>" +
 
                 "<strong>LRN:</strong> " +
-
                 escapeHTML(
                     result.student.lrn
                 ) +
@@ -1758,7 +1737,6 @@ async function checkDatabase() {
                 "<br><br>" +
 
                 "<strong>ID Number:</strong> " +
-
                 escapeHTML(
                     result.student.idNumber
                 ) +
@@ -1766,7 +1744,6 @@ async function checkDatabase() {
                 "<br><br>" +
 
                 "<strong>Grade:</strong> " +
-
                 escapeHTML(
                     result.student.grade
                 ) +
@@ -1774,7 +1751,6 @@ async function checkDatabase() {
                 "<br><br>" +
 
                 "<strong>Section:</strong> " +
-
                 escapeHTML(
                     result.student.section
                 );
@@ -1786,15 +1762,14 @@ async function checkDatabase() {
         }
 
 
-        /* =================================================
+        /*
            STUDENT NOT FOUND
-        ================================================= */
+        */
 
         else {
 
             databaseResult.style.display =
                 "block";
-
 
             databaseResult.className =
                 "database-result invalid";
@@ -1807,7 +1782,6 @@ async function checkDatabase() {
             databaseDetails.innerHTML =
 
                 "<strong>Scanned LRN:</strong> " +
-
                 escapeHTML(
                     lrn
                 ) +
@@ -1836,7 +1810,6 @@ async function checkDatabase() {
 
         databaseResult.style.display =
             "block";
-
 
         databaseResult.className =
             "database-result invalid";
@@ -1918,3 +1891,4 @@ function escapeHTML(value) {
 </body>
 
 </html>
+```
