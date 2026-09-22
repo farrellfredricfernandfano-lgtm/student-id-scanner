@@ -47,7 +47,7 @@ video {
 .scan-guide {
     position: absolute;
     width: 88%;
-    aspect-ratio: 1.586 / 1;
+    aspect-ratio: 1870 / 670;
     border: 4px solid #00ff66;
     border-radius: 8px;
     top: 50%;
@@ -436,6 +436,31 @@ let cameraStream = null;
 
 
 /* =========================================================
+   CAMERA CROP SETTINGS
+========================================================= */
+
+/*
+   IMPORTANT:
+
+   The crop itself is now 1870 × 670.
+
+   Aspect ratio:
+
+   1870 / 670 = 2.791044...
+
+   Therefore the camera crop uses the SAME aspect ratio.
+
+   This prevents stretching.
+*/
+
+const CROP_WIDTH = 1870;
+const CROP_HEIGHT = 670;
+
+const CROP_ASPECT =
+    CROP_WIDTH / CROP_HEIGHT;
+
+
+/* =========================================================
    BUTTON EVENTS
 ========================================================= */
 
@@ -470,6 +495,7 @@ async function startCamera() {
 
         status.textContent =
             "Starting camera...";
+
 
         cameraStream =
             await navigator.mediaDevices.getUserMedia({
@@ -546,7 +572,7 @@ async function startCamera() {
 
 
         status.textContent =
-            "Camera ready. Align the entire ID inside the green guide.";
+            "Camera ready. Align the ID inside the green guide.";
 
 
     } catch (error) {
@@ -659,9 +685,7 @@ async function captureAndScan() {
 
 
 /* =========================================================
-   IMAGE PREPROCESSING
-   Gentle processing is kept because this worked better
-   with the user's ID images.
+   PREPROCESS IMAGE
 ========================================================= */
 
 function preprocessCanvas(
@@ -670,9 +694,12 @@ function preprocessCanvas(
 ) {
 
     const ctx =
-        sourceCanvas.getContext("2d", {
-            willReadFrequently: true
-        });
+        sourceCanvas.getContext(
+            "2d",
+            {
+                willReadFrequently: true
+            }
+        );
 
 
     const imageData =
@@ -699,9 +726,14 @@ function preprocessCanvas(
         i += 4
     ) {
 
-        const r = data[i];
-        const g = data[i + 1];
-        const b = data[i + 2];
+        const r =
+            data[i];
+
+        const g =
+            data[i + 1];
+
+        const b =
+            data[i + 2];
 
 
         let gray =
@@ -801,12 +833,6 @@ function createSharpenedCanvas(
         sharpenCanvas.height;
 
 
-    /*
-       Very mild sharpening.
-       This avoids the aggressive processing that
-       previously made OCR worse.
-    */
-
     for (
         let y = 1;
         y < height - 1;
@@ -826,23 +852,35 @@ function createSharpenedCanvas(
             const center =
                 copy[index];
 
-
             const top =
-                copy[((y - 1) * width + x) * 4];
+                copy[
+                    ((y - 1) * width + x) * 4
+                ];
 
             const bottom =
-                copy[((y + 1) * width + x) * 4];
+                copy[
+                    ((y + 1) * width + x) * 4
+                ];
 
             const left =
-                copy[(y * width + x - 1) * 4];
+                copy[
+                    (y * width + x - 1) * 4
+                ];
 
             const right =
-                copy[(y * width + x + 1) * 4];
+                copy[
+                    (y * width + x + 1) * 4
+                ];
 
 
             let value =
                 center * 1.4 -
-                (top + bottom + left + right) * 0.1;
+                (
+                    top +
+                    bottom +
+                    left +
+                    right
+                ) * 0.1;
 
 
             value =
@@ -907,27 +945,29 @@ async function performOCR() {
 
 
     /*
-       Requested output resolution.
+       ======================================================
+       CALCULATE A TRUE 1870:670 CAMERA CROP
+       ======================================================
+
+       We DO NOT take the old 1.586 card crop and
+       stretch it.
+
+       Instead, the source crop itself has the
+       exact same aspect ratio as 1870 × 670.
     */
 
-    const TARGET_WIDTH =
-        1850;
-
-    const TARGET_HEIGHT =
-        617;
-
-
-    /*
-       Keep the original ID-card crop.
-    */
 
     let cropWidth =
         videoWidth * 0.88;
 
 
     let cropHeight =
-        cropWidth / 1.586;
+        cropWidth / CROP_ASPECT;
 
+
+    /*
+       Make sure the crop fits vertically.
+    */
 
     if (
         cropHeight >
@@ -938,7 +978,25 @@ async function performOCR() {
             videoHeight * 0.92;
 
         cropWidth =
-            cropHeight * 1.586;
+            cropHeight * CROP_ASPECT;
+
+    }
+
+
+    /*
+       Make sure the crop also fits horizontally.
+    */
+
+    if (
+        cropWidth >
+        videoWidth * 0.96
+    ) {
+
+        cropWidth =
+            videoWidth * 0.96;
+
+        cropHeight =
+            cropWidth / CROP_ASPECT;
 
     }
 
@@ -952,15 +1010,16 @@ async function performOCR() {
 
 
     /*
-       The OCR canvas is exactly 1850 × 617
-       as requested.
+       ======================================================
+       OUTPUT IS EXACTLY 1870 × 670
+       ======================================================
     */
 
     canvas.width =
-        TARGET_WIDTH;
+        CROP_WIDTH;
 
     canvas.height =
-        TARGET_HEIGHT;
+        CROP_HEIGHT;
 
 
     const ctx =
@@ -974,6 +1033,12 @@ async function performOCR() {
         "high";
 
 
+    /*
+       Because the source crop and destination
+       have the SAME aspect ratio, this does NOT
+       stretch the image.
+    */
+
     ctx.drawImage(
 
         video,
@@ -985,16 +1050,14 @@ async function performOCR() {
 
         0,
         0,
-        TARGET_WIDTH,
-        TARGET_HEIGHT
+        CROP_WIDTH,
+        CROP_HEIGHT
 
     );
 
 
     /*
-       Primary processing.
-       Keep this gentle because the original
-       grayscale + contrast method worked.
+       Gentle grayscale + contrast.
     */
 
     preprocessCanvas(
@@ -1003,11 +1066,14 @@ async function performOCR() {
     );
 
 
+    /*
+       Show processed image.
+    */
+
     processedImage.src =
         canvas.toDataURL(
             "image/png"
         );
-
 
     processedImage.style.display =
         "block";
@@ -1095,10 +1161,8 @@ async function performOCR() {
 
 
     /*
-       FAST PATH:
-       If Pass 1 already found both critical
-       numeric identifiers, don't waste time
-       running another full-image OCR.
+       If Pass 1 already has LRN + ID,
+       don't waste another full OCR pass.
     */
 
     if (
@@ -1116,7 +1180,7 @@ async function performOCR() {
 
 
         /* =================================================
-           PASS 2
+           PASS 2 — MILD SHARPENING
         ================================================= */
 
         status.textContent =
@@ -1190,8 +1254,8 @@ async function performOCR() {
 
 
         /*
-           If Pass 2 successfully found both
-           critical identifiers, stop here.
+           If both important identifiers
+           are now available, finish.
         */
 
         if (
@@ -1209,14 +1273,11 @@ async function performOCR() {
 
 
             /* =============================================
-               PASS 3
-               TARGETED NUMERIC OCR
+               TARGETED NUMERIC FALLBACK
 
-               IMPORTANT:
-               This is NOT the old raw-color pass.
+               This replaces the old raw-color Pass 3.
 
-               It only focuses on the LRN + ID number
-               area and cannot overwrite good values.
+               It focuses only on the LRN + ID area.
             ============================================= */
 
             status.textContent =
@@ -1239,10 +1300,8 @@ async function performOCR() {
 
 
             /*
-               Only fill missing values.
-
-               A good LRN from Pass 1/2 is NEVER
-               replaced by the targeted pass.
+               NEVER replace a valid LRN
+               with a worse OCR result.
             */
 
             if (
@@ -1255,6 +1314,10 @@ async function performOCR() {
 
             }
 
+
+            /*
+               Same idea for ID number.
+            */
 
             if (
                 !bestResults.id &&
@@ -1279,7 +1342,7 @@ async function performOCR() {
 
 
     /* =====================================================
-       SHOW OCR DEBUG
+       RAW OCR DEBUG
     ===================================================== */
 
     rawOCR.textContent =
@@ -1295,18 +1358,14 @@ async function performOCR() {
     nameField.value =
         bestResults.name || "";
 
-
     gradeField.value =
         bestResults.grade || "";
-
 
     sectionField.value =
         bestResults.section || "";
 
-
     lrnField.value =
         bestResults.lrn || "";
-
 
     idField.value =
         bestResults.id || "";
@@ -1323,11 +1382,6 @@ async function performOCR() {
         databaseButton.disabled =
             false;
 
-
-        /*
-           Automatically check the database
-           using the valid LRN.
-        */
 
         await checkDatabase();
 
@@ -1373,10 +1427,11 @@ async function performTargetedNumericOCR(
 
 
     /*
-       The LRN and ID number are normally
-       located in the middle portion of the card.
+       LRN + ID area.
 
-       We intentionally avoid the name/grade areas.
+       Since the new crop is 1870 × 670,
+       these coordinates are relative to that
+       exact resolution.
     */
 
     const sourceX =
@@ -1434,11 +1489,6 @@ async function performTargetedNumericOCR(
 
     );
 
-
-    /*
-       Slightly stronger contrast for
-       the numeric fallback only.
-    */
 
     preprocessCanvas(
         targetCanvas,
@@ -1517,24 +1567,16 @@ function parseOCR(text) {
             .filter(Boolean);
 
 
-    /* =====================================================
-       LRN
-    ===================================================== */
-
     result.lrn =
         extractBestLRN(text);
 
-
-    /* =====================================================
-       ID NUMBER
-    ===================================================== */
 
     result.id =
         extractBestID(text);
 
 
     /* =====================================================
-       GRADE + SECTION
+       GRADE
     ===================================================== */
 
     for (const line of lines) {
@@ -1553,6 +1595,7 @@ function parseOCR(text) {
 
             result.grade =
                 gradeMatch[1];
+
 
             if (
                 gradeMatch[2]
@@ -1699,10 +1742,6 @@ function extractBestLRN(text) {
     }
 
 
-    /*
-       First try normal 12-digit matches.
-    */
-
     const directMatches =
         text.match(
             /\b\d{12}\b/g
@@ -1718,10 +1757,6 @@ function extractBestLRN(text) {
 
     }
 
-
-    /*
-       Normalize common OCR mistakes.
-    */
 
     let cleaned =
         text
@@ -1765,34 +1800,24 @@ function extractBestLRN(text) {
         );
 
 
-    if (!digitSequences) {
-        return "";
-    }
+    if (digitSequences) {
 
-
-    /*
-       Prefer exactly 12 digits.
-    */
-
-    for (
-        const sequence of digitSequences
-    ) {
-
-        if (
-            sequence.length === 12
+        for (
+            const sequence of digitSequences
         ) {
 
-            return sequence;
+            if (
+                sequence.length === 12
+            ) {
+
+                return sequence;
+
+            }
 
         }
 
     }
 
-
-    /*
-       If OCR joined/separated digits,
-       try stripping everything except digits.
-    */
 
     const digitOnly =
         cleaned.replace(
@@ -1800,10 +1825,6 @@ function extractBestLRN(text) {
             ""
         );
 
-
-    /*
-       Search for any 12-digit window.
-    */
 
     if (
         digitOnly.length >= 12
@@ -1841,7 +1862,7 @@ function extractBestLRN(text) {
 
 
 /* =========================================================
-   ID NUMBER EXTRACTION
+   ID EXTRACTION
 ========================================================= */
 
 function extractBestID(text) {
@@ -1850,12 +1871,6 @@ function extractBestID(text) {
         return "";
     }
 
-
-    /*
-       Normal format:
-
-       305015-410-SHS
-    */
 
     const normal =
         text.match(
@@ -1870,10 +1885,6 @@ function extractBestID(text) {
 
     }
 
-
-    /*
-       OCR sometimes adds spaces.
-    */
 
     const normalized =
         text
@@ -1901,11 +1912,6 @@ function extractBestID(text) {
     }
 
 
-    /*
-       Search for ID NO and inspect
-       the following text.
-    */
-
     const idMatch =
         normalized.match(
             /ID\s*(?:NO|NUMBER)?\.?\s*[:\-]?\s*([A-Z0-9\- ]{5,30})/
@@ -1922,10 +1928,6 @@ function extractBestID(text) {
                     ""
                 );
 
-
-        /*
-           Avoid accidentally returning LRN.
-        */
 
         if (
             value.length >= 5 &&
@@ -1945,7 +1947,7 @@ function extractBestID(text) {
 
 
 /* =========================================================
-   MERGE OCR RESULTS
+   MERGE OCR
 ========================================================= */
 
 function mergeOCRResults(
@@ -1986,11 +1988,6 @@ function mergeOCRResults(
     }
 
 
-    /*
-       LRN is only accepted if it is
-       exactly 12 digits.
-    */
-
     if (
         !isValidLRN(current.lrn) &&
         isValidLRN(incoming.lrn)
@@ -2014,58 +2011,6 @@ function mergeOCRResults(
 
 
     return current;
-
-}
-
-
-/* =========================================================
-   DIGIT CLEANING
-========================================================= */
-
-function cleanDigits(value) {
-
-    if (!value) {
-        return "";
-    }
-
-
-    return String(value)
-        .replace(
-            /O/gi,
-            "0"
-        )
-        .replace(
-            /Q/gi,
-            "0"
-        )
-        .replace(
-            /I/gi,
-            "1"
-        )
-        .replace(
-            /L/gi,
-            "1"
-        )
-        .replace(
-            /\|/g,
-            "1"
-        )
-        .replace(
-            /S/gi,
-            "5"
-        )
-        .replace(
-            /B/gi,
-            "8"
-        )
-        .replace(
-            /G/gi,
-            "6"
-        )
-        .replace(
-            /\D/g,
-            ""
-        );
 
 }
 
@@ -2100,7 +2045,7 @@ function cleanSection(section) {
             ""
         )
         .replace(
-            /[\s]+/g,
+            /\s+/g,
             " "
         )
         .trim();
@@ -2175,11 +2120,7 @@ async function checkDatabase() {
 
 
             /*
-               Database information becomes
-               authoritative.
-
-               This is especially useful when
-               OCR misses the name/section.
+               Database information is authoritative.
             */
 
             if (
@@ -2291,7 +2232,7 @@ async function checkDatabase() {
 
 
 /* =========================================================
-   HTML ESCAPE
+   ESCAPE HTML
 ========================================================= */
 
 function escapeHTML(value) {
