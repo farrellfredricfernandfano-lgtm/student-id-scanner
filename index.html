@@ -1,5 +1,5 @@
-```html
 <!DOCTYPE html>
+
 <html lang="en">
 <head>
 <meta charset="UTF-8">
@@ -241,6 +241,7 @@ button:disabled {
     overflow-wrap: break-word;
 }
 </style>
+
 </head>
 
 <body>
@@ -252,43 +253,50 @@ button:disabled {
 </div>
 
 <!-- CAMERA -->
+
 <div class="camera-container">
     <video id="video" autoplay playsinline></video>
     <div class="scan-guide"></div>
 </div>
 
 <!-- CONTROLS -->
+
 <div class="controls">
 
-    <button id="startButton">
-        📷 Start Camera
-    </button>
+```
+<button id="startButton">
+    📷 Start Camera
+</button>
 
-    <button id="scanButton" disabled>
-        🔍 Scan & Verify
-    </button>
+<button id="scanButton" disabled>
+    🔍 Scan & Verify
+</button>
 
-    <button id="stopButton" disabled>
-        ⛔ Stop Camera
-    </button>
+<button id="stopButton" disabled>
+    ⛔ Stop Camera
+</button>
 
-    <button id="databaseButton" disabled>
-        🔎 Check Database
-    </button>
+<button id="databaseButton" disabled>
+    🔎 Check Database
+</button>
+```
 
 </div>
 
 <!-- STATUS -->
+
 <div class="status" id="status">
     Camera not started.
 </div>
 
 <!-- PROGRESS -->
+
 <div class="progress-container">
     <div class="progress-bar" id="progressBar"></div>
 </div>
 
 <!-- SCAN TIME -->
+
 <div id="scanTime" style="
     max-width: 700px;
     margin: 10px auto;
@@ -303,66 +311,76 @@ button:disabled {
 </div>
 
 <!-- PROCESSED IMAGE -->
+
 <div class="image-container">
     <h3>Processed Image — 1850 × 617</h3>
     <img id="processedImage" alt="Processed ID">
 </div>
 
 <!-- RESULTS -->
+
 <div class="results">
 
-    <h2>Scanned Information</h2>
+```
+<h2>Scanned Information</h2>
 
-    <div class="field">
-        <label>NAME</label>
-        <input id="nameField" type="text" readonly>
-    </div>
+<div class="field">
+    <label>NAME</label>
+    <input id="nameField" type="text" readonly>
+</div>
 
-    <div class="field">
-        <label>GRADE LEVEL</label>
-        <input id="gradeField" type="text" readonly>
-    </div>
+<div class="field">
+    <label>GRADE LEVEL</label>
+    <input id="gradeField" type="text" readonly>
+</div>
 
-    <div class="field">
-        <label>SECTION</label>
-        <input id="sectionField" type="text" readonly>
-    </div>
+<div class="field">
+    <label>SECTION</label>
+    <input id="sectionField" type="text" readonly>
+</div>
 
-    <div class="field">
-        <label>LRN</label>
-        <input id="lrnField" type="text" readonly>
-    </div>
+<div class="field">
+    <label>LRN</label>
+    <input id="lrnField" type="text" readonly>
+</div>
 
-    <div class="field">
-        <label>ID NUMBER</label>
-        <input id="idField" type="text" readonly>
-    </div>
+<div class="field">
+    <label>ID NUMBER</label>
+    <input id="idField" type="text" readonly>
+</div>
+```
 
 </div>
 
 <!-- DATABASE RESULT -->
+
 <div class="database-result" id="databaseResult">
 
-    <div id="databaseStatus"></div>
+```
+<div id="databaseStatus"></div>
 
-    <div id="databaseDetails"></div>
+<div id="databaseDetails"></div>
+```
 
 </div>
 
 <!-- RAW OCR -->
+
 <div class="ocr-debug">
 
-    <h3>Raw OCR Result</h3>
+```
+<h3>Raw OCR Result</h3>
 
-    <div id="rawOCR">
-        No OCR result yet.
-    </div>
+<div id="rawOCR">
+    No OCR result yet.
+</div>
+```
 
 </div>
 
 <!-- HIDDEN CANVASES -->
-<canvas id="canvas" style="display:none;"></canvas>
-<canvas id="lrnCanvas" style="display:none;"></canvas>
+
+<canvas id="canvas" style="display:none;"></canvas> <canvas id="lrnCanvas" style="display:none;"></canvas>
 
 <script>
 
@@ -372,7 +390,7 @@ button:disabled {
 
 const video = document.getElementById("video");
 const canvas = document.getElementById("canvas");
-const lrnCanvas = document.getElementById("lrnCanvas");
+
 
 const processedImage =
     document.getElementById("processedImage");
@@ -1281,118 +1299,7 @@ async function performOCR() {
    TARGETED LRN OCR
 ========================================================= */
 
-async function performTargetedLRNOCR(
-    fullCanvas
-) {
 
-    const width =
-        fullCanvas.width;
-
-    const height =
-        fullCanvas.height;
-
-
-    const x =
-        width * 0.05;
-
-    const y =
-        height * 0.25;
-
-    const cropWidth =
-        width * 0.90;
-
-    const cropHeight =
-        height * 0.18;
-
-    const scale = 3;
-
-    lrnCanvas.width =
-        Math.round(
-            cropWidth * scale
-        );
-
-    lrnCanvas.height =
-        Math.round(
-            cropHeight * scale
-        );
-
-    const ctx =
-        lrnCanvas.getContext(
-            "2d"
-        );
-
-    ctx.imageSmoothingEnabled =
-        true;
-
-    ctx.imageSmoothingQuality =
-        "high";
-
-    ctx.drawImage(
-
-        fullCanvas,
-
-        x,
-        y,
-        cropWidth,
-        cropHeight,
-
-        0,
-        0,
-        lrnCanvas.width,
-        lrnCanvas.height
-
-    );
-
-    preprocessCanvas(
-        lrnCanvas,
-        1.6
-    );
-
-    console.log(
-        "Running targeted LRN OCR..."
-    );
-
-    const result =
-        await Tesseract.recognize(
-
-            lrnCanvas,
-
-            "eng",
-
-            {
-
-                logger:
-                    function(info) {
-
-                        console.log(
-                            "LRN OCR:",
-                            info
-                        );
-
-                    },
-
-                tessedit_pageseg_mode: 7,
-
-                tessedit_char_whitelist:
-                    "LRN:0123456789"
-
-            }
-
-        );
-
-    const text =
-        result.data.text;
-
-    console.log(
-        "TARGETED LRN RESULT:",
-        text
-    );
-
-    return extractBestLRN(
-        text
-    );
-
-}
 
 
 /* =========================================================
@@ -2093,14 +2000,21 @@ async function checkDatabase() {
         sectionField.value.trim();
 
 
+    /*
+     * A student can now be identified using
+     * ANY useful combination of the five fields.
+     */
+
     if (
         !isValidLRN(lrn) &&
         !normalizeIDNumber(idNumber) &&
-        name.length < 5
+        name.length < 5 &&
+        grade.length === 0 &&
+        section.length === 0
     ) {
 
         status.textContent =
-            "No usable student identifier was detected.";
+            "No usable student information was detected.";
 
         databaseButton.disabled =
             false;
@@ -2487,3 +2401,7 @@ function escapeHTML(value) {
 </body>
 </html>
 ```
+
+**Important:** this HTML is compatible with the **new Apps Script I gave you previously**. You don't need to add another OCR pass or change your OCR parsing.
+
+The only functional change in this HTML is that it no longer requires one of the old three identifier conditions before contacting the database. Your existing five-field request is preserved.
