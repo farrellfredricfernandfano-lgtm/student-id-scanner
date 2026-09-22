@@ -1,251 +1,394 @@
-```html
 <!DOCTYPE html>
+
 <html lang="en">
 
 <head>
+
+```
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0"
+>
 
 <title>Student ID Scanner</title>
 
-<script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
+<script
+    src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js">
+</script>
 
 <style>
 
-body {
-    font-family: Arial, sans-serif;
-    text-align: center;
-    margin: 0;
-    padding: 30px 15px;
-    background: #f4f6f8;
-}
+    * {
+        box-sizing: border-box;
+    }
 
-h1 {
-    margin-bottom: 5px;
-}
+    body {
+        margin: 0;
+        padding: 20px;
+        font-family: Arial, sans-serif;
+        background: #111;
+        color: white;
+        text-align: center;
+    }
 
-.subtitle {
-    color: #666;
-    margin-bottom: 25px;
-}
+    h1 {
+        margin-bottom: 5px;
+    }
 
+    .subtitle {
+        color: #aaa;
+        margin-bottom: 20px;
+    }
 
-/* =========================================================
-   CAMERA
-========================================================= */
+    .camera-container {
+        position: relative;
+        width: 100%;
+        max-width: 700px;
+        margin: auto;
+        background: black;
+        overflow: hidden;
+        border-radius: 12px;
+    }
 
-.camera-container {
-    position: relative;
-    width: 95%;
-    max-width: 900px;
-    margin: auto;
-    background: #000;
-    overflow: hidden;
-    border-radius: 12px;
-}
+    video {
+        display: block;
+        width: 100%;
+        height: auto;
+    }
 
-video {
-    width: 100%;
-    height: auto;
-    display: block;
-    object-fit: contain;
-    background: #000;
-}
+    .scan-guide {
+        position: absolute;
 
+        width: 88%;
 
-/* =========================================================
-   SCAN GUIDE
-========================================================= */
+        /*
+         * 1850 / 617 = approximately 2.999
+         * This matches the new OCR crop ratio.
+         */
+        aspect-ratio: 1850 / 617;
 
-.scan-guide {
-    position: absolute;
-    width: 88%;
-    aspect-ratio: 1851 / 617;
-    border: 4px solid #00ff66;
-    border-radius: 8px;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    box-sizing: border-box;
-    pointer-events: none;
-}
+        left: 50%;
+        top: 50%;
 
+        transform:
+            translate(-50%, -50%);
 
-/* =========================================================
-   CONTROLS
-========================================================= */
+        border:
+            3px solid #00ff66;
 
-.controls {
-    margin: 20px auto;
-    display: flex;
-    flex-wrap: wrap;
-    gap: 10px;
-    justify-content: center;
-}
+        border-radius: 10px;
 
-button {
-    border: none;
-    padding: 12px 18px;
-    border-radius: 8px;
-    cursor: pointer;
-    font-size: 15px;
-    background: #1976d2;
-    color: white;
-}
+        box-shadow:
+            0 0 10px #00ff66,
+            inset 0 0 10px rgba(
+                0,
+                255,
+                102,
+                0.2
+            );
 
-button:hover {
-    opacity: 0.9;
-}
+        pointer-events: none;
+    }
 
-button:disabled {
-    background: #aaa;
-    cursor: not-allowed;
-}
+    .scan-guide::after {
 
+        content:
+            "ALIGN ID CARD HERE";
 
-/* =========================================================
-   STATUS
-========================================================= */
+        position: absolute;
 
-.status {
-    margin: 15px auto;
-    font-weight: bold;
-    max-width: 900px;
-}
+        top: -30px;
 
-.progress-container {
-    width: 90%;
-    max-width: 800px;
-    height: 12px;
-    background: #ddd;
-    margin: 10px auto 25px;
-    border-radius: 10px;
-    overflow: hidden;
-}
+        left: 50%;
 
-.progress-bar {
-    width: 0%;
-    height: 100%;
-    background: #2196f3;
-    transition: width 0.2s ease;
-}
+        transform:
+            translateX(-50%);
 
+        font-size: 13px;
 
-/* =========================================================
-   PROCESSED IMAGE
-========================================================= */
+        color: #00ff66;
 
-.image-container {
-    width: 95%;
-    max-width: 900px;
-    margin: 20px auto;
-}
+        white-space: nowrap;
+    }
 
-#processedImage {
-    display: none;
-    width: 100%;
-    max-width: 900px;
-    border: 1px solid #ccc;
-    border-radius: 8px;
-}
+    .controls {
 
+        max-width: 700px;
 
-/* =========================================================
-   RESULTS
-========================================================= */
+        margin: 20px auto;
 
-.results {
-    width: 95%;
-    max-width: 700px;
-    margin: 25px auto;
-    text-align: left;
-    background: white;
-    padding: 20px;
-    border-radius: 12px;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
-}
+        display: flex;
 
-.results h2 {
-    text-align: center;
-}
+        flex-wrap: wrap;
 
-.field {
-    margin: 12px 0;
-}
+        justify-content: center;
 
-.field label {
-    display: block;
-    font-weight: bold;
-    margin-bottom: 5px;
-}
+        gap: 10px;
+    }
 
-.field input {
-    width: 100%;
-    box-sizing: border-box;
-    padding: 10px;
-    border: 1px solid #ccc;
-    border-radius: 6px;
-    font-size: 16px;
-}
+    button {
 
+        padding:
+            12px 18px;
 
-/* =========================================================
-   DATABASE
-========================================================= */
+        border: none;
 
-.database-result {
-    width: 95%;
-    max-width: 700px;
-    margin: 20px auto;
-    padding: 15px;
-    background: white;
-    border-radius: 10px;
-}
+        border-radius: 8px;
 
-#databaseStatus {
-    font-weight: bold;
-    margin-bottom: 10px;
-}
+        font-size: 15px;
 
-#databaseDetails {
-    line-height: 1.7;
-}
+        font-weight: bold;
 
+        cursor: pointer;
+    }
 
-/* =========================================================
-   OCR DEBUG
-========================================================= */
+    button:disabled {
 
-.ocr-debug {
-    width: 95%;
-    max-width: 900px;
-    margin: 25px auto;
-    text-align: left;
-}
+        opacity: 0.4;
 
-#rawOCR {
-    background: #111;
-    color: #00ff66;
-    padding: 15px;
-    border-radius: 8px;
-    white-space: pre-wrap;
-    word-break: break-word;
-    min-height: 100px;
-    font-family: monospace;
-}
+        cursor: not-allowed;
+    }
+
+    #startButton {
+
+        background: #00c853;
+        color: white;
+    }
+
+    #scanButton {
+
+        background: #2196f3;
+        color: white;
+    }
+
+    #stopButton {
+
+        background: #f44336;
+        color: white;
+    }
+
+    #databaseButton {
+
+        background: #9c27b0;
+        color: white;
+    }
+
+    .status {
+
+        max-width: 700px;
+
+        margin: 15px auto;
+
+        padding: 12px;
+
+        background: #222;
+
+        border-radius: 8px;
+
+        color: #ddd;
+    }
+
+    .progress-container {
+
+        max-width: 700px;
+
+        margin: 15px auto;
+
+        background: #333;
+
+        border-radius: 10px;
+
+        overflow: hidden;
+
+        height: 12px;
+    }
+
+    .progress-bar {
+
+        width: 0%;
+
+        height: 100%;
+
+        background: #00ff66;
+
+        transition:
+            width 0.2s;
+    }
+
+    .image-container {
+
+        max-width: 700px;
+
+        margin: 20px auto;
+    }
+
+    .image-container h3 {
+
+        margin-bottom: 10px;
+    }
+
+    #processedImage {
+
+        max-width: 100%;
+
+        border-radius: 8px;
+
+        display: none;
+    }
+
+    .results {
+
+        max-width: 700px;
+
+        margin: 20px auto;
+
+        text-align: left;
+    }
+
+    .results h2 {
+
+        text-align: center;
+    }
+
+    .field {
+
+        margin: 10px 0;
+    }
+
+    .field label {
+
+        display: block;
+
+        color: #aaa;
+
+        font-size: 13px;
+
+        margin-bottom: 4px;
+    }
+
+    .field input {
+
+        width: 100%;
+
+        padding: 11px;
+
+        background: #222;
+
+        color: white;
+
+        border: 1px solid #444;
+
+        border-radius: 6px;
+
+        font-size: 15px;
+    }
+
+    .database-result {
+
+        display: none;
+
+        max-width: 700px;
+
+        margin: 20px auto;
+
+        padding: 20px;
+
+        border-radius: 10px;
+
+        text-align: center;
+    }
+
+    .database-result.valid {
+
+        background: #123d20;
+
+        border:
+            2px solid #00c853;
+    }
+
+    .database-result.invalid {
+
+        background: #421414;
+
+        border:
+            2px solid #f44336;
+    }
+
+    #databaseStatus {
+
+        font-size: 22px;
+
+        font-weight: bold;
+
+        margin-bottom: 15px;
+    }
+
+    #databaseDetails {
+
+        text-align: left;
+
+        line-height: 1.5;
+    }
+
+    .ocr-debug {
+
+        max-width: 700px;
+
+        margin: 20px auto;
+
+        text-align: left;
+    }
+
+    .ocr-debug h3 {
+
+        text-align: center;
+    }
+
+    #rawOCR {
+
+        width: 100%;
+
+        min-height: 150px;
+
+        padding: 12px;
+
+        background: #080808;
+
+        color: #00ff66;
+
+        border: 1px solid #333;
+
+        border-radius: 8px;
+
+        font-family: monospace;
+
+        font-size: 14px;
+
+        white-space: pre-wrap;
+
+        overflow-wrap: break-word;
+    }
 
 </style>
-</head>
+```
 
+</head>
 
 <body>
 
-<h1>Student ID Scanner</h1>
+```
+<h1>
+    Student ID Scanner
+</h1>
 
 <div class="subtitle">
-OCR-Based Student Identification System
+    OCR-Based Student Identification System
 </div>
 
+
+<!-- CAMERA -->
 
 <div class="camera-container">
 
@@ -260,31 +403,59 @@ OCR-Based Student Identification System
 </div>
 
 
+<!-- CONTROLS -->
+
 <div class="controls">
 
-    <button id="startButton">
+    <button
+        id="startButton">
+
         📷 Start Camera
+
     </button>
 
-    <button id="scanButton" disabled>
+
+    <button
+        id="scanButton"
+        disabled>
+
         🔍 Scan & Verify
+
     </button>
 
-    <button id="stopButton" disabled>
+
+    <button
+        id="stopButton"
+        disabled>
+
         ⛔ Stop Camera
+
     </button>
 
-    <button id="databaseButton" disabled>
+
+    <button
+        id="databaseButton"
+        disabled>
+
         🔎 Check Database
+
     </button>
 
 </div>
 
 
-<div class="status" id="status">
+<!-- STATUS -->
+
+<div
+    class="status"
+    id="status">
+
     Camera not started.
+
 </div>
 
+
+<!-- PROGRESS -->
 
 <div class="progress-container">
 
@@ -296,9 +467,13 @@ OCR-Based Student Identification System
 </div>
 
 
+<!-- PROCESSED IMAGE -->
+
 <div class="image-container">
 
-    <h3>Processed Image</h3>
+    <h3>
+        Processed Image — 1850 × 617
+    </h3>
 
     <img
         id="processedImage"
@@ -307,14 +482,20 @@ OCR-Based Student Identification System
 </div>
 
 
+<!-- RESULTS -->
+
 <div class="results">
 
-    <h2>Scanned Information</h2>
+    <h2>
+        Scanned Information
+    </h2>
 
 
     <div class="field">
 
-        <label>NAME</label>
+        <label>
+            NAME
+        </label>
 
         <input
             id="nameField"
@@ -326,7 +507,9 @@ OCR-Based Student Identification System
 
     <div class="field">
 
-        <label>GRADE LEVEL</label>
+        <label>
+            GRADE LEVEL
+        </label>
 
         <input
             id="gradeField"
@@ -338,7 +521,9 @@ OCR-Based Student Identification System
 
     <div class="field">
 
-        <label>SECTION</label>
+        <label>
+            SECTION
+        </label>
 
         <input
             id="sectionField"
@@ -350,12 +535,13 @@ OCR-Based Student Identification System
 
     <div class="field">
 
-        <label>LRN</label>
+        <label>
+            LRN
+        </label>
 
         <input
             id="lrnField"
             type="text"
-            maxlength="12"
             readonly>
 
     </div>
@@ -363,7 +549,9 @@ OCR-Based Student Identification System
 
     <div class="field">
 
-        <label>ID NUMBER</label>
+        <label>
+            ID NUMBER
+        </label>
 
         <input
             id="idField"
@@ -374,6 +562,8 @@ OCR-Based Student Identification System
 
 </div>
 
+
+<!-- DATABASE RESULT -->
 
 <div
     class="database-result"
@@ -386,9 +576,13 @@ OCR-Based Student Identification System
 </div>
 
 
+<!-- RAW OCR -->
+
 <div class="ocr-debug">
 
-    <h3>Raw OCR Result</h3>
+    <h3>
+        Raw OCR Result
+    </h3>
 
     <div id="rawOCR">
         No OCR result yet.
@@ -396,6 +590,8 @@ OCR-Based Student Identification System
 
 </div>
 
+
+<!-- HIDDEN CANVASES -->
 
 <canvas
     id="canvas"
@@ -407,7 +603,7 @@ OCR-Based Student Identification System
     id="lrnCanvas"
     style="display:none;">
 </canvas>
-
+```
 
 <script>
 
@@ -417,101 +613,133 @@ OCR-Based Student Identification System
 ========================================================= */
 
 const video =
-    document.getElementById("video");
+    document.getElementById(
+        "video"
+    );
 
 const canvas =
-    document.getElementById("canvas");
+    document.getElementById(
+        "canvas"
+    );
 
 const lrnCanvas =
-    document.getElementById("lrnCanvas");
-
-const startButton =
-    document.getElementById("startButton");
-
-const scanButton =
-    document.getElementById("scanButton");
-
-const stopButton =
-    document.getElementById("stopButton");
-
-const databaseButton =
-    document.getElementById("databaseButton");
-
-const status =
-    document.getElementById("status");
-
-const progressBar =
-    document.getElementById("progressBar");
+    document.getElementById(
+        "lrnCanvas"
+    );
 
 const processedImage =
-    document.getElementById("processedImage");
+    document.getElementById(
+        "processedImage"
+    );
 
-const rawOCR =
-    document.getElementById("rawOCR");
+const startButton =
+    document.getElementById(
+        "startButton"
+    );
+
+const scanButton =
+    document.getElementById(
+        "scanButton"
+    );
+
+const stopButton =
+    document.getElementById(
+        "stopButton"
+    );
+
+const databaseButton =
+    document.getElementById(
+        "databaseButton"
+    );
+
+const status =
+    document.getElementById(
+        "status"
+    );
+
+const progressBar =
+    document.getElementById(
+        "progressBar"
+    );
 
 const nameField =
-    document.getElementById("nameField");
+    document.getElementById(
+        "nameField"
+    );
 
 const gradeField =
-    document.getElementById("gradeField");
+    document.getElementById(
+        "gradeField"
+    );
 
 const sectionField =
-    document.getElementById("sectionField");
+    document.getElementById(
+        "sectionField"
+    );
 
 const lrnField =
-    document.getElementById("lrnField");
+    document.getElementById(
+        "lrnField"
+    );
 
 const idField =
-    document.getElementById("idField");
+    document.getElementById(
+        "idField"
+    );
+
+const databaseResult =
+    document.getElementById(
+        "databaseResult"
+    );
 
 const databaseStatus =
-    document.getElementById("databaseStatus");
+    document.getElementById(
+        "databaseStatus"
+    );
 
 const databaseDetails =
-    document.getElementById("databaseDetails");
+    document.getElementById(
+        "databaseDetails"
+    );
+
+const rawOCR =
+    document.getElementById(
+        "rawOCR"
+    );
 
 
 /* =========================================================
-   DATABASE
+   GOOGLE APPS SCRIPT
 ========================================================= */
 
 const DATABASE_URL =
-"https://script.google.com/macros/s/AKfycby8SQH20dz2PK6Covm_GOy4sG1WigvDaxZr8a--gbrI_LBKE1KJoQO7AMzaKZR_3mQ/exec";
+    "https://script.google.com/macros/s/AKfycby8SQH20dz2PK6Covm_GOy4sG1WigvDaxZr8a--gbrI_LBKE1KJoQO7AMzaKZR_3mQ/exec";
 
+
+/* =========================================================
+   CAMERA
+========================================================= */
 
 let cameraStream = null;
 
-
-/* =========================================================
-   CAMERA CROP SETTINGS
-========================================================= */
-
-const CROP_WIDTH = 1851;
-
-const CROP_HEIGHT = 617;
-
-const CROP_ASPECT =
-    CROP_WIDTH / CROP_HEIGHT;
-
-
-/* =========================================================
-   BUTTON EVENTS
-========================================================= */
 
 startButton.addEventListener(
     "click",
     startCamera
 );
 
-scanButton.addEventListener(
-    "click",
-    captureAndScan
-);
 
 stopButton.addEventListener(
     "click",
     stopCamera
 );
+
+
+scanButton.addEventListener(
+    "click",
+    captureAndScan
+);
+
 
 databaseButton.addEventListener(
     "click",
@@ -520,7 +748,7 @@ databaseButton.addEventListener(
 
 
 /* =========================================================
-   CAMERA
+   START CAMERA
 ========================================================= */
 
 async function startCamera() {
@@ -532,31 +760,33 @@ async function startCamera() {
 
 
         cameraStream =
-            await navigator.mediaDevices.getUserMedia({
+            await navigator.mediaDevices
+                .getUserMedia({
 
-                audio: false,
+                    audio: false,
 
-                video: {
+                    video: {
 
-                    facingMode: {
-                        ideal: "environment"
-                    },
+                        facingMode: {
+                            ideal:
+                                "environment"
+                        },
 
-                    width: {
-                        ideal: 1920
-                    },
+                        width: {
+                            ideal: 1920
+                        },
 
-                    height: {
-                        ideal: 1080
-                    },
+                        height: {
+                            ideal: 1080
+                        },
 
-                    frameRate: {
-                        ideal: 30
+                        frameRate: {
+                            ideal: 30
+                        }
+
                     }
 
-                }
-
-            });
+                });
 
 
         video.srcObject =
@@ -564,7 +794,8 @@ async function startCamera() {
 
 
         const track =
-            cameraStream.getVideoTracks()[0];
+            cameraStream
+                .getVideoTracks()[0];
 
 
         try {
@@ -585,11 +816,13 @@ async function startCamera() {
 
             });
 
-        } catch (e) {
+        }
+
+        catch (constraintError) {
 
             console.log(
-                "Camera constraints:",
-                e
+                "Could not apply extra camera constraints:",
+                constraintError
             );
 
         }
@@ -606,15 +839,19 @@ async function startCamera() {
 
 
         status.textContent =
-            "Camera ready. Align the ID inside the green guide.";
+            "Camera ready. Align the entire ID inside the green guide.";
 
+    }
 
-    } catch (error) {
+    catch (error) {
 
-        console.error(error);
+        console.error(
+            "CAMERA ERROR:",
+            error
+        );
 
         status.textContent =
-            "Camera error: " +
+            "Could not access camera: " +
             error.message;
 
     }
@@ -632,16 +869,19 @@ function stopCamera() {
 
         cameraStream
             .getTracks()
-            .forEach(track =>
-                track.stop()
+            .forEach(
+                track =>
+                    track.stop()
             );
 
-        cameraStream = null;
+        cameraStream =
+            null;
 
     }
 
 
-    video.srcObject = null;
+    video.srcObject =
+        null;
 
 
     startButton.disabled =
@@ -653,9 +893,6 @@ function stopCamera() {
     stopButton.disabled =
         true;
 
-    databaseButton.disabled =
-        true;
-
 
     status.textContent =
         "Camera stopped.";
@@ -664,15 +901,16 @@ function stopCamera() {
 
 
 /* =========================================================
-   CAPTURE
+   CAPTURE + SCAN
 ========================================================= */
 
 async function captureAndScan() {
 
     if (!cameraStream) {
 
-        status.textContent =
-            "Please start the camera first.";
+        alert(
+            "Please start the camera first."
+        );
 
         return;
 
@@ -686,27 +924,33 @@ async function captureAndScan() {
         true;
 
 
+    databaseResult.style.display =
+        "none";
+
+
     progressBar.style.width =
         "0%";
 
 
-    databaseStatus.textContent =
-        "";
-
-    databaseDetails.textContent =
-        "";
+    status.textContent =
+        "Capturing ID...";
 
 
     try {
 
         await performOCR();
 
-    } catch (error) {
+    }
 
-        console.error(error);
+    catch (error) {
+
+        console.error(
+            "SCAN ERROR:",
+            error
+        );
 
         status.textContent =
-            "Scanning error: " +
+            "Scanning failed: " +
             error.message;
 
     }
@@ -719,7 +963,7 @@ async function captureAndScan() {
 
 
 /* =========================================================
-   PREPROCESS IMAGE
+   IMAGE PREPROCESSING
 ========================================================= */
 
 function preprocessCanvas(
@@ -731,7 +975,8 @@ function preprocessCanvas(
         sourceCanvas.getContext(
             "2d",
             {
-                willReadFrequently: true
+                willReadFrequently:
+                    true
             }
         );
 
@@ -750,8 +995,14 @@ function preprocessCanvas(
 
 
     const factor =
-        (259 * (contrast + 255)) /
-        (255 * (259 - contrast));
+        (
+            259 *
+            (contrast + 255)
+        ) /
+        (
+            255 *
+            (259 - contrast)
+        );
 
 
     for (
@@ -814,217 +1065,14 @@ function preprocessCanvas(
 
 
 /* =========================================================
-   MILD SHARPENING
-========================================================= */
-
-function createSharpenedCanvas(
-    sourceCanvas
-) {
-
-    const sharpenCanvas =
-        document.createElement("canvas");
-
-
-    sharpenCanvas.width =
-        sourceCanvas.width;
-
-    sharpenCanvas.height =
-        sourceCanvas.height;
-
-
-    const ctx =
-        sharpenCanvas.getContext("2d");
-
-
-    ctx.drawImage(
-        sourceCanvas,
-        0,
-        0
-    );
-
-
-    const imageData =
-        ctx.getImageData(
-            0,
-            0,
-            sharpenCanvas.width,
-            sharpenCanvas.height
-        );
-
-
-    const data =
-        imageData.data;
-
-
-    const copy =
-        new Uint8ClampedArray(data);
-
-
-    const width =
-        sharpenCanvas.width;
-
-    const height =
-        sharpenCanvas.height;
-
-
-    for (
-        let y = 1;
-        y < height - 1;
-        y++
-    ) {
-
-        for (
-            let x = 1;
-            x < width - 1;
-            x++
-        ) {
-
-            const index =
-                (y * width + x) * 4;
-
-
-            const center =
-                copy[index];
-
-            const top =
-                copy[
-                    ((y - 1) * width + x) * 4
-                ];
-
-            const bottom =
-                copy[
-                    ((y + 1) * width + x) * 4
-                ];
-
-            const left =
-                copy[
-                    (y * width + x - 1) * 4
-                ];
-
-            const right =
-                copy[
-                    (y * width + x + 1) * 4
-                ];
-
-
-            let value =
-                center * 1.4 -
-                (
-                    top +
-                    bottom +
-                    left +
-                    right
-                ) * 0.1;
-
-
-            value =
-                Math.max(
-                    0,
-                    Math.min(
-                        255,
-                        value
-                    )
-                );
-
-
-            data[index] =
-                value;
-
-            data[index + 1] =
-                value;
-
-            data[index + 2] =
-                value;
-
-        }
-
-    }
-
-
-    ctx.putImageData(
-        imageData,
-        0,
-        0
-    );
-
-
-    return sharpenCanvas;
-
-}
-
-
-/* =========================================================
-   PASS 3 IMAGE
-========================================================= */
-
-function createPass3Canvas(
-    sourceCanvas
-) {
-
-    const pass3Canvas =
-        document.createElement("canvas");
-
-
-    const scale = 1.35;
-
-
-    pass3Canvas.width =
-        Math.round(
-            sourceCanvas.width * scale
-        );
-
-    pass3Canvas.height =
-        Math.round(
-            sourceCanvas.height * scale
-        );
-
-
-    const ctx =
-        pass3Canvas.getContext("2d");
-
-
-    ctx.imageSmoothingEnabled =
-        true;
-
-    ctx.imageSmoothingQuality =
-        "high";
-
-
-    ctx.drawImage(
-
-        sourceCanvas,
-
-        0,
-        0,
-        sourceCanvas.width,
-        sourceCanvas.height,
-
-        0,
-        0,
-        pass3Canvas.width,
-        pass3Canvas.height
-
-    );
-
-
-    preprocessCanvas(
-        pass3Canvas,
-        1.55
-    );
-
-
-    return createSharpenedCanvas(
-        pass3Canvas
-    );
-
-}
-
-
-/* =========================================================
    MAIN OCR
 ========================================================= */
 
 async function performOCR() {
+
+    status.textContent =
+        "Preparing ID image...";
+
 
     const videoWidth =
         video.videoWidth;
@@ -1045,68 +1093,94 @@ async function performOCR() {
     }
 
 
+    /* =====================================================
+       NEW CROP RATIO
+       1850 × 617
+       ===================================================== */
+
+    const targetWidth =
+        1850;
+
+    const targetHeight =
+        617;
+
+    const targetRatio =
+        targetWidth /
+        targetHeight;
+
+
     /*
-       TRUE 1851 × 617 CROP
-    */
+     * Determine the largest centered
+     * camera crop matching 1850:617.
+     */
 
-    let cropWidth =
-        videoWidth * 0.88;
-
-
-    let cropHeight =
-        cropWidth / CROP_ASPECT;
+    let finalCropWidth;
+    let finalCropHeight;
 
 
     if (
-        cropHeight >
-        videoHeight * 0.92
+        videoWidth / videoHeight >
+        targetRatio
     ) {
 
-        cropHeight =
+        /*
+         * Camera is wider than target.
+         */
+
+        finalCropHeight =
             videoHeight * 0.92;
 
-        cropWidth =
-            cropHeight * CROP_ASPECT;
+        finalCropWidth =
+            finalCropHeight *
+            targetRatio;
 
     }
 
+    else {
 
-    if (
-        cropWidth >
-        videoWidth * 0.96
-    ) {
+        /*
+         * Camera is narrower than target.
+         */
 
-        cropWidth =
-            videoWidth * 0.96;
+        finalCropWidth =
+            videoWidth * 0.92;
 
-        cropHeight =
-            cropWidth / CROP_ASPECT;
+        finalCropHeight =
+            finalCropWidth /
+            targetRatio;
 
     }
 
 
     const cropX =
-        (videoWidth - cropWidth) / 2;
+        (
+            videoWidth -
+            finalCropWidth
+        ) / 2;
 
 
     const cropY =
-        (videoHeight - cropHeight) / 2;
+        (
+            videoHeight -
+            finalCropHeight
+        ) / 2;
 
 
-    /*
-       EXACT OUTPUT:
-       1851 × 617
-    */
+    /* =====================================================
+       EXACT 1850 × 617 OUTPUT
+       ===================================================== */
 
     canvas.width =
-        CROP_WIDTH;
+        targetWidth;
 
     canvas.height =
-        CROP_HEIGHT;
+        targetHeight;
 
 
     const ctx =
-        canvas.getContext("2d");
+        canvas.getContext(
+            "2d"
+        );
 
 
     ctx.imageSmoothingEnabled =
@@ -1122,26 +1196,36 @@ async function performOCR() {
 
         cropX,
         cropY,
-        cropWidth,
-        cropHeight,
+
+        finalCropWidth,
+        finalCropHeight,
 
         0,
         0,
-        CROP_WIDTH,
-        CROP_HEIGHT
+
+        targetWidth,
+        targetHeight
 
     );
 
 
+    status.textContent =
+        "Enhancing image...";
+
+
     /*
-       Pass 1 preprocessing.
-    */
+     * Original preprocessing.
+     */
 
     preprocessCanvas(
         canvas,
         1.35
     );
 
+
+    /*
+     * Display processed image.
+     */
 
     processedImage.src =
         canvas.toDataURL(
@@ -1152,32 +1236,15 @@ async function performOCR() {
         "block";
 
 
-    let bestResults = {
-
-        name: "",
-        grade: "",
-        section: "",
-        lrn: "",
-        id: ""
-
-    };
-
-
-    const OCR_RESULTS = [];
-
-
     /* =====================================================
-       PASS 1
+       OCR PASS 1
     ===================================================== */
 
     status.textContent =
-        "Scanning ID... Pass 1";
-
-    progressBar.style.width =
-        "10%";
+        "Reading ID information...";
 
 
-    const pass1 =
+    const result1 =
         await Tesseract.recognize(
 
             canvas,
@@ -1186,72 +1253,246 @@ async function performOCR() {
 
             {
 
-                tessedit_pageseg_mode: 6,
+                logger:
+                    function(info) {
 
-                logger: message => {
+                        console.log(
+                            "TESSERACT PASS 1:",
+                            info
+                        );
 
-                    if (
-                        message.status ===
-                        "recognizing text"
-                    ) {
 
-                        const p =
-                            10 +
-                            Math.round(
-                                message.progress *
-                                25
-                            );
+                        if (
+                            info.progress !==
+                            undefined
+                        ) {
 
-                        progressBar.style.width =
-                            p + "%";
+                            progressBar.style.width =
+                                (
+                                    info.progress *
+                                    30
+                                ) + "%";
 
-                    }
+                        }
 
-                }
+
+                        if (
+                            info.status
+                        ) {
+
+                            status.textContent =
+                                info.status;
+
+                        }
+
+                    },
+
+                tessedit_pageseg_mode:
+                    6,
+
+                preserve_interword_spaces:
+                    1
 
             }
 
         );
 
 
-    const pass1Text =
-        pass1.data.text;
+    const textPass1 =
+        result1.data.text;
 
 
-    OCR_RESULTS.push(
-        "[OCR PASS 1]\n" +
-        pass1Text
+    console.log(
+        "OCR PASS 1:",
+        textPass1
     );
 
 
-    bestResults =
-        mergeOCRResults(
-
-            bestResults,
-
-            parseOCR(pass1Text)
-
+    const pass1Results =
+        parseOCR(
+            textPass1
         );
+
+
+    let bestResults = {
+
+        name:
+            pass1Results.name,
+
+        grade:
+            pass1Results.grade,
+
+        section:
+            pass1Results.section,
+
+        lrn:
+            pass1Results.lrn,
+
+        id:
+            pass1Results.id
+
+    };
 
 
     /* =====================================================
-       PASS 2
+       OCR PASS 2
+       MILD SHARPEN
     ===================================================== */
 
     status.textContent =
-        "Improving image... Pass 2";
-
-    progressBar.style.width =
-        "40%";
+        "Running second OCR pass...";
 
 
     const sharpenCanvas =
-        createSharpenedCanvas(
-            canvas
+        document.createElement(
+            "canvas"
         );
 
 
-    const pass2 =
+    sharpenCanvas.width =
+        canvas.width;
+
+    sharpenCanvas.height =
+        canvas.height;
+
+
+    const sharpenCtx =
+        sharpenCanvas.getContext(
+            "2d"
+        );
+
+
+    sharpenCtx.drawImage(
+        canvas,
+        0,
+        0
+    );
+
+
+    const imageData =
+        sharpenCtx.getImageData(
+            0,
+            0,
+            sharpenCanvas.width,
+            sharpenCanvas.height
+        );
+
+
+    const data =
+        imageData.data;
+
+
+    const original =
+        new Uint8ClampedArray(
+            data
+        );
+
+
+    const w =
+        sharpenCanvas.width;
+
+    const h =
+        sharpenCanvas.height;
+
+
+    for (
+        let y = 1;
+        y < h - 1;
+        y++
+    ) {
+
+        for (
+            let x = 1;
+            x < w - 1;
+            x++
+        ) {
+
+            const index =
+                (
+                    y * w + x
+                ) * 4;
+
+
+            for (
+                let c = 0;
+                c < 3;
+                c++
+            ) {
+
+                const center =
+                    original[
+                        index + c
+                    ];
+
+
+                const top =
+                    original[
+                        index -
+                        w * 4 +
+                        c
+                    ];
+
+
+                const bottom =
+                    original[
+                        index +
+                        w * 4 +
+                        c
+                    ];
+
+
+                const left =
+                    original[
+                        index -
+                        4 +
+                        c
+                    ];
+
+
+                const right =
+                    original[
+                        index +
+                        4 +
+                        c
+                    ];
+
+
+                const sharpened =
+                    (
+                        5 * center -
+                        top -
+                        bottom -
+                        left -
+                        right
+                    );
+
+
+                data[
+                    index + c
+                ] =
+                    Math.max(
+                        0,
+                        Math.min(
+                            255,
+                            sharpened
+                        )
+                    );
+
+            }
+
+        }
+
+    }
+
+
+    sharpenCtx.putImageData(
+        imageData,
+        0,
+        0
+    );
+
+
+    const result2 =
         await Tesseract.recognize(
 
             sharpenCanvas,
@@ -1260,175 +1501,310 @@ async function performOCR() {
 
             {
 
-                tessedit_pageseg_mode: 6,
+                logger:
+                    function(info) {
 
-                logger: message => {
+                        console.log(
+                            "TESSERACT PASS 2:",
+                            info
+                        );
 
-                    if (
-                        message.status ===
-                        "recognizing text"
-                    ) {
 
-                        const p =
-                            40 +
-                            Math.round(
-                                message.progress *
-                                25
-                            );
+                        if (
+                            info.progress !==
+                            undefined
+                        ) {
 
-                        progressBar.style.width =
-                            p + "%";
+                            progressBar.style.width =
+                                (
+                                    30 +
+                                    info.progress *
+                                    30
+                                ) + "%";
 
-                    }
+                        }
 
-                }
+                    },
+
+                tessedit_pageseg_mode:
+                    6,
+
+                preserve_interword_spaces:
+                    1
 
             }
 
         );
 
 
-    const pass2Text =
-        pass2.data.text;
+    const textPass2 =
+        result2.data.text;
 
 
-    OCR_RESULTS.push(
-        "[OCR PASS 2 - SHARPENED]\n" +
-        pass2Text
+    console.log(
+        "OCR PASS 2:",
+        textPass2
     );
+
+
+    const pass2Results =
+        parseOCR(
+            textPass2
+        );
 
 
     bestResults =
         mergeOCRResults(
-
             bestResults,
-
-            parseOCR(pass2Text)
-
+            pass2Results
         );
 
 
     /* =====================================================
-       PASS 3 — OPTIMIZED FALLBACK
+       OCR PASS 3
+       ORIGINAL COLOR IMAGE
+       ===================================================== */
+
+    status.textContent =
+        "Running final OCR pass...";
+
+
+    const colorCanvas =
+        document.createElement(
+            "canvas"
+        );
+
+
+    /*
+     * IMPORTANT:
+     * Pass 3 is also EXACTLY 1850 × 617.
+     */
+
+    colorCanvas.width =
+        1850;
+
+    colorCanvas.height =
+        617;
+
+
+    const colorCtx =
+        colorCanvas.getContext(
+            "2d"
+        );
+
+
+    colorCtx.imageSmoothingEnabled =
+        true;
+
+    colorCtx.imageSmoothingQuality =
+        "high";
+
+
+    /*
+     * Re-capture the SAME crop
+     * from the live camera.
+     */
+
+    colorCtx.drawImage(
+
+        video,
+
+        cropX,
+        cropY,
+
+        finalCropWidth,
+        finalCropHeight,
+
+        0,
+        0,
+
+        1850,
+        617
+
+    );
+
+
+    const result3 =
+        await Tesseract.recognize(
+
+            colorCanvas,
+
+            "eng",
+
+            {
+
+                logger:
+                    function(info) {
+
+                        console.log(
+                            "TESSERACT PASS 3:",
+                            info
+                        );
+
+
+                        if (
+                            info.progress !==
+                            undefined
+                        ) {
+
+                            progressBar.style.width =
+                                (
+                                    60 +
+                                    info.progress *
+                                    20
+                                ) + "%";
+
+                        }
+
+                    },
+
+                tessedit_pageseg_mode:
+                    6,
+
+                preserve_interword_spaces:
+                    1
+
+            }
+
+        );
+
+
+    const textPass3 =
+        result3.data.text;
+
+
+    console.log(
+        "OCR PASS 3:",
+        textPass3
+    );
+
+
+    const pass3Results =
+        parseOCR(
+            textPass3
+        );
+
+
+    bestResults =
+        mergeOCRResults(
+            bestResults,
+            pass3Results
+        );
+
+
+    /* =====================================================
+       SHOW ALL OCR RESULTS
+    ===================================================== */
+
+    rawOCR.textContent =
+
+        "[OCR PASS 1]\n" +
+        textPass1 +
+
+        "\n\n" +
+
+        "[OCR PASS 2]\n" +
+        textPass2 +
+
+        "\n\n" +
+
+        "[OCR PASS 3]\n" +
+        textPass3;
+
+
+    /* =====================================================
+       PUT MERGED RESULTS INTO TEXTBOXES
+    ===================================================== */
+
+    nameField.value =
+        bestResults.name;
+
+    gradeField.value =
+        bestResults.grade;
+
+    sectionField.value =
+        bestResults.section;
+
+    lrnField.value =
+        bestResults.lrn;
+
+    idField.value =
+        bestResults.id;
+
+
+    console.log(
+        "FINAL MERGED RESULTS:",
+        bestResults
+    );
+
+
+    /* =====================================================
+       TARGETED LRN OCR
     ===================================================== */
 
     if (
-        !(
-            isValidLRN(bestResults.lrn) &&
-            bestResults.id
+        !isValidLRN(
+            bestResults.lrn
         )
     ) {
 
         status.textContent =
-            "Running OCR Pass 3...";
-
-        progressBar.style.width =
-            "70%";
+            "Improving LRN recognition...";
 
 
-        const pass3Canvas =
-            createPass3Canvas(
+        const targetedLRN =
+            await performTargetedLRNOCR(
                 canvas
             );
 
 
-        const pass3 =
-            await Tesseract.recognize(
+        if (
+            isValidLRN(
+                targetedLRN
+            )
+        ) {
 
-                pass3Canvas,
-
-                "eng",
-
-                {
-
-                    tessedit_pageseg_mode: 6,
-
-                    preserve_interword_spaces: 1,
-
-                    logger: message => {
-
-                        if (
-                            message.status ===
-                            "recognizing text"
-                        ) {
-
-                            const p =
-                                70 +
-                                Math.round(
-                                    message.progress *
-                                    25
-                                );
-
-                            progressBar.style.width =
-                                p + "%";
-
-                        }
-
-                    }
-
-                }
-
-            );
+            bestResults.lrn =
+                targetedLRN;
 
 
-        const pass3Text =
-            pass3.data.text;
+            lrnField.value =
+                targetedLRN;
 
 
-        OCR_RESULTS.push(
-            "[OCR PASS 3 - ENHANCED]\n" +
-            pass3Text
-        );
+            rawOCR.textContent +=
 
+                "\n\n" +
+                "[Targeted LRN OCR]\n" +
+                targetedLRN;
 
-        bestResults =
-            mergeOCRResults(
-
-                bestResults,
-
-                parseOCR(pass3Text)
-
-            );
+        }
 
     }
 
 
-    progressBar.style.width =
-        "100%";
-
-
-    status.textContent =
-        "Scan complete.";
-
-
     /* =====================================================
-       RAW OCR DEBUG
-    ===================================================== */
-
-    rawOCR.textContent =
-        OCR_RESULTS.join(
-            "\n\n-----------------------------\n\n"
-        );
-
-
-    /* =====================================================
-       DISPLAY RESULTS
+       FINAL RESULTS
     ===================================================== */
 
     nameField.value =
-        bestResults.name || "";
+        bestResults.name;
 
     gradeField.value =
-        bestResults.grade || "";
+        bestResults.grade;
 
     sectionField.value =
-        bestResults.section || "";
+        bestResults.section;
 
     lrnField.value =
-        bestResults.lrn || "";
+        bestResults.lrn;
 
     idField.value =
-        bestResults.id || "";
+        bestResults.id;
+
+
+    progressBar.style.width =
+        "100%";
 
 
     /* =====================================================
@@ -1436,26 +1812,27 @@ async function performOCR() {
     ===================================================== */
 
     if (
-        isValidLRN(bestResults.lrn)
+        isValidLRN(
+            lrnField.value
+        )
     ) {
 
-        databaseButton.disabled =
-            false;
+        status.textContent =
+            "OCR complete. Checking database...";
 
 
         await checkDatabase();
 
-    } else {
+    }
+
+    else {
+
+        status.textContent =
+            "OCR complete. LRN could not be confidently detected.";
+
 
         databaseButton.disabled =
-            true;
-
-
-        databaseStatus.textContent =
-            "LRN not detected.";
-
-        databaseDetails.textContent =
-            "The scanner could not find a valid 12-digit LRN.";
+            false;
 
     }
 
@@ -1463,7 +1840,153 @@ async function performOCR() {
 
 
 /* =========================================================
-   OCR PARSER
+   TARGETED LRN OCR
+========================================================= */
+
+async function performTargetedLRNOCR(
+    fullCanvas
+) {
+
+    const width =
+        fullCanvas.width;
+
+    const height =
+        fullCanvas.height;
+
+
+    /*
+     * LRN area.
+     *
+     * This remains based on the
+     * processed 1850 × 617 image.
+     */
+
+    const x =
+        width * 0.05;
+
+
+    const y =
+        height * 0.25;
+
+
+    const cropWidth =
+        width * 0.90;
+
+
+    const cropHeight =
+        height * 0.18;
+
+
+    const scale =
+        3;
+
+
+    lrnCanvas.width =
+        Math.round(
+            cropWidth *
+            scale
+        );
+
+
+    lrnCanvas.height =
+        Math.round(
+            cropHeight *
+            scale
+        );
+
+
+    const ctx =
+        lrnCanvas.getContext(
+            "2d"
+        );
+
+
+    ctx.imageSmoothingEnabled =
+        true;
+
+    ctx.imageSmoothingQuality =
+        "high";
+
+
+    ctx.drawImage(
+
+        fullCanvas,
+
+        x,
+        y,
+
+        cropWidth,
+        cropHeight,
+
+        0,
+        0,
+
+        lrnCanvas.width,
+        lrnCanvas.height
+
+    );
+
+
+    preprocessCanvas(
+        lrnCanvas,
+        1.6
+    );
+
+
+    console.log(
+        "Running targeted LRN OCR..."
+    );
+
+
+    const result =
+        await Tesseract.recognize(
+
+            lrnCanvas,
+
+            "eng",
+
+            {
+
+                logger:
+                    function(info) {
+
+                        console.log(
+                            "LRN OCR:",
+                            info
+                        );
+
+                    },
+
+                tessedit_pageseg_mode:
+                    7,
+
+                tessedit_char_whitelist:
+                    "LRN:0123456789"
+
+            }
+
+        );
+
+
+    const text =
+        result.data.text;
+
+
+    console.log(
+        "TARGETED LRN RESULT:",
+        text
+    );
+
+
+    return extractBestLRN(
+        text
+    );
+
+}
+
+
+/* =========================================================
+   OCR PARSING
 ========================================================= */
 
 function parseOCR(text) {
@@ -1479,151 +2002,188 @@ function parseOCR(text) {
     };
 
 
-    if (!text) {
-        return result;
+    const lines =
+        String(text)
+            .split(/\r?\n/)
+            .map(
+                line =>
+                    line.trim()
+            )
+            .filter(
+                line =>
+                    line.length > 0
+            );
+
+
+    /* LRN */
+
+    const lrn =
+        extractBestLRN(
+            text
+        );
+
+
+    if (
+        isValidLRN(lrn)
+    ) {
+
+        result.lrn =
+            lrn;
+
     }
 
 
-    const lines =
-        text
-            .split(/\r?\n/)
-            .map(line =>
-                line.trim()
-            )
-            .filter(Boolean);
+    /* ID NUMBER */
+
+    let idMatch =
+        text.match(
+
+            /ID\s*(?:NO|NUMBER)?\s*[:#.\-]?\s*([0-9]{3,})\s*[-–—]\s*([0-9]{2,})\s*[-–—]?\s*([A-Za-z]{0,5})/i
+
+        );
 
 
-    result.lrn =
-        extractBestLRN(text);
+    if (idMatch) {
+
+        let id =
+            idMatch[1] +
+            "-" +
+            idMatch[2];
 
 
-    result.id =
-        extractBestID(text);
+        if (
+            idMatch[3]
+        ) {
+
+            const suffix =
+                idMatch[3]
+                    .toUpperCase();
 
 
-    /* =====================================================
-       GRADE
-    ===================================================== */
+            if (
+                suffix.length > 0
+            ) {
 
-    for (const line of lines) {
+                id +=
+                    "-" +
+                    suffix;
+
+            }
+
+        }
+
+
+        result.id =
+            id;
+
+    }
+
+    else {
+
+        const fallbackID =
+            text.match(
+
+                /\b([0-9]{5,})\s*[-–—]\s*([0-9]{2,})\s*[-–—]?\s*(SHS|JHS)?\b/i
+
+            );
+
+
+        if (
+            fallbackID
+        ) {
+
+            result.id =
+                fallbackID[1] +
+                "-" +
+                fallbackID[2];
+
+
+            if (
+                fallbackID[3]
+            ) {
+
+                result.id +=
+                    "-" +
+                    fallbackID[3]
+                        .toUpperCase();
+
+            }
+
+        }
+
+    }
+
+
+    /* GRADE + SECTION */
+
+    let gradeMatch =
+        text.match(
+
+            /GRADE\s*(?:LEVEL)?\s*(7|8|9|10|11|12)\s*[-–—:]?\s*([A-Za-z0-9][A-Za-z0-9 .'-]*)/i
+
+        );
+
+
+    if (
+        gradeMatch
+    ) {
+
+        result.grade =
+            gradeMatch[1];
+
+
+        result.section =
+            cleanSection(
+                gradeMatch[2]
+            );
+
+    }
+
+
+    if (
+        !result.grade
+    ) {
+
+        const fallbackGrade =
+            text.match(
+
+                /\b(?:G[A-Z]*R[A-Z]*D[A-Z]*E?)\s*[^0-9]{0,3}(7|8|9|10|11|12)\s*[-–—:]?\s*([A-Za-z0-9 .'-]+)/i
+
+            );
+
+
+        if (
+            fallbackGrade
+        ) {
+
+            result.grade =
+                fallbackGrade[1];
+
+
+            result.section =
+                cleanSection(
+                    fallbackGrade[2]
+                );
+
+        }
+
+    }
+
+
+    /* NAME */
+
+    for (
+        const line of lines
+    ) {
 
         const upper =
             line.toUpperCase();
 
 
-        const gradeMatch =
-            upper.match(
-                /GRADE\s*[:\-]?\s*(\d{1,2})\s*[-–—]?\s*([A-Z0-9 ._-]+)?/
-            );
-
-
-        if (gradeMatch) {
-
-            result.grade =
-                gradeMatch[1];
-
-
-            if (
-                gradeMatch[2]
-            ) {
-
-                result.section =
-                    cleanSection(
-                        gradeMatch[2]
-                    );
-
-            }
-
-            break;
-
-        }
-
-    }
-
-
-    /* =====================================================
-       SECTION FALLBACK
-    ===================================================== */
-
-    if (!result.section) {
-
-        for (const line of lines) {
-
-            const upper =
-                line.toUpperCase();
-
-
-            if (
-                upper.includes("SECTION")
-            ) {
-
-                let section =
-                    line
-                        .replace(
-                            /SECTION/ig,
-                            ""
-                        )
-                        .replace(
-                            /[:\-]/g,
-                            " "
-                        )
-                        .trim();
-
-
-                section =
-                    cleanSection(
-                        section
-                    );
-
-
-                if (section) {
-
-                    result.section =
-                        section;
-
-                    break;
-
-                }
-
-            }
-
-        }
-
-    }
-
-
-    /* =====================================================
-       NAME
-    ===================================================== */
-
-    for (const line of lines) {
-
-        const cleaned =
-            line
-                .replace(
-                    /[^A-Za-zÀ-ÿ .'-]/g,
-                    " "
-                )
-                .replace(
-                    /\s+/g,
-                    " "
-                )
-                .trim();
-
-
-        const upper =
-            cleaned.toUpperCase();
-
-
-        if (!cleaned) {
-            continue;
-        }
-
-
         if (
             upper.includes("LRN") ||
             upper.includes("ID NO") ||
-            upper.includes("IDNO") ||
+            upper.includes("ID NUMBER") ||
             upper.includes("GRADE") ||
             upper.includes("SECTION")
         ) {
@@ -1633,8 +2193,29 @@ function parseOCR(text) {
         }
 
 
+        const cleaned =
+            line
+
+                .replace(
+                    /[^A-Za-zÀ-ÿ.' -]/g,
+                    ""
+                )
+
+                .replace(
+                    /\s+/g,
+                    " "
+                )
+
+                .trim();
+
+
         const words =
-            cleaned.split(" ");
+            cleaned
+                .split(" ")
+                .filter(
+                    word =>
+                        word.length > 0
+                );
 
 
         if (
@@ -1652,7 +2233,86 @@ function parseOCR(text) {
     }
 
 
+    console.log(
+        "PARSED OCR PASS:",
+        result
+    );
+
+
     return result;
+
+}
+
+
+/* =========================================================
+   MERGE OCR RESULTS
+========================================================= */
+
+function mergeOCRResults(
+    bestResults,
+    newResults
+) {
+
+    if (
+        !bestResults.name &&
+        newResults.name
+    ) {
+
+        bestResults.name =
+            newResults.name;
+
+    }
+
+
+    if (
+        !bestResults.grade &&
+        newResults.grade
+    ) {
+
+        bestResults.grade =
+            newResults.grade;
+
+    }
+
+
+    if (
+        !bestResults.section &&
+        newResults.section
+    ) {
+
+        bestResults.section =
+            newResults.section;
+
+    }
+
+
+    if (
+        !isValidLRN(
+            bestResults.lrn
+        ) &&
+        isValidLRN(
+            newResults.lrn
+        )
+    ) {
+
+        bestResults.lrn =
+            newResults.lrn;
+
+    }
+
+
+    if (
+        !bestResults.id &&
+        newResults.id
+    ) {
+
+        bestResults.id =
+            newResults.id;
+
+    }
+
+
+    return bestResults;
 
 }
 
@@ -1663,204 +2323,93 @@ function parseOCR(text) {
 
 function extractBestLRN(text) {
 
-    if (!text) {
-        return "";
-    }
-
-
-    const directMatches =
+    let match =
         text.match(
-            /\b\d{12}\b/g
+
+            /LRN\s*[:#=\-]?\s*([0-9OoQqIiLl|SsBbGg\s]{10,24})/i
+
         );
 
 
     if (
-        directMatches &&
-        directMatches.length
+        match
     ) {
 
-        return directMatches[0];
-
-    }
-
-
-    let cleaned =
-        text
-            .replace(
-                /O/gi,
-                "0"
-            )
-            .replace(
-                /Q/gi,
-                "0"
-            )
-            .replace(
-                /I/gi,
-                "1"
-            )
-            .replace(
-                /L/gi,
-                "1"
-            )
-            .replace(
-                /\|/g,
-                "1"
-            )
-            .replace(
-                /S/gi,
-                "5"
-            )
-            .replace(
-                /B/gi,
-                "8"
-            )
-            .replace(
-                /G/gi,
-                "6"
+        const digits =
+            cleanDigits(
+                match[1]
             );
-
-
-    const digitSequences =
-        cleaned.match(
-            /\d{8,14}/g
-        );
-
-
-    if (digitSequences) {
-
-        for (
-            const sequence of digitSequences
-        ) {
-
-            if (
-                sequence.length === 12
-            ) {
-
-                return sequence;
-
-            }
-
-        }
-
-    }
-
-
-    const digitOnly =
-        cleaned.replace(
-            /\D/g,
-            ""
-        );
-
-
-    if (
-        digitOnly.length >= 12
-    ) {
-
-        for (
-            let i = 0;
-            i <= digitOnly.length - 12;
-            i++
-        ) {
-
-            const candidate =
-                digitOnly.substring(
-                    i,
-                    i + 12
-                );
-
-
-            if (
-                isValidLRN(candidate)
-            ) {
-
-                return candidate;
-
-            }
-
-        }
-
-    }
-
-
-    return "";
-
-}
-
-
-/* =========================================================
-   ID EXTRACTION
-========================================================= */
-
-function extractBestID(text) {
-
-    if (!text) {
-        return "";
-    }
-
-
-    const normal =
-        text.match(
-            /\b\d{3,8}-\d{2,5}-[A-Z]{2,6}\b/i
-        );
-
-
-    if (normal) {
-
-        return normal[0]
-            .toUpperCase();
-
-    }
-
-
-    const normalized =
-        text
-            .toUpperCase()
-            .replace(
-                /\s+/g,
-                " "
-            );
-
-
-    const spaced =
-        normalized.match(
-            /\b\d{3,8}\s*-\s*\d{2,5}\s*-\s*[A-Z]{2,6}\b/
-        );
-
-
-    if (spaced) {
-
-        return spaced[0]
-            .replace(
-                /\s+/g,
-                ""
-            );
-
-    }
-
-
-    const idMatch =
-        normalized.match(
-            /ID\s*(?:NO|NUMBER)?\.?\s*[:\-]?\s*([A-Z0-9\- ]{5,30})/
-        );
-
-
-    if (idMatch) {
-
-        let value =
-            idMatch[1]
-                .trim()
-                .replace(
-                    /\s+/g,
-                    ""
-                );
 
 
         if (
-            value.length >= 5 &&
-            !/^\d{12}$/.test(value)
+            isValidLRN(digits)
         ) {
 
-            return value;
+            return digits;
+
+        }
+
+    }
+
+
+    match =
+        text.match(
+
+            /\b[A-Z]{2,4}\s*[:#=\-]?\s*([0-9OoQqIiLl|SsBbGg\s]{10,24})\b/i
+
+        );
+
+
+    if (
+        match
+    ) {
+
+        const digits =
+            cleanDigits(
+                match[1]
+            );
+
+
+        if (
+            isValidLRN(digits)
+        ) {
+
+            return digits;
+
+        }
+
+    }
+
+
+    const digitGroups =
+        text.match(
+
+            /[0-9OoQqIiLl|SsBbGg][0-9OoQqIiLl|SsBbGg\s]{10,24}/g
+
+        );
+
+
+    if (
+        digitGroups
+    ) {
+
+        for (
+            const group of digitGroups
+        ) {
+
+            const digits =
+                cleanDigits(
+                    group
+                );
+
+
+            if (
+                isValidLRN(digits)
+            ) {
+
+                return digits;
+
+            }
 
         }
 
@@ -1873,114 +2422,86 @@ function extractBestID(text) {
 
 
 /* =========================================================
-   MERGE OCR
+   CLEAN LRN
 ========================================================= */
 
-function mergeOCRResults(
-    current,
-    incoming
-) {
+function cleanDigits(value) {
 
-    if (
-        !current.name &&
-        incoming.name
-    ) {
+    return String(value)
 
-        current.name =
-            incoming.name;
+        .replace(
+            /[OoQq]/g,
+            "0"
+        )
 
-    }
+        .replace(
+            /[IiLl|]/g,
+            "1"
+        )
 
+        .replace(
+            /[Ss]/g,
+            "5"
+        )
 
-    if (
-        !current.grade &&
-        incoming.grade
-    ) {
+        .replace(
+            /[Bb]/g,
+            "8"
+        )
 
-        current.grade =
-            incoming.grade;
+        .replace(
+            /[Gg]/g,
+            "6"
+        )
 
-    }
-
-
-    if (
-        !current.section &&
-        incoming.section
-    ) {
-
-        current.section =
-            incoming.section;
-
-    }
-
-
-    if (
-        !isValidLRN(current.lrn) &&
-        isValidLRN(incoming.lrn)
-    ) {
-
-        current.lrn =
-            incoming.lrn;
-
-    }
-
-
-    if (
-        !current.id &&
-        incoming.id
-    ) {
-
-        current.id =
-            incoming.id;
-
-    }
-
-
-    return current;
+        .replace(
+            /[^0-9]/g,
+            ""
+        );
 
 }
 
 
 /* =========================================================
-   VALID LRN
+   LRN VALIDATION
 ========================================================= */
 
 function isValidLRN(lrn) {
 
     return /^\d{12}$/.test(
-        String(lrn || "").trim()
+
+        String(lrn).trim()
+
     );
 
 }
 
 
 /* =========================================================
-   SECTION CLEANING
+   CLEAN SECTION
 ========================================================= */
 
 function cleanSection(section) {
 
-    if (!section) {
-        return "";
-    }
+    return String(section)
 
-
-    return section
-        .replace(
-            /^[\s:.\-]+/,
-            ""
-        )
         .replace(
             /\s+/g,
             " "
         )
+
+        .replace(
+            /^[\-–—:\s]+/,
+            ""
+        )
+
         .trim();
 
 }
 
 
 /* =========================================================
-   DATABASE
+   DATABASE CHECK
 ========================================================= */
 
 async function checkDatabase() {
@@ -1993,160 +2514,233 @@ async function checkDatabase() {
         !isValidLRN(lrn)
     ) {
 
-        databaseStatus.textContent =
-            "Invalid LRN.";
+        status.textContent =
+            "No valid 12-digit LRN was detected.";
 
-        databaseDetails.textContent =
-            "A valid 12-digit LRN is required.";
+
+        databaseButton.disabled =
+            false;
+
 
         return;
 
     }
 
 
-    databaseStatus.textContent =
-        "Checking database...";
+    if (
+        DATABASE_URL.includes(
+            "PASTE_YOUR"
+        )
+    ) {
+
+        alert(
+            "Apps Script URL has not been entered."
+        );
 
 
-    databaseDetails.textContent =
-        "";
+        databaseButton.disabled =
+            false;
+
+
+        return;
+
+    }
+
+
+    status.textContent =
+        "Checking Google Sheets...";
+
+
+    databaseButton.disabled =
+        true;
+
+
+    databaseResult.style.display =
+        "none";
 
 
     try {
 
-        const response =
-            await fetch(
-                DATABASE_URL +
-                "?lrn=" +
-                encodeURIComponent(lrn)
+        const url =
+            DATABASE_URL +
+            "?lrn=" +
+            encodeURIComponent(
+                lrn
             );
 
 
-        if (!response.ok) {
+        console.log(
+            "DATABASE REQUEST:",
+            url
+        );
+
+
+        const response =
+            await fetch(
+                url
+            );
+
+
+        if (
+            !response.ok
+        ) {
 
             throw new Error(
-                "HTTP " +
+                "HTTP error: " +
                 response.status
             );
 
         }
 
 
-        const data =
+        const result =
             await response.json();
 
 
+        console.log(
+            "DATABASE RESULT:",
+            result
+        );
+
+
         if (
-            data.status === "success" &&
-            data.student
+            result.match === true
         ) {
 
-            const student =
-                data.student;
+            databaseResult.style.display =
+                "block";
 
 
-            if (
-                student.name
-            ) {
-
-                nameField.value =
-                    student.name;
-
-            }
-
-
-            if (
-                student.grade
-            ) {
-
-                gradeField.value =
-                    student.grade;
-
-            }
-
-
-            if (
-                student.section
-            ) {
-
-                sectionField.value =
-                    student.section;
-
-            }
-
-
-            if (
-                student.idNumber
-            ) {
-
-                idField.value =
-                    student.idNumber;
-
-            } else if (
-                student.id
-            ) {
-
-                idField.value =
-                    student.id;
-
-            }
+            databaseResult.className =
+                "database-result valid";
 
 
             databaseStatus.textContent =
-                "✓ Student found in database.";
+                "🟢 VALID STUDENT";
 
 
             databaseDetails.innerHTML =
 
-                "<strong>NAME:</strong> " +
+                "<strong>Name:</strong> " +
                 escapeHTML(
-                    student.name || ""
+                    result.student.name
                 ) +
 
-                "<br><strong>LRN:</strong> " +
+                "<br><br>" +
+
+                "<strong>LRN:</strong> " +
                 escapeHTML(
-                    student.lrn || lrn
+                    result.student.lrn
                 ) +
 
-                "<br><strong>ID NUMBER:</strong> " +
+                "<br><br>" +
+
+                "<strong>ID Number:</strong> " +
                 escapeHTML(
-                    student.idNumber ||
-                    student.id ||
-                    ""
+                    result.student.idNumber
                 ) +
 
-                "<br><strong>GRADE:</strong> " +
+                "<br><br>" +
+
+                "<strong>Grade:</strong> " +
                 escapeHTML(
-                    student.grade || ""
+                    result.student.grade
                 ) +
 
-                "<br><strong>SECTION:</strong> " +
+                "<br><br>" +
+
+                "<strong>Section:</strong> " +
                 escapeHTML(
-                    student.section || ""
+                    result.student.section
                 );
 
 
-        } else {
-
-            databaseStatus.textContent =
-                "✗ Student not found.";
-
-            databaseDetails.textContent =
-                "No student with this LRN was found in the database.";
+            status.textContent =
+                "Student identified successfully.";
 
         }
 
 
-    } catch (error) {
+        else {
 
-        console.error(error);
+            databaseResult.style.display =
+                "block";
+
+
+            databaseResult.className =
+                "database-result invalid";
+
+
+            databaseStatus.textContent =
+                "🔴 STUDENT NOT FOUND";
+
+
+            databaseDetails.innerHTML =
+
+                "<strong>Scanned LRN:</strong> " +
+                escapeHTML(
+                    lrn
+                ) +
+
+                "<br><br>" +
+
+                "This LRN was not found " +
+                "in the student database.";
+
+
+            status.textContent =
+                "No matching student.";
+
+        }
+
+    }
+
+
+    catch (error) {
+
+        console.error(
+            "DATABASE ERROR:",
+            error
+        );
+
+
+        databaseResult.style.display =
+            "block";
+
+
+        databaseResult.className =
+            "database-result invalid";
 
 
         databaseStatus.textContent =
+            "⚠️ DATABASE CONNECTION FAILED";
+
+
+        databaseDetails.innerHTML =
+
+            "Could not connect to Google Apps Script." +
+
+            "<br><br>" +
+
+            "<small>" +
+
+            escapeHTML(
+                error.message
+            ) +
+
+            "</small>";
+
+
+        status.textContent =
             "Database connection failed.";
 
-        databaseDetails.textContent =
-            error.message;
+    }
+
+
+    finally {
+
+        databaseButton.disabled =
+            false;
 
     }
 
@@ -2154,28 +2748,33 @@ async function checkDatabase() {
 
 
 /* =========================================================
-   ESCAPE HTML
+   HTML SECURITY
 ========================================================= */
 
 function escapeHTML(value) {
 
-    return String(value || "")
+    return String(value)
+
         .replace(
             /&/g,
             "&amp;"
         )
+
         .replace(
             /</g,
             "&lt;"
         )
+
         .replace(
             />/g,
             "&gt;"
         )
+
         .replace(
             /"/g,
             "&quot;"
         )
+
         .replace(
             /'/g,
             "&#039;"
@@ -2183,8 +2782,9 @@ function escapeHTML(value) {
 
 }
 
+
 </script>
 
 </body>
+
 </html>
-```
