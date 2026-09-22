@@ -1,16 +1,10 @@
+```html
 <!DOCTYPE html>
-
 <html lang="en">
 
 <head>
-
 <meta charset="UTF-8">
-
-<meta
-name="viewport"
-content="width=device-width, initial-scale=1.0"
-
->
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 <title>Student ID Scanner</title>
 
@@ -18,20 +12,12 @@ content="width=device-width, initial-scale=1.0"
 
 <style>
 
-* {
-    box-sizing: border-box;
-}
-
 body {
-    margin: 0;
-    padding: 20px;
-
     font-family: Arial, sans-serif;
-
-    background: #111;
-    color: white;
-
     text-align: center;
+    margin: 0;
+    padding: 30px 15px;
+    background: #f4f6f8;
 }
 
 h1 {
@@ -39,546 +25,345 @@ h1 {
 }
 
 .subtitle {
-    color: #aaa;
-    margin-bottom: 20px;
+    color: #666;
+    margin-bottom: 25px;
 }
 
 .camera-container {
     position: relative;
-
-    width: 100%;
-    max-width: 700px;
-
+    width: 95%;
+    max-width: 900px;
     margin: auto;
-
-    background: black;
-
+    background: #000;
     overflow: hidden;
-
     border-radius: 12px;
 }
 
 video {
-    display: block;
-
     width: 100%;
-    height: auto;
+    display: block;
 }
 
 .scan-guide {
     position: absolute;
-
     width: 88%;
-
-    aspect-ratio: 1.586 / 1;
-
-    left: 50%;
+    aspect-ratio: 1851 / 617;
+    border: 4px solid #00ff66;
+    border-radius: 8px;
     top: 50%;
-
-    transform:
-        translate(-50%, -50%);
-
-    border:
-        3px solid #00ff66;
-
-    border-radius: 10px;
-
-    box-shadow:
-        0 0 10px #00ff66,
-        inset 0 0 10px rgba(
-            0,
-            255,
-            102,
-            0.2
-        );
-
+    left: 50%;
+    transform: translate(-50%, -50%);
+    box-sizing: border-box;
     pointer-events: none;
 }
 
-.scan-guide::after {
-
-    content:
-        "ALIGN ID CARD HERE";
-
-    position: absolute;
-
-    top: -30px;
-
-    left: 50%;
-
-    transform:
-        translateX(-50%);
-
-    font-size: 13px;
-
-    color: #00ff66;
-
-    white-space: nowrap;
-}
-
 .controls {
-
-    max-width: 700px;
-
     margin: 20px auto;
-
     display: flex;
-
     flex-wrap: wrap;
-
-    justify-content: center;
-
     gap: 10px;
+    justify-content: center;
 }
 
 button {
-
-    padding:
-        12px 18px;
-
     border: none;
-
+    padding: 12px 18px;
     border-radius: 8px;
-
-    font-size: 15px;
-
-    font-weight: bold;
-
     cursor: pointer;
+    font-size: 15px;
+    background: #1976d2;
+    color: white;
+}
+
+button:hover {
+    opacity: 0.9;
 }
 
 button:disabled {
-
-    opacity: 0.4;
-
+    background: #aaa;
     cursor: not-allowed;
 }
 
-#startButton {
-
-    background: #00c853;
-
-    color: white;
-}
-
-#scanButton {
-
-    background: #2196f3;
-
-    color: white;
-}
-
-#stopButton {
-
-    background: #f44336;
-
-    color: white;
-}
-
-#databaseButton {
-
-    background: #9c27b0;
-
-    color: white;
-}
-
 .status {
-
-    max-width: 700px;
-
     margin: 15px auto;
-
-    padding: 12px;
-
-    background: #222;
-
-    border-radius: 8px;
-
-    color: #ddd;
+    font-weight: bold;
+    max-width: 900px;
 }
 
 .progress-container {
-
-    max-width: 700px;
-
-    margin: 15px auto;
-
-    background: #333;
-
-    border-radius: 10px;
-
-    overflow: hidden;
-
+    width: 90%;
+    max-width: 800px;
     height: 12px;
+    background: #ddd;
+    margin: 10px auto 25px;
+    border-radius: 10px;
+    overflow: hidden;
 }
 
 .progress-bar {
-
     width: 0%;
-
     height: 100%;
-
-    background: #00ff66;
-
-    transition:
-        width 0.2s;
+    background: #2196f3;
+    transition: width 0.2s ease;
 }
 
 .image-container {
-
-    max-width: 700px;
-
+    width: 95%;
+    max-width: 900px;
     margin: 20px auto;
-}
-
-.image-container h3 {
-
-    margin-bottom: 10px;
 }
 
 #processedImage {
-
-    max-width: 100%;
-
-    border-radius: 8px;
-
     display: none;
+    width: 100%;
+    max-width: 900px;
+    border: 1px solid #ccc;
+    border-radius: 8px;
 }
 
 .results {
-
+    width: 95%;
     max-width: 700px;
-
-    margin: 20px auto;
-
+    margin: 25px auto;
     text-align: left;
+    background: white;
+    padding: 20px;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
 }
 
 .results h2 {
-
     text-align: center;
 }
 
 .field {
-
-    margin: 10px 0;
+    margin: 12px 0;
 }
 
 .field label {
-
     display: block;
-
-    color: #aaa;
-
-    font-size: 13px;
-
-    margin-bottom: 4px;
+    font-weight: bold;
+    margin-bottom: 5px;
 }
 
 .field input {
-
     width: 100%;
-
-    padding: 11px;
-
-    background: #222;
-
-    color: white;
-
-    border: 1px solid #444;
-
+    box-sizing: border-box;
+    padding: 10px;
+    border: 1px solid #ccc;
     border-radius: 6px;
-
-    font-size: 15px;
+    font-size: 16px;
 }
 
 .database-result {
-
-    display: none;
-
+    width: 95%;
     max-width: 700px;
-
     margin: 20px auto;
-
-    padding: 20px;
-
+    padding: 15px;
+    background: white;
     border-radius: 10px;
-
-    text-align: center;
-}
-
-.database-result.valid {
-
-    background: #123d20;
-
-    border:
-        2px solid #00c853;
-}
-
-.database-result.invalid {
-
-    background: #421414;
-
-    border:
-        2px solid #f44336;
 }
 
 #databaseStatus {
-
-    font-size: 22px;
-
     font-weight: bold;
-
-    margin-bottom: 15px;
+    margin-bottom: 10px;
 }
 
 #databaseDetails {
-
-    text-align: left;
-
-    line-height: 1.5;
+    line-height: 1.7;
 }
 
 .ocr-debug {
-
-    max-width: 700px;
-
-    margin: 20px auto;
-
+    width: 95%;
+    max-width: 900px;
+    margin: 25px auto;
     text-align: left;
 }
 
-.ocr-debug h3 {
-
-    text-align: center;
-}
-
 #rawOCR {
-
-    width: 100%;
-
-    min-height: 150px;
-
-    padding: 12px;
-
-    background: #080808;
-
+    background: #111;
     color: #00ff66;
-
-    border: 1px solid #333;
-
+    padding: 15px;
     border-radius: 8px;
-
-    font-family: monospace;
-
-    font-size: 14px;
-
     white-space: pre-wrap;
-
-    overflow-wrap: break-word;
+    word-break: break-word;
+    min-height: 100px;
+    font-family: monospace;
 }
 
 </style>
-
 </head>
+
 
 <body>
 
-<h1>
-    Student ID Scanner
-</h1>
+<h1>Student ID Scanner</h1>
 
 <div class="subtitle">
-    OCR-Based Student Identification System
+OCR-Based Student Identification System
 </div>
+
 
 <div class="camera-container">
 
-```
-<video
-    id="video"
-    autoplay
-    playsinline>
-</video>
+    <video id="video" autoplay playsinline></video>
 
-<div class="scan-guide"></div>
-```
+    <div class="scan-guide"></div>
 
 </div>
+
 
 <div class="controls">
 
-```
-<button id="startButton">
-    📷 Start Camera
-</button>
+    <button id="startButton">
+        📷 Start Camera
+    </button>
 
-<button
-    id="scanButton"
-    disabled>
-    🔍 Scan & Verify
-</button>
+    <button id="scanButton" disabled>
+        🔍 Scan & Verify
+    </button>
 
-<button
-    id="stopButton"
-    disabled>
-    ⛔ Stop Camera
-</button>
+    <button id="stopButton" disabled>
+        ⛔ Stop Camera
+    </button>
 
-<button
-    id="databaseButton"
-    disabled>
-    🔎 Check Database
-</button>
-```
+    <button id="databaseButton" disabled>
+        🔎 Check Database
+    </button>
 
 </div>
 
-<div
-    class="status"
-    id="status">
 
-```
-Camera not started.
-```
-
+<div class="status" id="status">
+    Camera not started.
 </div>
+
 
 <div class="progress-container">
 
-```
-<div
-    class="progress-bar"
-    id="progressBar">
-</div>
-```
+    <div
+        class="progress-bar"
+        id="progressBar">
+    </div>
 
 </div>
+
 
 <div class="image-container">
 
-```
-<h3>
-    Processed Image
-</h3>
+    <h3>Processed Image</h3>
 
-<img
-    id="processedImage"
-    alt="Processed ID">
-```
+    <img
+        id="processedImage"
+        alt="Processed ID">
 
 </div>
+
 
 <div class="results">
 
-```
-<h2>
-    Scanned Information
-</h2>
+    <h2>Scanned Information</h2>
 
-<div class="field">
 
-    <label>
-        NAME
-    </label>
+    <div class="field">
 
-    <input
-        id="nameField"
-        type="text"
-        readonly>
+        <label>NAME</label>
 
-</div>
+        <input
+            id="nameField"
+            type="text"
+            readonly>
 
-<div class="field">
+    </div>
 
-    <label>
-        GRADE LEVEL
-    </label>
 
-    <input
-        id="gradeField"
-        type="text"
-        readonly>
+    <div class="field">
 
-</div>
+        <label>GRADE LEVEL</label>
 
-<div class="field">
+        <input
+            id="gradeField"
+            type="text"
+            readonly>
 
-    <label>
-        SECTION
-    </label>
+    </div>
 
-    <input
-        id="sectionField"
-        type="text"
-        readonly>
 
-</div>
+    <div class="field">
 
-<div class="field">
+        <label>SECTION</label>
 
-    <label>
-        LRN
-    </label>
+        <input
+            id="sectionField"
+            type="text"
+            readonly>
 
-    <input
-        id="lrnField"
-        type="text"
-        readonly>
+    </div>
 
-</div>
 
-<div class="field">
+    <div class="field">
 
-    <label>
-        ID NUMBER
-    </label>
+        <label>LRN</label>
 
-    <input
-        id="idField"
-        type="text"
-        readonly>
+        <input
+            id="lrnField"
+            type="text"
+            maxlength="12"
+            readonly>
+
+    </div>
+
+
+    <div class="field">
+
+        <label>ID NUMBER</label>
+
+        <input
+            id="idField"
+            type="text"
+            readonly>
+
+    </div>
 
 </div>
-```
 
-</div>
 
 <div
     class="database-result"
     id="databaseResult">
 
-```
-<div id="databaseStatus"></div>
+    <div id="databaseStatus"></div>
 
-<div id="databaseDetails"></div>
-```
+    <div id="databaseDetails"></div>
 
 </div>
+
 
 <div class="ocr-debug">
 
-```
-<h3>
-    Raw OCR Result
-</h3>
+    <h3>Raw OCR Result</h3>
 
-<div id="rawOCR">
-    No OCR result yet.
-</div>
-```
+    <div id="rawOCR">
+        No OCR result yet.
+    </div>
 
 </div>
 
-<canvas
- id="canvas"
- style="display:none;"> </canvas>
 
 <canvas
- id="lrnCanvas"
- style="display:none;"> </canvas>
+    id="canvas"
+    style="display:none;">
+</canvas>
+
+
+<canvas
+    id="lrnCanvas"
+    style="display:none;">
+</canvas>
+
 
 <script>
+
 
 /* =========================================================
    ELEMENTS
@@ -592,9 +377,6 @@ const canvas =
 
 const lrnCanvas =
     document.getElementById("lrnCanvas");
-
-const processedImage =
-    document.getElementById("processedImage");
 
 const startButton =
     document.getElementById("startButton");
@@ -614,6 +396,12 @@ const status =
 const progressBar =
     document.getElementById("progressBar");
 
+const processedImage =
+    document.getElementById("processedImage");
+
+const rawOCR =
+    document.getElementById("rawOCR");
+
 const nameField =
     document.getElementById("nameField");
 
@@ -629,36 +417,46 @@ const lrnField =
 const idField =
     document.getElementById("idField");
 
-const databaseResult =
-    document.getElementById("databaseResult");
-
 const databaseStatus =
     document.getElementById("databaseStatus");
 
 const databaseDetails =
     document.getElementById("databaseDetails");
 
-const rawOCR =
-    document.getElementById("rawOCR");
-
 
 /* =========================================================
-   GOOGLE APPS SCRIPT
+   DATABASE
 ========================================================= */
 
 const DATABASE_URL =
-    "https://script.google.com/macros/s/AKfycby8SQH20dz2PK6Covm_GOy4sG1WigvDaxZr8a--gbrI_LBKE1KJoQO7AMzaKZR_3mQ/exec";
+"https://script.google.com/macros/s/AKfycby8SQH20dz2PK6Covm_GOy4sG1WigvDaxZr8a--gbrI_LBKE1KJoQO7AMzaKZR_3mQ/exec";
 
-
-/* =========================================================
-   CAMERA
-========================================================= */
 
 let cameraStream = null;
 
 
 /* =========================================================
-   BUTTONS
+   CAMERA CROP SETTINGS
+========================================================= */
+
+/*
+   EXACT OCR IMAGE RESOLUTION:
+
+   1851 × 617
+
+   The source camera crop uses the SAME
+   aspect ratio, so the image is NOT stretched.
+*/
+
+const CROP_WIDTH = 1851;
+const CROP_HEIGHT = 617;
+
+const CROP_ASPECT =
+    CROP_WIDTH / CROP_HEIGHT;
+
+
+/* =========================================================
+   BUTTON EVENTS
 ========================================================= */
 
 startButton.addEventListener(
@@ -666,14 +464,14 @@ startButton.addEventListener(
     startCamera
 );
 
-stopButton.addEventListener(
-    "click",
-    stopCamera
-);
-
 scanButton.addEventListener(
     "click",
     captureAndScan
+);
+
+stopButton.addEventListener(
+    "click",
+    stopCamera
 );
 
 databaseButton.addEventListener(
@@ -683,7 +481,7 @@ databaseButton.addEventListener(
 
 
 /* =========================================================
-   START CAMERA
+   CAMERA
 ========================================================= */
 
 async function startCamera() {
@@ -692,6 +490,7 @@ async function startCamera() {
 
         status.textContent =
             "Starting camera...";
+
 
         cameraStream =
             await navigator.mediaDevices.getUserMedia({
@@ -720,8 +519,42 @@ async function startCamera() {
 
             });
 
+
         video.srcObject =
             cameraStream;
+
+
+        const track =
+            cameraStream.getVideoTracks()[0];
+
+
+        try {
+
+            await track.applyConstraints({
+
+                width: {
+                    ideal: 1920
+                },
+
+                height: {
+                    ideal: 1080
+                },
+
+                frameRate: {
+                    ideal: 30
+                }
+
+            });
+
+        } catch (e) {
+
+            console.log(
+                "Camera constraints:",
+                e
+            );
+
+        }
+
 
         startButton.disabled =
             true;
@@ -732,20 +565,17 @@ async function startCamera() {
         stopButton.disabled =
             false;
 
-        status.textContent =
-            "Camera ready. Align the entire ID inside the green guide.";
-
-    }
-
-    catch (error) {
-
-        console.error(
-            "CAMERA ERROR:",
-            error
-        );
 
         status.textContent =
-            "Could not access camera: " +
+            "Camera ready. Align the ID inside the green guide.";
+
+
+    } catch (error) {
+
+        console.error(error);
+
+        status.textContent =
+            "Camera error: " +
             error.message;
 
     }
@@ -763,22 +593,30 @@ function stopCamera() {
 
         cameraStream
             .getTracks()
-            .forEach(
-                track =>
-                    track.stop()
+            .forEach(track =>
+                track.stop()
             );
 
         cameraStream = null;
 
     }
 
+
     video.srcObject = null;
 
-    startButton.disabled = false;
 
-    scanButton.disabled = true;
+    startButton.disabled =
+        false;
 
-    stopButton.disabled = true;
+    scanButton.disabled =
+        true;
+
+    stopButton.disabled =
+        true;
+
+    databaseButton.disabled =
+        true;
+
 
     status.textContent =
         "Camera stopped.";
@@ -787,66 +625,67 @@ function stopCamera() {
 
 
 /* =========================================================
-   CAPTURE + SCAN
+   CAPTURE
 ========================================================= */
 
 async function captureAndScan() {
 
     if (!cameraStream) {
 
-        alert(
-            "Please start the camera first."
-        );
+        status.textContent =
+            "Please start the camera first.";
 
         return;
 
     }
 
-    scanButton.disabled = true;
 
-    databaseButton.disabled = true;
+    scanButton.disabled =
+        true;
 
-    databaseResult.style.display =
-        "none";
+    databaseButton.disabled =
+        true;
+
 
     progressBar.style.width =
         "0%";
 
-    status.textContent =
-        "Capturing ID...";
+
+    databaseStatus.textContent =
+        "";
+
+    databaseDetails.textContent =
+        "";
+
 
     try {
 
         await performOCR();
 
-    }
+    } catch (error) {
 
-    catch (error) {
-
-        console.error(
-            "SCAN ERROR:",
-            error
-        );
+        console.error(error);
 
         status.textContent =
-            "Scanning failed: " +
+            "Scanning error: " +
             error.message;
 
     }
 
-    scanButton.disabled = false;
+
+    scanButton.disabled =
+        false;
 
 }
 
 
 /* =========================================================
-   IMAGE PREPROCESSING
+   PREPROCESS IMAGE
 ========================================================= */
 
 function preprocessCanvas(
     sourceCanvas,
-    contrast = 1.35,
-    brightness = 0
+    contrast = 1.35
 ) {
 
     const ctx =
@@ -857,6 +696,7 @@ function preprocessCanvas(
             }
         );
 
+
     const imageData =
         ctx.getImageData(
             0,
@@ -865,18 +705,15 @@ function preprocessCanvas(
             sourceCanvas.height
         );
 
+
     const data =
         imageData.data;
 
+
     const factor =
-        (
-            259 *
-            (contrast + 255)
-        ) /
-        (
-            255 *
-            (259 - contrast)
-        );
+        (259 * (contrast + 255)) /
+        (255 * (259 - contrast));
+
 
     for (
         let i = 0;
@@ -884,22 +721,27 @@ function preprocessCanvas(
         i += 4
     ) {
 
-        const r = data[i];
-        const g = data[i + 1];
-        const b = data[i + 2];
+        const r =
+            data[i];
+
+        const g =
+            data[i + 1];
+
+        const b =
+            data[i + 2];
+
 
         let gray =
             0.299 * r +
             0.587 * g +
             0.114 * b;
 
-        gray =
-            gray + brightness;
 
         gray =
             factor *
             (gray - 128) +
             128;
+
 
         gray =
             Math.max(
@@ -910,11 +752,18 @@ function preprocessCanvas(
                 )
             );
 
-        data[i] = gray;
-        data[i + 1] = gray;
-        data[i + 2] = gray;
+
+        data[i] =
+            gray;
+
+        data[i + 1] =
+            gray;
+
+        data[i + 2] =
+            gray;
 
     }
+
 
     ctx.putImageData(
         imageData,
@@ -926,31 +775,27 @@ function preprocessCanvas(
 
 
 /* =========================================================
-   CREATE SHARPENED IMAGE
+   MILD SHARPENING
 ========================================================= */
 
 function createSharpenedCanvas(
     sourceCanvas
 ) {
 
-    const result =
-        document.createElement(
-            "canvas"
-        );
+    const sharpenCanvas =
+        document.createElement("canvas");
 
-    result.width =
+
+    sharpenCanvas.width =
         sourceCanvas.width;
 
-    result.height =
+    sharpenCanvas.height =
         sourceCanvas.height;
 
+
     const ctx =
-        result.getContext(
-            "2d",
-            {
-                willReadFrequently: true
-            }
-        );
+        sharpenCanvas.getContext("2d");
+
 
     ctx.drawImage(
         sourceCanvas,
@@ -958,208 +803,204 @@ function createSharpenedCanvas(
         0
     );
 
+
     const imageData =
         ctx.getImageData(
             0,
             0,
-            result.width,
-            result.height
+            sharpenCanvas.width,
+            sharpenCanvas.height
         );
+
 
     const data =
         imageData.data;
 
-    const original =
+
+    const copy =
         new Uint8ClampedArray(data);
 
-    const w =
-        result.width;
 
-    const h =
-        result.height;
+    const width =
+        sharpenCanvas.width;
+
+    const height =
+        sharpenCanvas.height;
+
 
     for (
         let y = 1;
-        y < h - 1;
+        y < height - 1;
         y++
     ) {
 
         for (
             let x = 1;
-            x < w - 1;
+            x < width - 1;
             x++
         ) {
 
             const index =
+                (y * width + x) * 4;
+
+
+            const center =
+                copy[index];
+
+            const top =
+                copy[
+                    ((y - 1) * width + x) * 4
+                ];
+
+            const bottom =
+                copy[
+                    ((y + 1) * width + x) * 4
+                ];
+
+            const left =
+                copy[
+                    (y * width + x - 1) * 4
+                ];
+
+            const right =
+                copy[
+                    (y * width + x + 1) * 4
+                ];
+
+
+            let value =
+                center * 1.4 -
                 (
-                    y * w + x
-                ) * 4;
+                    top +
+                    bottom +
+                    left +
+                    right
+                ) * 0.1;
 
-            for (
-                let c = 0;
-                c < 3;
-                c++
-            ) {
 
-                const center =
-                    original[
-                        index + c
-                    ];
+            value =
+                Math.max(
+                    0,
+                    Math.min(
+                        255,
+                        value
+                    )
+                );
 
-                const top =
-                    original[
-                        index -
-                        w * 4 +
-                        c
-                    ];
 
-                const bottom =
-                    original[
-                        index +
-                        w * 4 +
-                        c
-                    ];
+            data[index] =
+                value;
 
-                const left =
-                    original[
-                        index -
-                        4 +
-                        c
-                    ];
+            data[index + 1] =
+                value;
 
-                const right =
-                    original[
-                        index +
-                        4 +
-                        c
-                    ];
-
-                const sharpened =
-                    (
-                        5 * center -
-                        top -
-                        bottom -
-                        left -
-                        right
-                    );
-
-                data[
-                    index + c
-                ] =
-                    Math.max(
-                        0,
-                        Math.min(
-                            255,
-                            sharpened
-                        )
-                    );
-
-            }
+            data[index + 2] =
+                value;
 
         }
 
     }
 
+
     ctx.putImageData(
         imageData,
         0,
         0
     );
 
-    return result;
+
+    return sharpenCanvas;
 
 }
 
 
 /* =========================================================
-   CREATE THRESHOLD IMAGE
+   PASS 3 IMAGE
 ========================================================= */
 
-function createThresholdCanvas(
+/*
+   PASS 3 IS NOT RAW COLOR.
+
+   It uses a fresh image derived from the original
+   grayscale image, with:
+
+   - stronger contrast
+   - mild sharpening
+   - slightly larger OCR image
+   - PSM 6
+
+   This gives Tesseract another representation
+   without destroying the text with hard thresholding.
+*/
+
+function createPass3Canvas(
     sourceCanvas
 ) {
 
-    const result =
-        document.createElement(
-            "canvas"
+    const pass3Canvas =
+        document.createElement("canvas");
+
+
+    const scale = 1.35;
+
+
+    pass3Canvas.width =
+        Math.round(
+            sourceCanvas.width * scale
         );
 
-    result.width =
-        sourceCanvas.width;
+    pass3Canvas.height =
+        Math.round(
+            sourceCanvas.height * scale
+        );
 
-    result.height =
-        sourceCanvas.height;
 
     const ctx =
-        result.getContext(
-            "2d",
-            {
-                willReadFrequently: true
-            }
-        );
+        pass3Canvas.getContext("2d");
+
+
+    ctx.imageSmoothingEnabled =
+        true;
+
+    ctx.imageSmoothingQuality =
+        "high";
+
 
     ctx.drawImage(
+
         sourceCanvas,
+
         0,
-        0
+        0,
+        sourceCanvas.width,
+        sourceCanvas.height,
+
+        0,
+        0,
+        pass3Canvas.width,
+        pass3Canvas.height
+
     );
 
-    const imageData =
-        ctx.getImageData(
-            0,
-            0,
-            result.width,
-            result.height
-        );
-
-    const data =
-        imageData.data;
 
     /*
-     * Soft threshold.
-     *
-     * We deliberately use
-     * 155 instead of an extreme
-     * threshold so thin letters
-     * are not destroyed.
-     */
+       Stronger contrast than Pass 1,
+       but not extreme.
+    */
 
-    for (
-        let i = 0;
-        i < data.length;
-        i += 4
-    ) {
-
-        const gray =
-            (
-                0.299 * data[i] +
-                0.587 * data[i + 1] +
-                0.114 * data[i + 2]
-            );
-
-        const value =
-            gray < 155
-                ? 0
-                : 255;
-
-        data[i] =
-            value;
-
-        data[i + 1] =
-            value;
-
-        data[i + 2] =
-            value;
-
-    }
-
-    ctx.putImageData(
-        imageData,
-        0,
-        0
+    preprocessCanvas(
+        pass3Canvas,
+        1.55
     );
 
-    return result;
+
+    /*
+       Mild sharpen after enlargement.
+    */
+
+    return createSharpenedCanvas(
+        pass3Canvas
+    );
 
 }
 
@@ -1170,14 +1011,12 @@ function createThresholdCanvas(
 
 async function performOCR() {
 
-    status.textContent =
-        "Preparing ID image...";
-
     const videoWidth =
         video.videoWidth;
 
     const videoHeight =
         video.videoHeight;
+
 
     if (
         !videoWidth ||
@@ -1191,82 +1030,71 @@ async function performOCR() {
     }
 
 
-    /* =====================================================
-       CARD CROP
-    ===================================================== */
+    /*
+       ======================================================
+       TRUE 1851 × 617 CROP
+       ======================================================
+    */
 
-    const cropWidth =
+    let cropWidth =
         videoWidth * 0.88;
 
-    const cropHeight =
-        cropWidth / 1.586;
 
-    let finalCropWidth =
-        cropWidth;
+    let cropHeight =
+        cropWidth / CROP_ASPECT;
 
-    let finalCropHeight =
-        cropHeight;
 
     if (
-        finalCropHeight >
+        cropHeight >
         videoHeight * 0.92
     ) {
 
-        finalCropHeight =
+        cropHeight =
             videoHeight * 0.92;
 
-        finalCropWidth =
-            finalCropHeight * 1.586;
+        cropWidth =
+            cropHeight * CROP_ASPECT;
 
     }
 
+
+    if (
+        cropWidth >
+        videoWidth * 0.96
+    ) {
+
+        cropWidth =
+            videoWidth * 0.96;
+
+        cropHeight =
+            cropWidth / CROP_ASPECT;
+
+    }
+
+
     const cropX =
-        (
-            videoWidth -
-            finalCropWidth
-        ) / 2;
+        (videoWidth - cropWidth) / 2;
+
 
     const cropY =
-        (
-            videoHeight -
-            finalCropHeight
-        ) / 2;
-
-
-    /* =====================================================
-       REQUESTED OCR RESOLUTION
-    ===================================================== */
-
-    const OCR_WIDTH =
-        1850;
-
-    const OCR_HEIGHT =
-        617;
-
-
-    canvas.width =
-        OCR_WIDTH;
-
-    canvas.height =
-        OCR_HEIGHT;
+        (videoHeight - cropHeight) / 2;
 
 
     /*
-     * IMPORTANT:
-     *
-     * We capture the frame ONCE.
-     *
-     * Pass 1, Pass 2 and Pass 3
-     * will all use this same frame.
-     *
-     * This prevents Pass 3 from
-     * getting a different/moved ID.
-     */
+       EXACT OUTPUT:
+       1851 × 617
+    */
+
+    canvas.width =
+        CROP_WIDTH;
+
+    canvas.height =
+        CROP_HEIGHT;
+
 
     const ctx =
-        canvas.getContext(
-            "2d"
-        );
+        canvas.getContext("2d");
+
 
     ctx.imageSmoothingEnabled =
         true;
@@ -1274,57 +1102,36 @@ async function performOCR() {
     ctx.imageSmoothingQuality =
         "high";
 
+
+    /*
+       Source and destination have
+       exactly the same aspect ratio.
+    */
+
     ctx.drawImage(
 
         video,
 
         cropX,
         cropY,
-
-        finalCropWidth,
-        finalCropHeight,
+        cropWidth,
+        cropHeight,
 
         0,
         0,
-
-        OCR_WIDTH,
-        OCR_HEIGHT
+        CROP_WIDTH,
+        CROP_HEIGHT
 
     );
 
 
-    /* =====================================================
-       MAKE ORIGINAL COPY
-    ===================================================== */
-
-    const originalCanvas =
-        document.createElement(
-            "canvas"
-        );
-
-    originalCanvas.width =
-        OCR_WIDTH;
-
-    originalCanvas.height =
-        OCR_HEIGHT;
-
-    originalCanvas
-        .getContext("2d")
-        .drawImage(
-            canvas,
-            0,
-            0
-        );
-
-
-    /* =====================================================
-       PASS 1 IMAGE
-    ===================================================== */
+    /*
+       Pass 1 preprocessing.
+    */
 
     preprocessCanvas(
         canvas,
-        1.35,
-        0
+        1.35
     );
 
 
@@ -1337,15 +1144,32 @@ async function performOCR() {
         "block";
 
 
+    let bestResults = {
+
+        name: "",
+        grade: "",
+        section: "",
+        lrn: "",
+        id: ""
+
+    };
+
+
+    const OCR_RESULTS = [];
+
+
     /* =====================================================
-       OCR PASS 1
-       MAIN IMAGE
+       PASS 1
     ===================================================== */
 
     status.textContent =
-        "Reading ID information...";
+        "Scanning ID... Pass 1";
 
-    const result1 =
+    progressBar.style.width =
+        "10%";
+
+
+    const pass1 =
         await Tesseract.recognize(
 
             canvas,
@@ -1354,78 +1178,65 @@ async function performOCR() {
 
             {
 
-                logger:
-                    function(info) {
+                tessedit_pageseg_mode: 6,
 
-                        if (
-                            info.progress !==
-                            undefined
-                        ) {
+                logger: message => {
 
-                            progressBar.style.width =
-                                (
-                                    info.progress *
-                                    30
-                                ) + "%";
+                    if (
+                        message.status ===
+                        "recognizing text"
+                    ) {
 
-                        }
+                        const p =
+                            10 +
+                            Math.round(
+                                message.progress *
+                                25
+                            );
 
-                    },
+                        progressBar.style.width =
+                            p + "%";
 
-                tessedit_pageseg_mode:
-                    6,
+                    }
 
-                preserve_interword_spaces:
-                    1
+                }
 
             }
 
         );
 
 
-    const textPass1 =
-        result1.data.text;
+    const pass1Text =
+        pass1.data.text;
 
 
-    console.log(
-        "OCR PASS 1:",
-        textPass1
+    OCR_RESULTS.push(
+        "[OCR PASS 1]\n" +
+        pass1Text
     );
 
 
-    const pass1Results =
-        parseOCR(
-            textPass1
+    bestResults =
+        mergeOCRResults(
+
+            bestResults,
+
+            parseOCR(pass1Text)
+
         );
 
 
-    let bestResults = {
-
-        name:
-            pass1Results.name,
-
-        grade:
-            pass1Results.grade,
-
-        section:
-            pass1Results.section,
-
-        lrn:
-            pass1Results.lrn,
-
-        id:
-            pass1Results.id
-
-    };
-
-
-    /* =====================================================
+    /*
+       =====================================================
        PASS 2
-       SHARPENED VERSION
-    ===================================================== */
+       =====================================================
+    */
 
     status.textContent =
-        "Improving text recognition...";
+        "Improving image... Pass 2";
+
+    progressBar.style.width =
+        "40%";
 
 
     const sharpenCanvas =
@@ -1434,7 +1245,7 @@ async function performOCR() {
         );
 
 
-    const result2 =
+    const pass2 =
         await Tesseract.recognize(
 
             sharpenCanvas,
@@ -1443,248 +1254,187 @@ async function performOCR() {
 
             {
 
-                logger:
-                    function(info) {
+                tessedit_pageseg_mode: 6,
 
-                        if (
-                            info.progress !==
-                            undefined
-                        ) {
+                logger: message => {
 
-                            progressBar.style.width =
-                                (
-                                    30 +
-                                    info.progress *
-                                    30
-                                ) + "%";
+                    if (
+                        message.status ===
+                        "recognizing text"
+                    ) {
 
-                        }
+                        const p =
+                            40 +
+                            Math.round(
+                                message.progress *
+                                25
+                            );
 
-                    },
+                        progressBar.style.width =
+                            p + "%";
 
-                tessedit_pageseg_mode:
-                    6,
+                    }
 
-                preserve_interword_spaces:
-                    1
+                }
 
             }
 
         );
 
 
-    const textPass2 =
-        result2.data.text;
+    const pass2Text =
+        pass2.data.text;
 
 
-    console.log(
-        "OCR PASS 2:",
-        textPass2
-    );
-
-
-    const pass2Results =
-        parseOCR(
-            textPass2
-        );
-
-
-    bestResults =
-        mergeOCRResults(
-            bestResults,
-            pass2Results
-        );
-
-
-    /* =====================================================
-       PASS 3
-       THRESHOLD VERSION
-    ===================================================== */
-
-    /*
-     * IMPORTANT CHANGE:
-     *
-     * Pass 3 no longer captures
-     * another frame from the camera.
-     *
-     * It is generated from the
-     * EXACT SAME captured image.
-     */
-
-    status.textContent =
-        "Running final image enhancement...";
-
-
-    const thresholdCanvas =
-        createThresholdCanvas(
-            canvas
-        );
-
-
-    const result3 =
-        await Tesseract.recognize(
-
-            thresholdCanvas,
-
-            "eng",
-
-            {
-
-                logger:
-                    function(info) {
-
-                        if (
-                            info.progress !==
-                            undefined
-                        ) {
-
-                            progressBar.style.width =
-                                (
-                                    60 +
-                                    info.progress *
-                                    25
-                                ) + "%";
-
-                        }
-
-                    },
-
-                tessedit_pageseg_mode:
-                    6,
-
-                preserve_interword_spaces:
-                    1
-
-            }
-
-        );
-
-
-    const textPass3 =
-        result3.data.text;
-
-
-    console.log(
-        "OCR PASS 3:",
-        textPass3
-    );
-
-
-    const pass3Results =
-        parseOCR(
-            textPass3
-        );
-
-
-    /*
-     * Pass 3 is SUPPLEMENTARY.
-     *
-     * It can fill missing fields,
-     * but it cannot replace a valid
-     * LRN found by Pass 1 or Pass 2.
-     */
-
-    bestResults =
-        mergeOCRResults(
-            bestResults,
-            pass3Results
-        );
-
-
-    /* =====================================================
-       RAW OCR
-    ===================================================== */
-
-    rawOCR.textContent =
-
-        "[OCR PASS 1]\n" +
-        textPass1 +
-
-        "\n\n" +
-
+    OCR_RESULTS.push(
         "[OCR PASS 2 - SHARPENED]\n" +
-        textPass2 +
-
-        "\n\n" +
-
-        "[OCR PASS 3 - THRESHOLD]\n" +
-        textPass3;
+        pass2Text
+    );
 
 
-    /* =====================================================
-       TARGETED LRN
-    ===================================================== */
+    bestResults =
+        mergeOCRResults(
+
+            bestResults,
+
+            parseOCR(pass2Text)
+
+        );
+
 
     /*
-     * Only run the slower targeted
-     * LRN scan if Pass 1, 2 and 3
-     * failed to produce a valid LRN.
-     */
+       =====================================================
+       PASS 3 — OPTIMIZED FALLBACK
+       =====================================================
+
+       This always gets a chance if Pass 1 + Pass 2
+       have not found BOTH LRN and ID.
+
+       It is deliberately different from Pass 1/2.
+    */
 
     if (
-        !isValidLRN(
-            bestResults.lrn
+        !(
+            isValidLRN(bestResults.lrn) &&
+            bestResults.id
         )
     ) {
 
         status.textContent =
-            "Improving LRN recognition...";
+            "Running OCR Pass 3...";
+
+        progressBar.style.width =
+            "70%";
 
 
-        const targetedLRN =
-            await performTargetedLRNOCR(
+        const pass3Canvas =
+            createPass3Canvas(
                 canvas
             );
 
 
-        if (
-            isValidLRN(
-                targetedLRN
-            )
-        ) {
+        const pass3 =
+            await Tesseract.recognize(
 
-            bestResults.lrn =
-                targetedLRN;
+                pass3Canvas,
 
-            rawOCR.textContent +=
+                "eng",
 
-                "\n\n" +
-                "[Targeted LRN OCR]\n" +
-                targetedLRN;
+                {
 
-        }
+                    tessedit_pageseg_mode: 6,
+
+                    /*
+                       Helps Tesseract focus on
+                       normal ID-card characters.
+                    */
+
+                    preserve_interword_spaces: 1,
+
+                    logger: message => {
+
+                        if (
+                            message.status ===
+                            "recognizing text"
+                        ) {
+
+                            const p =
+                                70 +
+                                Math.round(
+                                    message.progress *
+                                    25
+                                );
+
+                            progressBar.style.width =
+                                p + "%";
+
+                        }
+
+                    }
+
+                }
+
+            );
+
+
+        const pass3Text =
+            pass3.data.text;
+
+
+        OCR_RESULTS.push(
+            "[OCR PASS 3 - ENHANCED]\n" +
+            pass3Text
+        );
+
+
+        bestResults =
+            mergeOCRResults(
+
+                bestResults,
+
+                parseOCR(pass3Text)
+
+            );
 
     }
 
 
+    progressBar.style.width =
+        "100%";
+
+
+    status.textContent =
+        "Scan complete.";
+
+
     /* =====================================================
-       FINAL TEXTBOXES
+       RAW OCR DEBUG
+    ===================================================== */
+
+    rawOCR.textContent =
+        OCR_RESULTS.join(
+            "\n\n-----------------------------\n\n"
+        );
+
+
+    /* =====================================================
+       DISPLAY RESULTS
     ===================================================== */
 
     nameField.value =
-        bestResults.name;
+        bestResults.name || "";
 
     gradeField.value =
-        bestResults.grade;
+        bestResults.grade || "";
 
     sectionField.value =
-        bestResults.section;
+        bestResults.section || "";
 
     lrnField.value =
-        bestResults.lrn;
+        bestResults.lrn || "";
 
     idField.value =
-        bestResults.id;
-
-
-    console.log(
-        "FINAL MERGED RESULTS:",
-        bestResults
-    );
-
-
-    progressBar.style.width =
-        "100%";
+        bestResults.id || "";
 
 
     /* =====================================================
@@ -1692,164 +1442,34 @@ async function performOCR() {
     ===================================================== */
 
     if (
-        isValidLRN(
-            bestResults.lrn
-        )
+        isValidLRN(bestResults.lrn)
     ) {
-
-        status.textContent =
-            "OCR complete. Checking database...";
-
-        await checkDatabase();
-
-    }
-
-    else {
-
-        status.textContent =
-            "OCR complete. LRN could not be confidently detected.";
 
         databaseButton.disabled =
             false;
 
+
+        await checkDatabase();
+
+    } else {
+
+        databaseButton.disabled =
+            true;
+
+
+        databaseStatus.textContent =
+            "LRN not detected.";
+
+        databaseDetails.textContent =
+            "The scanner could not find a valid 12-digit LRN.";
+
     }
 
 }
 
 
 /* =========================================================
-   TARGETED LRN OCR
-========================================================= */
-
-async function performTargetedLRNOCR(
-    fullCanvas
-) {
-
-    const width =
-        fullCanvas.width;
-
-    const height =
-        fullCanvas.height;
-
-
-    /*
-     * LRN area.
-     *
-     * This remains deliberately
-     * broad so slight ID positioning
-     * does not cut off the LRN.
-     */
-
-    const x =
-        width * 0.05;
-
-    const y =
-        height * 0.25;
-
-    const cropWidth =
-        width * 0.90;
-
-    const cropHeight =
-        height * 0.18;
-
-
-    const scale =
-        3;
-
-
-    lrnCanvas.width =
-        Math.round(
-            cropWidth * scale
-        );
-
-    lrnCanvas.height =
-        Math.round(
-            cropHeight * scale
-        );
-
-
-    const ctx =
-        lrnCanvas.getContext(
-            "2d"
-        );
-
-    ctx.imageSmoothingEnabled =
-        true;
-
-    ctx.imageSmoothingQuality =
-        "high";
-
-
-    ctx.drawImage(
-
-        fullCanvas,
-
-        x,
-        y,
-
-        cropWidth,
-        cropHeight,
-
-        0,
-        0,
-
-        lrnCanvas.width,
-        lrnCanvas.height
-
-    );
-
-
-    preprocessCanvas(
-        lrnCanvas,
-        1.6,
-        0
-    );
-
-
-    console.log(
-        "Running targeted LRN OCR..."
-    );
-
-
-    const result =
-        await Tesseract.recognize(
-
-            lrnCanvas,
-
-            "eng",
-
-            {
-
-                tessedit_pageseg_mode:
-                    7,
-
-                tessedit_char_whitelist:
-                    "LRN:0123456789OoQqIiLlSsBbGg"
-
-            }
-
-        );
-
-
-    const text =
-        result.data.text;
-
-
-    console.log(
-        "TARGETED LRN RESULT:",
-        text
-    );
-
-
-    return extractBestLRN(
-        text
-    );
-
-}
-
-
-/* =========================================================
-   OCR PARSING
+   OCR PARSER
 ========================================================= */
 
 function parseOCR(text) {
@@ -1865,168 +1485,113 @@ function parseOCR(text) {
     };
 
 
+    if (!text) {
+        return result;
+    }
+
+
     const lines =
-        String(text)
+        text
             .split(/\r?\n/)
-            .map(
-                line =>
-                    line.trim()
+            .map(line =>
+                line.trim()
             )
-            .filter(
-                line =>
-                    line.length > 0
-            );
+            .filter(Boolean);
+
+
+    result.lrn =
+        extractBestLRN(text);
+
+
+    result.id =
+        extractBestID(text);
 
 
     /* =====================================================
-       LRN
+       GRADE
     ===================================================== */
 
-    const lrn =
-        extractBestLRN(
-            text
-        );
+    for (const line of lines) {
+
+        const upper =
+            line.toUpperCase();
 
 
-    if (
-        isValidLRN(lrn)
-    ) {
-
-        result.lrn =
-            lrn;
-
-    }
-
-
-    /* =====================================================
-       ID NUMBER
-    ===================================================== */
-
-    let idMatch =
-        text.match(
-
-            /ID\s*(?:NO|NUMBER)?\s*[:#.\-]?\s*([0-9]{3,})\s*[-–—]\s*([0-9]{2,})\s*[-–—]?\s*([A-Za-z]{0,5})/i
-
-        );
-
-
-    if (idMatch) {
-
-        let id =
-            idMatch[1] +
-            "-" +
-            idMatch[2];
-
-        if (
-            idMatch[3]
-        ) {
-
-            const suffix =
-                idMatch[3]
-                    .toUpperCase();
-
-            if (
-                suffix.length > 0
-            ) {
-
-                id +=
-                    "-" +
-                    suffix;
-
-            }
-
-        }
-
-        result.id =
-            id;
-
-    }
-
-    else {
-
-        const fallbackID =
-            text.match(
-
-                /\b([0-9]{5,})\s*[-–—]\s*([0-9]{2,})\s*[-–—]?\s*(SHS|JHS)?\b/i
-
+        const gradeMatch =
+            upper.match(
+                /GRADE\s*[:\-]?\s*(\d{1,2})\s*[-–—]?\s*([A-Z0-9 ._-]+)?/
             );
 
 
-        if (
-            fallbackID
-        ) {
-
-            result.id =
-                fallbackID[1] +
-                "-" +
-                fallbackID[2];
-
-            if (
-                fallbackID[3]
-            ) {
-
-                result.id +=
-                    "-" +
-                    fallbackID[3]
-                        .toUpperCase();
-
-            }
-
-        }
-
-    }
-
-
-    /* =====================================================
-       GRADE + SECTION
-    ===================================================== */
-
-    let gradeMatch =
-        text.match(
-
-            /GRADE\s*(?:LEVEL)?\s*(7|8|9|10|11|12)\s*[-–—:]?\s*([A-Za-z0-9][A-Za-z0-9 .'-]*)/i
-
-        );
-
-
-    if (
-        gradeMatch
-    ) {
-
-        result.grade =
-            gradeMatch[1];
-
-        result.section =
-            cleanSection(
-                gradeMatch[2]
-            );
-
-    }
-
-
-    if (
-        !result.grade
-    ) {
-
-        const fallbackGrade =
-            text.match(
-
-                /\b(?:G[A-Z]*R[A-Z]*D[A-Z]*E?)\s*[^0-9]{0,3}(7|8|9|10|11|12)\s*[-–—:]?\s*([A-Za-z0-9 .'-]+)/i
-
-            );
-
-
-        if (
-            fallbackGrade
-        ) {
+        if (gradeMatch) {
 
             result.grade =
-                fallbackGrade[1];
+                gradeMatch[1];
 
-            result.section =
-                cleanSection(
-                    fallbackGrade[2]
-                );
+
+            if (
+                gradeMatch[2]
+            ) {
+
+                result.section =
+                    cleanSection(
+                        gradeMatch[2]
+                    );
+
+            }
+
+            break;
+
+        }
+
+    }
+
+
+    /* =====================================================
+       SECTION FALLBACK
+    ===================================================== */
+
+    if (!result.section) {
+
+        for (const line of lines) {
+
+            const upper =
+                line.toUpperCase();
+
+
+            if (
+                upper.includes("SECTION")
+            ) {
+
+                let section =
+                    line
+                        .replace(
+                            /SECTION/ig,
+                            ""
+                        )
+                        .replace(
+                            /[:\-]/g,
+                            " "
+                        )
+                        .trim();
+
+
+                section =
+                    cleanSection(
+                        section
+                    );
+
+
+                if (section) {
+
+                    result.section =
+                        section;
+
+                    break;
+
+                }
+
+            }
 
         }
 
@@ -2037,18 +1602,34 @@ function parseOCR(text) {
        NAME
     ===================================================== */
 
-    for (
-        const line of lines
-    ) {
+    for (const line of lines) {
+
+        const cleaned =
+            line
+                .replace(
+                    /[^A-Za-zÀ-ÿ .'-]/g,
+                    " "
+                )
+                .replace(
+                    /\s+/g,
+                    " "
+                )
+                .trim();
+
 
         const upper =
-            line.toUpperCase();
+            cleaned.toUpperCase();
+
+
+        if (!cleaned) {
+            continue;
+        }
 
 
         if (
             upper.includes("LRN") ||
             upper.includes("ID NO") ||
-            upper.includes("ID NUMBER") ||
+            upper.includes("IDNO") ||
             upper.includes("GRADE") ||
             upper.includes("SECTION")
         ) {
@@ -2058,29 +1639,8 @@ function parseOCR(text) {
         }
 
 
-        const cleaned =
-            line
-
-                .replace(
-                    /[^A-Za-zÀ-ÿ.' -]/g,
-                    ""
-                )
-
-                .replace(
-                    /\s+/g,
-                    " "
-                )
-
-                .trim();
-
-
         const words =
-            cleaned
-                .split(" ")
-                .filter(
-                    word =>
-                        word.length > 0
-                );
+            cleaned.split(" ");
 
 
         if (
@@ -2104,207 +1664,122 @@ function parseOCR(text) {
 
 
 /* =========================================================
-   MERGE OCR RESULTS
-========================================================= */
-
-function mergeOCRResults(
-    bestResults,
-    newResults
-) {
-
-    /*
-     * NAME
-     */
-
-    if (
-        !bestResults.name &&
-        newResults.name
-    ) {
-
-        bestResults.name =
-            newResults.name;
-
-    }
-
-
-    /*
-     * GRADE
-     */
-
-    if (
-        !bestResults.grade &&
-        newResults.grade
-    ) {
-
-        bestResults.grade =
-            newResults.grade;
-
-    }
-
-
-    /*
-     * SECTION
-     */
-
-    if (
-        !bestResults.section &&
-        newResults.section
-    ) {
-
-        bestResults.section =
-            newResults.section;
-
-    }
-
-
-    /*
-     * LRN
-     *
-     * NEVER replace a valid
-     * 12-digit LRN.
-     */
-
-    if (
-        !isValidLRN(
-            bestResults.lrn
-        ) &&
-        isValidLRN(
-            newResults.lrn
-        )
-    ) {
-
-        bestResults.lrn =
-            newResults.lrn;
-
-    }
-
-
-    /*
-     * ID NUMBER
-     */
-
-    if (
-        !bestResults.id &&
-        newResults.id
-    ) {
-
-        bestResults.id =
-            newResults.id;
-
-    }
-
-
-    return bestResults;
-
-}
-
-
-/* =========================================================
    LRN EXTRACTION
 ========================================================= */
 
 function extractBestLRN(text) {
 
-    /*
-     * METHOD 1
-     * Directly after LRN.
-     */
+    if (!text) {
+        return "";
+    }
 
-    let match =
+
+    const directMatches =
         text.match(
-
-            /LRN\s*[:#=\-]?\s*([0-9OoQqIiLl|SsBbGg\s]{10,24})/i
-
+            /\b\d{12}\b/g
         );
 
 
     if (
-        match
+        directMatches &&
+        directMatches.length
     ) {
 
-        const digits =
-            cleanDigits(
-                match[1]
+        return directMatches[0];
+
+    }
+
+
+    let cleaned =
+        text
+            .replace(
+                /O/gi,
+                "0"
+            )
+            .replace(
+                /Q/gi,
+                "0"
+            )
+            .replace(
+                /I/gi,
+                "1"
+            )
+            .replace(
+                /L/gi,
+                "1"
+            )
+            .replace(
+                /\|/g,
+                "1"
+            )
+            .replace(
+                /S/gi,
+                "5"
+            )
+            .replace(
+                /B/gi,
+                "8"
+            )
+            .replace(
+                /G/gi,
+                "6"
             );
 
 
-        if (
-            isValidLRN(digits)
+    const digitSequences =
+        cleaned.match(
+            /\d{8,14}/g
+        );
+
+
+    if (digitSequences) {
+
+        for (
+            const sequence of digitSequences
         ) {
 
-            return digits;
+            if (
+                sequence.length === 12
+            ) {
+
+                return sequence;
+
+            }
 
         }
 
     }
 
 
-    /*
-     * METHOD 2
-     * OCR may damage "LRN".
-     */
-
-    match =
-        text.match(
-
-            /\b[A-Z]{2,4}\s*[:#=\-]?\s*([0-9OoQqIiLl|SsBbGg\s]{10,24})\b/i
-
+    const digitOnly =
+        cleaned.replace(
+            /\D/g,
+            ""
         );
 
 
     if (
-        match
-    ) {
-
-        const digits =
-            cleanDigits(
-                match[1]
-            );
-
-
-        if (
-            isValidLRN(digits)
-        ) {
-
-            return digits;
-
-        }
-
-    }
-
-
-    /*
-     * METHOD 3
-     * Search the entire OCR text.
-     */
-
-    const digitGroups =
-        text.match(
-
-            /[0-9OoQqIiLl|SsBbGg][0-9OoQqIiLl|SsBbGg\s]{10,24}/g
-
-        );
-
-
-    if (
-        digitGroups
+        digitOnly.length >= 12
     ) {
 
         for (
-            const group of digitGroups
+            let i = 0;
+            i <= digitOnly.length - 12;
+            i++
         ) {
 
-            const digits =
-                cleanDigits(
-                    group
+            const candidate =
+                digitOnly.substring(
+                    i,
+                    i + 12
                 );
 
 
             if (
-                isValidLRN(digits)
+                isValidLRN(candidate)
             ) {
 
-                return digits;
+                return candidate;
 
             }
 
@@ -2319,84 +1794,199 @@ function extractBestLRN(text) {
 
 
 /* =========================================================
-   CLEAN LRN
+   ID EXTRACTION
 ========================================================= */
 
-function cleanDigits(value) {
+function extractBestID(text) {
 
-    return String(value)
+    if (!text) {
+        return "";
+    }
 
-        .replace(
-            /[OoQq]/g,
-            "0"
-        )
 
-        .replace(
-            /[IiLl|]/g,
-            "1"
-        )
-
-        .replace(
-            /[Ss]/g,
-            "5"
-        )
-
-        .replace(
-            /[Bb]/g,
-            "8"
-        )
-
-        .replace(
-            /[Gg]/g,
-            "6"
-        )
-
-        .replace(
-            /[^0-9]/g,
-            ""
+    const normal =
+        text.match(
+            /\b\d{3,8}-\d{2,5}-[A-Z]{2,6}\b/i
         );
+
+
+    if (normal) {
+
+        return normal[0]
+            .toUpperCase();
+
+    }
+
+
+    const normalized =
+        text
+            .toUpperCase()
+            .replace(
+                /\s+/g,
+                " "
+            );
+
+
+    const spaced =
+        normalized.match(
+            /\b\d{3,8}\s*-\s*\d{2,5}\s*-\s*[A-Z]{2,6}\b/
+        );
+
+
+    if (spaced) {
+
+        return spaced[0]
+            .replace(
+                /\s+/g,
+                ""
+            );
+
+    }
+
+
+    const idMatch =
+        normalized.match(
+            /ID\s*(?:NO|NUMBER)?\.?\s*[:\-]?\s*([A-Z0-9\- ]{5,30})/
+        );
+
+
+    if (idMatch) {
+
+        let value =
+            idMatch[1]
+                .trim()
+                .replace(
+                    /\s+/g,
+                    ""
+                );
+
+
+        if (
+            value.length >= 5 &&
+            !/^\d{12}$/.test(value)
+        ) {
+
+            return value;
+
+        }
+
+    }
+
+
+    return "";
 
 }
 
 
 /* =========================================================
-   LRN VALIDATION
+   MERGE OCR
+========================================================= */
+
+function mergeOCRResults(
+    current,
+    incoming
+) {
+
+    if (
+        !current.name &&
+        incoming.name
+    ) {
+
+        current.name =
+            incoming.name;
+
+    }
+
+
+    if (
+        !current.grade &&
+        incoming.grade
+    ) {
+
+        current.grade =
+            incoming.grade;
+
+    }
+
+
+    if (
+        !current.section &&
+        incoming.section
+    ) {
+
+        current.section =
+            incoming.section;
+
+    }
+
+
+    if (
+        !isValidLRN(current.lrn) &&
+        isValidLRN(incoming.lrn)
+    ) {
+
+        current.lrn =
+            incoming.lrn;
+
+    }
+
+
+    if (
+        !current.id &&
+        incoming.id
+    ) {
+
+        current.id =
+            incoming.id;
+
+    }
+
+
+    return current;
+
+}
+
+
+/* =========================================================
+   VALID LRN
 ========================================================= */
 
 function isValidLRN(lrn) {
 
     return /^\d{12}$/.test(
-        String(lrn).trim()
+        String(lrn || "").trim()
     );
 
 }
 
 
 /* =========================================================
-   CLEAN SECTION
+   SECTION CLEANING
 ========================================================= */
 
 function cleanSection(section) {
 
-    return String(section)
+    if (!section) {
+        return "";
+    }
 
+
+    return section
+        .replace(
+            /^[\s:.\-]+/,
+            ""
+        )
         .replace(
             /\s+/g,
             " "
         )
-
-        .replace(
-            /^[\-–—:\s]+/,
-            ""
-        )
-
         .trim();
 
 }
 
 
 /* =========================================================
-   DATABASE CHECK
+   DATABASE
 ========================================================= */
 
 async function checkDatabase() {
@@ -2409,218 +1999,160 @@ async function checkDatabase() {
         !isValidLRN(lrn)
     ) {
 
-        status.textContent =
-            "No valid 12-digit LRN was detected.";
+        databaseStatus.textContent =
+            "Invalid LRN.";
 
-        databaseButton.disabled =
-            false;
-
-        return;
-
-    }
-
-
-    if (
-        DATABASE_URL.includes(
-            "PASTE_YOUR"
-        )
-    ) {
-
-        alert(
-            "Apps Script URL has not been entered."
-        );
-
-        databaseButton.disabled =
-            false;
+        databaseDetails.textContent =
+            "A valid 12-digit LRN is required.";
 
         return;
 
     }
 
 
-    status.textContent =
-        "Checking Google Sheets...";
+    databaseStatus.textContent =
+        "Checking database...";
 
-    databaseButton.disabled =
-        true;
 
-    databaseResult.style.display =
-        "none";
+    databaseDetails.textContent =
+        "";
 
 
     try {
 
-        const url =
-            DATABASE_URL +
-            "?lrn=" +
-            encodeURIComponent(
-                lrn
-            );
-
-
-        console.log(
-            "DATABASE REQUEST:",
-            url
-        );
-
-
         const response =
             await fetch(
-                url
+                DATABASE_URL +
+                "?lrn=" +
+                encodeURIComponent(lrn)
             );
 
 
-        if (
-            !response.ok
-        ) {
+        if (!response.ok) {
 
             throw new Error(
-                "HTTP error: " +
+                "HTTP " +
                 response.status
             );
 
         }
 
 
-        const result =
+        const data =
             await response.json();
 
 
-        console.log(
-            "DATABASE RESULT:",
-            result
-        );
-
-
         if (
-            result.match === true
+            data.status === "success" &&
+            data.student
         ) {
 
-            databaseResult.style.display =
-                "block";
+            const student =
+                data.student;
 
-            databaseResult.className =
-                "database-result valid";
+
+            if (
+                student.name
+            ) {
+
+                nameField.value =
+                    student.name;
+
+            }
+
+
+            if (
+                student.grade
+            ) {
+
+                gradeField.value =
+                    student.grade;
+
+            }
+
+
+            if (
+                student.section
+            ) {
+
+                sectionField.value =
+                    student.section;
+
+            }
+
+
+            if (
+                student.idNumber
+            ) {
+
+                idField.value =
+                    student.idNumber;
+
+            } else if (
+                student.id
+            ) {
+
+                idField.value =
+                    student.id;
+
+            }
+
 
             databaseStatus.textContent =
-                "🟢 VALID STUDENT";
+                "✓ Student found in database.";
 
 
             databaseDetails.innerHTML =
 
-                "<strong>Name:</strong> " +
+                "<strong>NAME:</strong> " +
                 escapeHTML(
-                    result.student.name
+                    student.name || ""
                 ) +
 
-                "<br><br>" +
-
-                "<strong>LRN:</strong> " +
+                "<br><strong>LRN:</strong> " +
                 escapeHTML(
-                    result.student.lrn
+                    student.lrn || lrn
                 ) +
 
-                "<br><br>" +
-
-                "<strong>ID Number:</strong> " +
+                "<br><strong>ID NUMBER:</strong> " +
                 escapeHTML(
-                    result.student.idNumber
+                    student.idNumber ||
+                    student.id ||
+                    ""
                 ) +
 
-                "<br><br>" +
-
-                "<strong>Grade:</strong> " +
+                "<br><strong>GRADE:</strong> " +
                 escapeHTML(
-                    result.student.grade
+                    student.grade || ""
                 ) +
 
-                "<br><br>" +
-
-                "<strong>Section:</strong> " +
+                "<br><strong>SECTION:</strong> " +
                 escapeHTML(
-                    result.student.section
+                    student.section || ""
                 );
 
 
-            status.textContent =
-                "Student identified successfully.";
-
-        }
-
-        else {
-
-            databaseResult.style.display =
-                "block";
-
-            databaseResult.className =
-                "database-result invalid";
+        } else {
 
             databaseStatus.textContent =
-                "🔴 STUDENT NOT FOUND";
+                "✗ Student not found.";
 
-
-            databaseDetails.innerHTML =
-
-                "<strong>Scanned LRN:</strong> " +
-                escapeHTML(
-                    lrn
-                ) +
-
-                "<br><br>" +
-
-                "This LRN was not found " +
-                "in the student database.";
-
-
-            status.textContent =
-                "No matching student.";
+            databaseDetails.textContent =
+                "No student with this LRN was found in the database.";
 
         }
 
-    }
 
-    catch (error) {
+    } catch (error) {
 
-        console.error(
-            "DATABASE ERROR:",
-            error
-        );
+        console.error(error);
 
-
-        databaseResult.style.display =
-            "block";
-
-        databaseResult.className =
-            "database-result invalid";
 
         databaseStatus.textContent =
-            "⚠️ DATABASE CONNECTION FAILED";
-
-
-        databaseDetails.innerHTML =
-
-            "Could not connect to Google Apps Script." +
-
-            "<br><br>" +
-
-            "<small>" +
-
-            escapeHTML(
-                error.message
-            ) +
-
-            "</small>";
-
-
-        status.textContent =
             "Database connection failed.";
 
-    }
-
-    finally {
-
-        databaseButton.disabled =
-            false;
+        databaseDetails.textContent =
+            error.message;
 
     }
 
@@ -2628,33 +2160,28 @@ async function checkDatabase() {
 
 
 /* =========================================================
-   HTML SECURITY
+   ESCAPE HTML
 ========================================================= */
 
 function escapeHTML(value) {
 
-    return String(value)
-
+    return String(value || "")
         .replace(
             /&/g,
             "&amp;"
         )
-
         .replace(
             /</g,
             "&lt;"
         )
-
         .replace(
             />/g,
             "&gt;"
         )
-
         .replace(
             /"/g,
             "&quot;"
         )
-
         .replace(
             /'/g,
             "&#039;"
@@ -2665,5 +2192,5 @@ function escapeHTML(value) {
 </script>
 
 </body>
-
 </html>
+```
