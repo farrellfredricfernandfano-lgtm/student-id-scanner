@@ -7,9 +7,8 @@
 <meta charset="UTF-8">
 
 <meta
-name="viewport"
-content="width=device-width, initial-scale=1.0"
-
+    name="viewport"
+    content="width=device-width, initial-scale=1.0"
 >
 
 <title>Student ID Scanner</title>
@@ -266,60 +265,59 @@ button:disabled {
     OCR-Based Student Identification System
 </div>
 
+
 <!-- CAMERA -->
 
 <div class="camera-container">
 
-```
-<video
-    id="video"
-    autoplay
-    playsinline>
-</video>
+    <video
+        id="video"
+        autoplay
+        playsinline>
+    </video>
 
-<div class="scan-guide"></div>
-```
+    <div class="scan-guide"></div>
 
 </div>
+
 
 <!-- CONTROLS -->
 
 <div class="controls">
 
-```
-<button
-    id="startButton">
+    <button
+        id="startButton">
 
-    📷 Start Camera
+        📷 Start Camera
 
-</button>
+    </button>
 
-<button
-    id="scanButton"
-    disabled>
+    <button
+        id="scanButton"
+        disabled>
 
-    🔍 Scan & Verify
+        🔍 Scan & Verify
 
-</button>
+    </button>
 
-<button
-    id="stopButton"
-    disabled>
+    <button
+        id="stopButton"
+        disabled>
 
-    ⛔ Stop Camera
+        ⛔ Stop Camera
 
-</button>
+    </button>
 
-<button
-    id="databaseButton"
-    disabled>
+    <button
+        id="databaseButton"
+        disabled>
 
-    🔎 Check Database
+        🔎 Check Database
 
-</button>
-```
+    </button>
 
 </div>
+
 
 <!-- STATUS -->
 
@@ -327,117 +325,113 @@ button:disabled {
     class="status"
     id="status">
 
-```
-Camera not started.
-```
+    Camera not started.
 
 </div>
+
 
 <!-- PROGRESS -->
 
 <div class="progress-container">
 
-```
-<div
-    class="progress-bar"
-    id="progressBar">
-</div>
-```
+    <div
+        class="progress-bar"
+        id="progressBar">
+    </div>
 
 </div>
+
 
 <!-- PROCESSED IMAGE -->
 
 <div class="image-container">
 
-```
-<h3>
-    Processed Image — 1850 × 617
-</h3>
+    <h3>
+        Processed Image — 1850 × 617
+    </h3>
 
-<img
-    id="processedImage"
-    alt="Processed ID">
-```
+    <img
+        id="processedImage"
+        alt="Processed ID">
 
 </div>
+
 
 <!-- RESULTS -->
 
 <div class="results">
 
-```
-<h2>
-    Scanned Information
-</h2>
+    <h2>
+        Scanned Information
+    </h2>
 
-<div class="field">
+    <div class="field">
 
-    <label>
-        NAME
-    </label>
+        <label>
+            NAME
+        </label>
 
-    <input
-        id="nameField"
-        type="text"
-        readonly>
+        <input
+            id="nameField"
+            type="text"
+            readonly>
 
-</div>
+    </div>
 
-<div class="field">
+    <div class="field">
 
-    <label>
-        GRADE LEVEL
-    </label>
+        <label>
+            GRADE LEVEL
+        </label>
 
-    <input
-        id="gradeField"
-        type="text"
-        readonly>
+        <input
+            id="gradeField"
+            type="text"
+            readonly>
 
-</div>
+    </div>
 
-<div class="field">
+    <div class="field">
 
-    <label>
-        SECTION
-    </label>
+        <label>
+            SECTION
+        </label>
 
-    <input
-        id="sectionField"
-        type="text"
-        readonly>
+        <input
+            id="sectionField"
+            type="text"
+            readonly>
 
-</div>
+    </div>
 
-<div class="field">
+    <div class="field">
 
-    <label>
-        LRN
-    </label>
+        <label>
+            LRN
+        </label>
 
-    <input
-        id="lrnField"
-        type="text"
-        readonly>
+        <input
+            id="lrnField"
+            type="text"
+            readonly>
 
-</div>
+    </div>
 
-<div class="field">
+    <div class="field">
 
-    <label>
-        ID NUMBER
-    </label>
+        <label>
+            ID NUMBER
+        </label>
 
-    <input
-        id="idField"
-        type="text"
-        readonly>
+        <input
+            id="idField"
+            type="text"
+            readonly>
 
-</div>
-```
+    </div>
 
 </div>
+
 
 <!-- DATABASE RESULT -->
 
@@ -445,39 +439,40 @@ Camera not started.
     class="database-result"
     id="databaseResult">
 
-```
-<div id="databaseStatus"></div>
+    <div id="databaseStatus"></div>
 
-<div id="databaseDetails"></div>
-```
+    <div id="databaseDetails"></div>
 
 </div>
+
 
 <!-- RAW OCR -->
 
 <div class="ocr-debug">
 
-```
-<h3>
-    Raw OCR Result
-</h3>
+    <h3>
+        Raw OCR Result
+    </h3>
 
-<div id="rawOCR">
-    No OCR result yet.
-</div>
-```
+    <div id="rawOCR">
+        No OCR result yet.
+    </div>
 
 </div>
+
 
 <!-- HIDDEN CANVASES -->
 
 <canvas
- id="canvas"
- style="display:none;"> </canvas>
+    id="canvas"
+    style="display:none;">
+</canvas>
 
 <canvas
- id="lrnCanvas"
- style="display:none;"> </canvas>
+    id="lrnCanvas"
+    style="display:none;">
+</canvas>
+
 
 <script>
 
@@ -593,32 +588,31 @@ async function startCamera() {
 
 
         cameraStream =
-            await navigator.mediaDevices
-                .getUserMedia({
+            await navigator.mediaDevices.getUserMedia({
 
-                    audio: false,
+                audio: false,
 
-                    video: {
+                video: {
 
-                        facingMode: {
-                            ideal: "environment"
-                        },
+                    facingMode: {
+                        ideal: "environment"
+                    },
 
-                        width: {
-                            ideal: 1920
-                        },
+                    width: {
+                        ideal: 1920
+                    },
 
-                        height: {
-                            ideal: 1080
-                        },
+                    height: {
+                        ideal: 1080
+                    },
 
-                        frameRate: {
-                            ideal: 30
-                        }
-
+                    frameRate: {
+                        ideal: 30
                     }
 
-                });
+                }
+
+            });
 
 
         video.srcObject =
@@ -896,17 +890,28 @@ function preprocessCanvas(
 
 
 /* =========================================================
-   THRESHOLD PREPROCESSING
-   USED ONLY FOR TARGETED LRN OCR
+   STRONGER SHARPEN
 ========================================================= */
 
-function thresholdCanvas(
-    sourceCanvas,
-    threshold = 165
+function sharpenCanvas(
+    sourceCanvas
 ) {
 
+    const output =
+        document.createElement(
+            "canvas"
+        );
+
+
+    output.width =
+        sourceCanvas.width;
+
+    output.height =
+        sourceCanvas.height;
+
+
     const ctx =
-        sourceCanvas.getContext(
+        output.getContext(
             "2d",
             {
                 willReadFrequently: true
@@ -914,84 +919,7 @@ function thresholdCanvas(
         );
 
 
-    const imageData =
-        ctx.getImageData(
-            0,
-            0,
-            sourceCanvas.width,
-            sourceCanvas.height
-        );
-
-
-    const data =
-        imageData.data;
-
-
-    for (
-        let i = 0;
-        i < data.length;
-        i += 4
-    ) {
-
-        const gray =
-            data[i];
-
-
-        const value =
-            gray < threshold
-                ? 0
-                : 255;
-
-
-        data[i] =
-            value;
-
-        data[i + 1] =
-            value;
-
-        data[i + 2] =
-            value;
-
-    }
-
-
-    ctx.putImageData(
-        imageData,
-        0,
-        0
-    );
-
-}
-
-
-/* =========================================================
-   SHARPEN CANVAS
-========================================================= */
-
-function createSharpenedCanvas(
-    sourceCanvas
-) {
-
-    const sharpenCanvas =
-        document.createElement(
-            "canvas"
-        );
-
-
-    sharpenCanvas.width =
-        sourceCanvas.width;
-
-    sharpenCanvas.height =
-        sourceCanvas.height;
-
-
-    const sharpenCtx =
-        sharpenCanvas.getContext(
-            "2d"
-        );
-
-
-    sharpenCtx.drawImage(
+    ctx.drawImage(
         sourceCanvas,
         0,
         0
@@ -999,11 +927,11 @@ function createSharpenedCanvas(
 
 
     const imageData =
-        sharpenCtx.getImageData(
+        ctx.getImageData(
             0,
             0,
-            sharpenCanvas.width,
-            sharpenCanvas.height
+            output.width,
+            output.height
         );
 
 
@@ -1018,10 +946,10 @@ function createSharpenedCanvas(
 
 
     const w =
-        sharpenCanvas.width;
+        output.width;
 
     const h =
-        sharpenCanvas.height;
+        output.height;
 
 
     for (
@@ -1053,14 +981,12 @@ function createSharpenedCanvas(
                         index + c
                     ];
 
-
                 const top =
                     original[
                         index -
                         w * 4 +
                         c
                     ];
-
 
                 const bottom =
                     original[
@@ -1069,14 +995,12 @@ function createSharpenedCanvas(
                         c
                     ];
 
-
                 const left =
                     original[
                         index -
                         4 +
                         c
                     ];
-
 
                 const right =
                     original[
@@ -1114,14 +1038,14 @@ function createSharpenedCanvas(
     }
 
 
-    sharpenCtx.putImageData(
+    ctx.putImageData(
         imageData,
         0,
         0
     );
 
 
-    return sharpenCanvas;
+    return output;
 
 }
 
@@ -1156,7 +1080,7 @@ async function performOCR() {
 
 
     /* =====================================================
-       FIXED OUTPUT
+       EXACT ID RATIO
        1850 × 617
        ===================================================== */
 
@@ -1216,7 +1140,7 @@ async function performOCR() {
 
 
     /* =====================================================
-       CREATE MAIN IMAGE
+       CREATE 1850 × 617 IMAGE
        ===================================================== */
 
     canvas.width =
@@ -1258,6 +1182,10 @@ async function performOCR() {
     );
 
 
+    /* =====================================================
+       PREPROCESS
+       ===================================================== */
+
     status.textContent =
         "Enhancing image...";
 
@@ -1279,7 +1207,7 @@ async function performOCR() {
 
     /* =====================================================
        OCR PASS 1
-       NORMAL ENHANCED IMAGE
+       NORMAL HIGH-CONTRAST
        ===================================================== */
 
     status.textContent =
@@ -1329,8 +1257,10 @@ async function performOCR() {
 
                     },
 
+
                 tessedit_pageseg_mode:
                     6,
+
 
                 preserve_interword_spaces:
                     1
@@ -1379,14 +1309,15 @@ async function performOCR() {
     /* =====================================================
        OCR PASS 2
        SHARPENED IMAGE
+       DIFFERENT SEGMENTATION
        ===================================================== */
 
     status.textContent =
-        "Running second OCR pass...";
+        "Running enhanced OCR pass...";
 
 
-    const sharpenCanvas =
-        createSharpenedCanvas(
+    const sharpened =
+        sharpenCanvas(
             canvas
         );
 
@@ -1394,7 +1325,7 @@ async function performOCR() {
     const result2 =
         await Tesseract.recognize(
 
-            sharpenCanvas,
+            sharpened,
 
             "eng",
 
@@ -1425,8 +1356,16 @@ async function performOCR() {
 
                     },
 
+
+                /*
+                 * PSM 11 is useful when
+                 * text is separated into
+                 * different areas.
+                 */
+
                 tessedit_pageseg_mode:
-                    6,
+                    11,
+
 
                 preserve_interword_spaces:
                     1
@@ -1461,7 +1400,7 @@ async function performOCR() {
 
     /* =====================================================
        SHOW OCR RESULTS
-       ONLY TWO FULL OCR PASSES
+       ONLY TWO PASSES
        ===================================================== */
 
     rawOCR.textContent =
@@ -1471,12 +1410,12 @@ async function performOCR() {
 
         "\n\n" +
 
-        "[OCR PASS 2]\n" +
+        "[OCR PASS 2 - SHARPENED]\n" +
         textPass2;
 
 
     /* =====================================================
-       INITIAL RESULTS
+       PUT INITIAL RESULTS
        ===================================================== */
 
     nameField.value =
@@ -1495,12 +1434,18 @@ async function performOCR() {
         bestResults.id;
 
 
+    console.log(
+        "MERGED OCR RESULTS:",
+        bestResults
+    );
+
+
     /* =====================================================
-       TARGETED LRN
+       TARGETED LRN OCR
        ===================================================== */
 
     status.textContent =
-        "Checking LRN with enhanced recognition...";
+        "Checking LRN recognition...";
 
 
     const targetedLRN =
@@ -1509,11 +1454,6 @@ async function performOCR() {
         );
 
 
-    /*
-     * Only replace the existing LRN when
-     * the targeted OCR has a valid 12-digit result.
-     */
-
     if (
         isValidLRN(
             targetedLRN
@@ -1521,54 +1461,24 @@ async function performOCR() {
     ) {
 
         /*
-         * If the existing LRN is already valid,
-         * keep it when both results disagree.
-         *
-         * This prevents one bad targeted OCR
-         * result from destroying a good result.
+         * Targeted LRN gets priority
+         * because this OCR is specifically
+         * looking for the LRN.
          */
 
-        if (
-            isValidLRN(
-                bestResults.lrn
-            )
-        ) {
+        bestResults.lrn =
+            targetedLRN;
 
-            if (
-                bestResults.lrn ===
-                targetedLRN
-            ) {
 
-                console.log(
-                    "LRN CONFIRMED BY MULTIPLE METHODS:",
-                    targetedLRN
-                );
+        lrnField.value =
+            targetedLRN;
 
-            }
 
-            else {
+        rawOCR.textContent +=
 
-                console.log(
-                    "LRN CONFLICT:",
-                    {
-                        mainOCR:
-                            bestResults.lrn,
-
-                        targetedOCR:
-                            targetedLRN
-                    }
-                );
-
-            }
-
-        }
-
-        else {
-
-            bestResults.lrn =
-                targetedLRN;
-
-        }
+            "\n\n" +
+            "[TARGETED LRN OCR]\n" +
+            targetedLRN;
 
     }
 
@@ -1595,12 +1505,6 @@ async function performOCR() {
 
     progressBar.style.width =
         "100%";
-
-
-    console.log(
-        "FINAL MERGED RESULTS:",
-        bestResults
-    );
 
 
     /* =====================================================
@@ -1637,7 +1541,6 @@ async function performOCR() {
 
 /* =========================================================
    TARGETED LRN OCR
-   MULTI-PREPROCESSING APPROACH
 ========================================================= */
 
 async function performTargetedLRNOCR(
@@ -1652,78 +1555,60 @@ async function performTargetedLRNOCR(
 
 
     /*
-     * LRN region.
+     * Slightly larger LRN region.
      *
-     * This is intentionally kept close
-     * to your existing working region.
+     * This prevents the LRN characters
+     * from being cut off at the edges.
      */
 
     const x =
-        width * 0.05;
+        width * 0.035;
+
 
     const y =
-        height * 0.25;
+        height * 0.21;
+
 
     const cropWidth =
-        width * 0.90;
+        width * 0.93;
+
 
     const cropHeight =
-        height * 0.18;
+        height * 0.24;
 
 
     const scale =
         4;
 
 
-    /*
-     * We will make THREE small
-     * preprocessing versions of the
-     * LRN region.
-     *
-     * This is NOT three full OCR scans.
-     *
-     * They are specialized LRN reads.
-     */
-
-    const variants = [];
-
-
-    /* =====================================================
-       VARIANT 1
-       HIGH CONTRAST
-       ===================================================== */
-
-    const normalCanvas =
-        document.createElement(
-            "canvas"
-        );
-
-
-    normalCanvas.width =
+    lrnCanvas.width =
         Math.round(
-            cropWidth * scale
+            cropWidth *
+            scale
         );
 
-    normalCanvas.height =
+
+    lrnCanvas.height =
         Math.round(
-            cropHeight * scale
+            cropHeight *
+            scale
         );
 
 
-    const normalCtx =
-        normalCanvas.getContext(
+    const ctx =
+        lrnCanvas.getContext(
             "2d"
         );
 
 
-    normalCtx.imageSmoothingEnabled =
+    ctx.imageSmoothingEnabled =
         true;
 
-    normalCtx.imageSmoothingQuality =
+    ctx.imageSmoothingQuality =
         "high";
 
 
-    normalCtx.drawImage(
+    ctx.drawImage(
 
         fullCanvas,
 
@@ -1736,253 +1621,178 @@ async function performTargetedLRNOCR(
         0,
         0,
 
-        normalCanvas.width,
-        normalCanvas.height
+        lrnCanvas.width,
+        lrnCanvas.height
 
     );
 
 
+    /*
+     * Stronger contrast specifically
+     * for the LRN.
+     */
+
     preprocessCanvas(
-        normalCanvas,
+        lrnCanvas,
         1.6
     );
 
 
-    variants.push(
-        {
-            canvas: normalCanvas,
-            name: "HIGH CONTRAST"
-        }
+    console.log(
+        "Running targeted LRN OCR..."
     );
 
 
     /* =====================================================
-       VARIANT 2
-       SHARPENED
+       LRN OCR PASS A
+       SINGLE LINE
        ===================================================== */
 
-    const sharpCanvas =
-        createSharpenedCanvas(
-            normalCanvas
+    const resultA =
+        await Tesseract.recognize(
+
+            lrnCanvas,
+
+            "eng",
+
+            {
+
+                logger:
+                    function(info) {
+
+                        console.log(
+                            "LRN PASS A:",
+                            info
+                        );
+
+                    },
+
+
+                tessedit_pageseg_mode:
+                    7,
+
+
+                tessedit_char_whitelist:
+                    "LRN:0123456789OoQqIiLlSsBbGg|"
+
+            }
+
         );
 
 
-    variants.push(
-        {
-            canvas: sharpCanvas,
-            name: "SHARPENED"
-        }
-    );
-
-
-    /* =====================================================
-       VARIANT 3
-       THRESHOLD
-       ===================================================== */
-
-    const threshold =
-        document.createElement(
-            "canvas"
-        );
-
-
-    threshold.width =
-        normalCanvas.width;
-
-    threshold.height =
-        normalCanvas.height;
-
-
-    const thresholdCtx =
-        threshold.getContext(
-            "2d"
-        );
-
-
-    thresholdCtx.drawImage(
-        normalCanvas,
-        0,
-        0
-    );
-
-
-    thresholdCanvas(
-        threshold,
-        165
-    );
-
-
-    variants.push(
-        {
-            canvas: threshold,
-            name: "THRESHOLD"
-        }
-    );
-
-
-    const candidates = [];
-
-
-    for (
-        const variant
-        of variants
-    ) {
-
-        console.log(
-            "TARGETED LRN VARIANT:",
-            variant.name
-        );
-
-
-        const result =
-            await Tesseract.recognize(
-
-                variant.canvas,
-
-                "eng",
-
-                {
-
-                    logger:
-                        function(info) {
-
-                            console.log(
-                                "LRN " +
-                                variant.name +
-                                ":",
-                                info
-                            );
-
-                        },
-
-                    tessedit_pageseg_mode:
-                        7,
-
-                    tessedit_char_whitelist:
-                        "0123456789LRNOQIlSBGgOo"
-
-                }
-
-            );
-
-
-        const text =
-            result.data.text;
-
-
-        console.log(
-            "TARGETED LRN " +
-            variant.name +
-            " RESULT:",
-            text
-        );
-
-
-        const extracted =
-            extractBestLRN(
-                text
-            );
-
-
-        if (
-            isValidLRN(
-                extracted
-            )
-        ) {
-
-            candidates.push(
-                extracted
-            );
-
-        }
-
-    }
+    const textA =
+        resultA.data.text;
 
 
     console.log(
-        "LRN CANDIDATES:",
-        candidates
+        "TARGETED LRN PASS A:",
+        textA
     );
 
 
-    /*
-     * Majority vote.
-     *
-     * If two preprocessing versions
-     * agree, that LRN wins.
-     */
+    const lrnA =
+        extractBestLRN(
+            textA
+        );
+
 
     if (
-        candidates.length === 0
+        isValidLRN(lrnA)
     ) {
 
-        return "";
+        console.log(
+            "LRN PASS A SUCCESS:",
+            lrnA
+        );
+
+        return lrnA;
 
     }
 
 
-    const counts = {};
+    /* =====================================================
+       LRN OCR PASS B
+       DIFFERENT SEGMENTATION
+       ===================================================== */
+
+    const sharpenedLRN =
+        sharpenCanvas(
+            lrnCanvas
+        );
 
 
-    for (
-        const candidate
-        of candidates
+    const resultB =
+        await Tesseract.recognize(
+
+            sharpenedLRN,
+
+            "eng",
+
+            {
+
+                logger:
+                    function(info) {
+
+                        console.log(
+                            "LRN PASS B:",
+                            info
+                        );
+
+                    },
+
+
+                tessedit_pageseg_mode:
+                    8,
+
+
+                tessedit_char_whitelist:
+                    "0123456789OoQqIiLlSsBbGg|"
+
+            }
+
+        );
+
+
+    const textB =
+        resultB.data.text;
+
+
+    console.log(
+        "TARGETED LRN PASS B:",
+        textB
+    );
+
+
+    const lrnB =
+        extractBestLRN(
+            textB
+        );
+
+
+    if (
+        isValidLRN(lrnB)
     ) {
 
-        counts[candidate] =
-            (
-                counts[candidate] ||
-                0
-            ) + 1;
+        console.log(
+            "LRN PASS B SUCCESS:",
+            lrnB
+        );
 
-    }
-
-
-    let bestCandidate =
-        candidates[0];
-
-    let bestCount =
-        counts[bestCandidate];
-
-
-    for (
-        const candidate
-        of Object.keys(counts)
-    ) {
-
-        if (
-            counts[candidate] >
-            bestCount
-        ) {
-
-            bestCandidate =
-                candidate;
-
-            bestCount =
-                counts[candidate];
-
-        }
+        return lrnB;
 
     }
 
 
     /*
-     * If there is only one candidate,
-     * return it as before.
-     *
-     * If multiple candidates agree,
-     * we have stronger confidence.
+     * Nothing confidently detected.
      */
 
     console.log(
-        "BEST TARGETED LRN:",
-        bestCandidate,
-        "VOTES:",
-        bestCount
+        "TARGETED LRN OCR FAILED."
     );
 
 
-    return bestCandidate;
+    return "";
 
 }
 
@@ -2228,13 +2038,6 @@ function parseOCR(text) {
                 );
 
 
-        /*
-         * Require at least two words.
-         *
-         * This prevents random OCR fragments
-         * from becoming the student's name.
-         */
-
         if (
             words.length >= 2 &&
             cleaned.length >= 5
@@ -2271,7 +2074,7 @@ function mergeOCRResults(
 ) {
 
     /*
-     * NAME
+     * Name
      */
 
     if (
@@ -2286,7 +2089,7 @@ function mergeOCRResults(
 
 
     /*
-     * GRADE
+     * Grade
      */
 
     if (
@@ -2301,7 +2104,7 @@ function mergeOCRResults(
 
 
     /*
-     * SECTION
+     * Section
      */
 
     if (
@@ -2317,10 +2120,6 @@ function mergeOCRResults(
 
     /*
      * LRN
-     *
-     * NEVER replace a valid LRN
-     * with another valid but conflicting
-     * LRN.
      */
 
     if (
@@ -2339,7 +2138,7 @@ function mergeOCRResults(
 
 
     /*
-     * ID NUMBER
+     * ID
      */
 
     if (
@@ -2364,15 +2163,19 @@ function mergeOCRResults(
 
 function extractBestLRN(text) {
 
-    /*
-     * First priority:
-     * Explicit LRN label.
-     */
+    const source =
+        String(text);
+
+
+    /* =====================================================
+       METHOD 1
+       EXPLICIT "LRN"
+       ===================================================== */
 
     let match =
-        text.match(
+        source.match(
 
-            /LRN\s*[:#=\-]?\s*([0-9OoQqIiLl|SsBbGg\s]{10,24})/i
+            /LRN\s*[:#=\-]?\s*([0-9OoQqIiLl|SsBbGg\s]{8,24})/i
 
         );
 
@@ -2398,16 +2201,15 @@ function extractBestLRN(text) {
     }
 
 
-    /*
-     * Second priority:
-     * OCR may read LRN as another
-     * short alphabetic label.
-     */
+    /* =====================================================
+       METHOD 2
+       OCR MAY READ "LRN" BADLY
+       ===================================================== */
 
     match =
-        text.match(
+        source.match(
 
-            /\b[A-Z]{2,4}\s*[:#=\-]?\s*([0-9OoQqIiLl|SsBbGg\s]{10,24})\b/i
+            /\b[A-Z]{2,5}\s*[:#=\-]?\s*([0-9OoQqIiLl|SsBbGg\s]{8,24})\b/i
 
         );
 
@@ -2433,15 +2235,15 @@ function extractBestLRN(text) {
     }
 
 
-    /*
-     * Third priority:
-     * Search for any long OCR digit-like group.
-     */
+    /* =====================================================
+       METHOD 3
+       FIND LONG NUMERIC-LIKE GROUPS
+       ===================================================== */
 
     const digitGroups =
-        text.match(
+        source.match(
 
-            /[0-9OoQqIiLl|SsBbGg][0-9OoQqIiLl|SsBbGg\s]{10,24}/g
+            /[0-9OoQqIiLl|SsBbGg][0-9OoQqIiLl|SsBbGg\s]{8,24}/g
 
         );
 
@@ -2451,8 +2253,7 @@ function extractBestLRN(text) {
     ) {
 
         for (
-            const group
-            of digitGroups
+            const group of digitGroups
         ) {
 
             const digits =
@@ -2487,14 +2288,8 @@ function cleanDigits(value) {
 
     return String(value)
 
-        .toUpperCase()
-
-        /*
-         * Common OCR substitutions.
-         */
-
         .replace(
-            /[OoQ]/g,
+            /[OoQq]/g,
             "0"
         )
 
@@ -2518,11 +2313,6 @@ function cleanDigits(value) {
             "6"
         )
 
-        /*
-         * Remove everything that
-         * is not a number.
-         */
-
         .replace(
             /[^0-9]/g,
             ""
@@ -2538,7 +2328,9 @@ function cleanDigits(value) {
 function isValidLRN(lrn) {
 
     return /^\d{12}$/.test(
+
         String(lrn).trim()
+
     );
 
 }
@@ -2720,30 +2512,6 @@ async function checkDatabase() {
                 escapeHTML(
                     result.student.section
                 );
-
-
-            /*
-             * IMPORTANT:
-             *
-             * The database is now the
-             * authoritative source for
-             * the student's information.
-             */
-
-            nameField.value =
-                result.student.name || "";
-
-            gradeField.value =
-                result.student.grade || "";
-
-            sectionField.value =
-                result.student.section || "";
-
-            lrnField.value =
-                result.student.lrn || lrn;
-
-            idField.value =
-                result.student.idNumber || "";
 
 
             status.textContent =
