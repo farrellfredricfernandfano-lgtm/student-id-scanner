@@ -1,3 +1,4 @@
+```html
 <!DOCTYPE html>
 <html lang="en">
 
@@ -1226,20 +1227,44 @@ async function performOCR() {
         );
 
 
-    const ctx =
-        canvas.getContext(
+    /*
+     * =====================================================
+     * IMPORTANT FIX
+     *
+     * Capture the original color image ONCE.
+     *
+     * Pass 3 will use this exact same image.
+     * It will NOT re-capture from the live video.
+     * =====================================================
+     */
+
+    const originalColorCanvas =
+        document.createElement(
+            "canvas"
+        );
+
+
+    originalColorCanvas.width =
+        canvas.width;
+
+    originalColorCanvas.height =
+        canvas.height;
+
+
+    const originalColorCtx =
+        originalColorCanvas.getContext(
             "2d"
         );
 
 
-    ctx.imageSmoothingEnabled =
+    originalColorCtx.imageSmoothingEnabled =
         true;
 
-    ctx.imageSmoothingQuality =
+    originalColorCtx.imageSmoothingQuality =
         "high";
 
 
-    ctx.drawImage(
+    originalColorCtx.drawImage(
 
         video,
 
@@ -1252,9 +1277,27 @@ async function performOCR() {
         0,
         0,
 
-        canvas.width,
-        canvas.height
+        originalColorCanvas.width,
+        originalColorCanvas.height
 
+    );
+
+
+    /*
+     * Now copy the exact same captured
+     * image into the main OCR canvas.
+     */
+
+    const ctx =
+        canvas.getContext(
+            "2d"
+        );
+
+
+    ctx.drawImage(
+        originalColorCanvas,
+        0,
+        0
     );
 
 
@@ -1367,11 +1410,6 @@ async function performOCR() {
             textPass1
         );
 
-
-    /*
-     * Start the combined result
-     * using Pass 1.
-     */
 
     let bestResults = {
 
@@ -1573,6 +1611,7 @@ async function performOCR() {
                             info
                         );
 
+
                         if (
                             info.progress !==
                             undefined
@@ -1637,61 +1676,21 @@ async function performOCR() {
         "Running final OCR pass...";
 
 
-    const colorCanvas =
-        document.createElement(
-            "canvas"
-        );
-
-
-    colorCanvas.width =
-        canvas.width;
-
-    colorCanvas.height =
-        canvas.height;
-
-
-    const colorCtx =
-        colorCanvas.getContext(
-            "2d"
-        );
-
-
     /*
-     * Re-capture the original
-     * crop from the video so that
-     * Pass 3 uses the color image.
+     * =====================================================
+     * FIX:
+     *
+     * DO NOT capture the video again here.
+     *
+     * originalColorCanvas contains the EXACT SAME
+     * camera frame captured before Pass 1.
+     * =====================================================
      */
-
-    colorCtx.imageSmoothingEnabled =
-        true;
-
-    colorCtx.imageSmoothingQuality =
-        "high";
-
-
-    colorCtx.drawImage(
-
-        video,
-
-        cropX,
-        cropY,
-
-        finalCropWidth,
-        finalCropHeight,
-
-        0,
-        0,
-
-        colorCanvas.width,
-        colorCanvas.height
-
-    );
-
 
     const result3 =
         await Tesseract.recognize(
 
-            colorCanvas,
+            originalColorCanvas,
 
             "eng",
 
@@ -1704,6 +1703,7 @@ async function performOCR() {
                             "TESSERACT PASS 3:",
                             info
                         );
+
 
                         if (
                             info.progress !==
@@ -2075,9 +2075,6 @@ async function performTargetedLRNOCR(
 
 /* =========================================================
    OCR PARSING
-   IMPORTANT:
-   THIS FUNCTION DOES NOT TOUCH THE TEXTBOXES.
-   IT ONLY RETURNS WHAT THIS OCR PASS FOUND.
 ========================================================= */
 
 function parseOCR(text) {
@@ -2130,12 +2127,6 @@ function parseOCR(text) {
        ID NUMBER
     ===================================================== */
 
-    /*
-     * Normal format:
-     *
-     * ID NO.: 305015-410-SHS
-     */
-
     let idMatch =
         text.match(
 
@@ -2161,11 +2152,6 @@ function parseOCR(text) {
                     .toUpperCase();
 
 
-            /*
-             * Don't append an empty
-             * suffix.
-             */
-
             if (
                 suffix.length > 0
             ) {
@@ -2185,11 +2171,6 @@ function parseOCR(text) {
     }
 
     else {
-
-        /*
-         * Fallback for cases where
-         * Tesseract misses "ID NO."
-         */
 
         const fallbackID =
             text.match(
@@ -2253,14 +2234,6 @@ function parseOCR(text) {
     }
 
 
-    /*
-     * Fallback for OCR mistakes such as:
-     *
-     * GRADEE
-     * GIRADDE
-     * GRADDE
-     */
-
     if (
         !result.grade
     ) {
@@ -2316,10 +2289,6 @@ function parseOCR(text) {
         }
 
 
-        /*
-         * Remove obvious OCR garbage.
-         */
-
         const cleaned =
             line
 
@@ -2344,11 +2313,6 @@ function parseOCR(text) {
                         word.length > 0
                 );
 
-
-        /*
-         * Names normally contain
-         * at least two words.
-         */
 
         if (
             words.length >= 2 &&
@@ -2387,9 +2351,6 @@ function mergeOCRResults(
 
     /*
      * NAME
-     *
-     * Only fill it if a previous
-     * pass did not get one.
      */
 
     if (
@@ -2435,9 +2396,6 @@ function mergeOCRResults(
 
     /*
      * LRN
-     *
-     * Only accept a valid 12-digit
-     * LRN.
      */
 
     if (
@@ -2457,9 +2415,6 @@ function mergeOCRResults(
 
     /*
      * ID NUMBER
-     *
-     * If an earlier pass missed it,
-     * take it from this pass.
      */
 
     if (
@@ -2485,10 +2440,8 @@ function mergeOCRResults(
 function extractBestLRN(text) {
 
     /*
-     * =====================================================
      * METHOD 1
      * Look directly after LRN.
-     * =====================================================
      */
 
     let match =
@@ -2521,11 +2474,7 @@ function extractBestLRN(text) {
 
 
     /*
-     * =====================================================
      * METHOD 2
-     * OCR may turn LRN into another
-     * 2–4 letter word.
-     * =====================================================
      */
 
     match =
@@ -2558,11 +2507,7 @@ function extractBestLRN(text) {
 
 
     /*
-     * =====================================================
      * METHOD 3
-     * Search for any possible 12-digit
-     * sequence.
-     * =====================================================
      */
 
     const digitGroups =
@@ -2613,10 +2558,6 @@ function cleanDigits(value) {
 
     return String(value)
 
-        /*
-         * Common OCR substitutions.
-         */
-
         .replace(
             /[OoQq]/g,
             "0"
@@ -2641,10 +2582,6 @@ function cleanDigits(value) {
             /[Gg]/g,
             "6"
         )
-
-        /*
-         * Keep digits only.
-         */
 
         .replace(
             /[^0-9]/g,
@@ -2989,3 +2926,4 @@ function escapeHTML(value) {
 </body>
 
 </html>
+```
