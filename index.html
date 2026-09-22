@@ -141,17 +141,6 @@ button:disabled {
     transition: width 0.2s;
 }
 
-.scan-time {
-    max-width: 700px;
-    margin: 10px auto;
-    padding: 10px;
-    background: #222;
-    border-radius: 8px;
-    color: #00ff66;
-    font-size: 16px;
-    font-weight: bold;
-}
-
 .image-container {
     max-width: 700px;
     margin: 20px auto;
@@ -298,6 +287,8 @@ button:disabled {
 <div class="progress-container">
     <div class="progress-bar" id="progressBar"></div>
 </div>
+
+<!-- SCAN TIME -->
 <div id="scanTime" style="
     max-width: 700px;
     margin: 10px auto;
@@ -308,10 +299,6 @@ button:disabled {
     font-size: 16px;
     font-weight: bold;
 ">
-    ⏱ Scan Time: —
-</div>
-<!-- SCAN TIME -->
-<div class="scan-time" id="scanTime">
     ⏱ Scan Time: —
 </div>
 
@@ -617,11 +604,7 @@ async function captureAndScan() {
 
     scanButton.disabled = true;
     databaseButton.disabled = true;
-    
-    const scanStartTime = performance.now();
 
-    scanTime.textContent =
-    "⏱ Scan Time: Scanning...";
     const scanStartTime =
         performance.now();
 
@@ -665,17 +648,7 @@ async function captureAndScan() {
         elapsedSeconds.toFixed(2) +
         " seconds";
 
-   const scanEndTime = performance.now();
-
-const elapsedSeconds =
-    (scanEndTime - scanStartTime) / 1000;
-
-scanTime.textContent =
-    "⏱ Scan Time: " +
-    elapsedSeconds.toFixed(2) +
-    " seconds";
-
-scanButton.disabled = false;
+    scanButton.disabled = false;
 
 }
 
@@ -714,13 +687,6 @@ function preprocessCanvas(
         imageData.data;
 
 
-    /*
-     * Stronger contrast formula.
-     *
-     * This increases the difference between
-     * dark characters and lighter backgrounds.
-     */
-
     const factor =
         (
             259 *
@@ -747,29 +713,15 @@ function preprocessCanvas(
         const b =
             data[i + 2];
 
-
-        /*
-         * Convert RGB to grayscale.
-         *
-         * This removes color information that
-         * can interfere with OCR.
-         */
-
         let gray =
             0.299 * r +
             0.587 * g +
             0.114 * b;
 
-
-        /*
-         * Apply stronger contrast.
-         */
-
         gray =
             factor *
             (gray - 128) +
             128;
-
 
         gray =
             Math.max(
@@ -779,18 +731,6 @@ function preprocessCanvas(
                     gray
                 )
             );
-
-
-        /*
-         * STRONG CHARACTER / BACKGROUND SEPARATION
-         *
-         * Very dark pixels become pure black.
-         * Very bright pixels become pure white.
-         *
-         * The middle range is preserved so that
-         * thin/anti-aliased characters aren't
-         * completely destroyed.
-         */
 
         if (
             gray <= 70
@@ -810,11 +750,6 @@ function preprocessCanvas(
 
         else {
 
-            /*
-             * Stretch the remaining middle range
-             * between black and white.
-             */
-
             gray =
                 (
                     (gray - 70) /
@@ -822,11 +757,6 @@ function preprocessCanvas(
                 ) * 255;
 
         }
-
-
-        /*
-         * Keep the image grayscale.
-         */
 
         data[i] =
             gray;
@@ -838,7 +768,6 @@ function preprocessCanvas(
             gray;
 
     }
-
 
     ctx.putImageData(
         imageData,
@@ -874,11 +803,6 @@ async function performOCR() {
         );
 
     }
-
-
-    /* =====================================================
-       1850 × 617 CROP
-    ===================================================== */
 
     const targetWidth = 1850;
     const targetHeight = 617;
@@ -922,11 +846,6 @@ async function performOCR() {
         (videoHeight -
         finalCropHeight) / 2;
 
-
-    /* =====================================================
-       EXACT 1850 × 617 OUTPUT
-    ===================================================== */
-
     canvas.width =
         targetWidth;
 
@@ -958,7 +877,6 @@ async function performOCR() {
 
     );
 
-
     status.textContent =
         "Enhancing image...";
 
@@ -974,11 +892,6 @@ async function performOCR() {
 
     processedImage.style.display =
         "block";
-
-
-    /* =====================================================
-       OCR PASS 1
-    ===================================================== */
 
     status.textContent =
         "Reading ID information...";
@@ -1052,11 +965,6 @@ async function performOCR() {
             pass1Results.id
 
     };
-
-
-    /* =====================================================
-       OCR PASS 2 SHARPENED
-    ===================================================== */
 
     status.textContent =
         "Running second OCR pass...";
@@ -1191,7 +1099,6 @@ async function performOCR() {
         0
     );
 
-
     const result2 =
         await Tesseract.recognize(
             sharpenCanvas,
@@ -1245,22 +1152,12 @@ async function performOCR() {
             pass2Results
         );
 
-
-    /* =====================================================
-       SHOW RAW OCR
-    ===================================================== */
-
     rawOCR.textContent =
         "[OCR PASS 1]\n" +
         textPass1 +
         "\n\n" +
         "[OCR PASS 2]\n" +
         textPass2;
-
-
-    /* =====================================================
-       INITIAL RESULTS
-    ===================================================== */
 
     nameField.value =
         bestResults.name;
@@ -1281,11 +1178,6 @@ async function performOCR() {
         "MERGED OCR RESULTS:",
         bestResults
     );
-
-
-    /* =====================================================
-       DATABASE IDENTIFICATION
-    ===================================================== */
 
     const hasLRN =
         isValidLRN(
@@ -1357,12 +1249,6 @@ async function performTargetedLRNOCR(
 
     const height =
         fullCanvas.height;
-
-
-    /*
-     * LRN area remains based on your
-     * 1850 × 617 processed image.
-     */
 
     const x =
         width * 0.05;
@@ -1483,7 +1369,6 @@ function parseOCR(text) {
 
     };
 
-
     const lines =
         String(text)
             .split(/\r?\n/)
@@ -1493,11 +1378,6 @@ function parseOCR(text) {
             .filter(
                 line => line.length > 0
             );
-
-
-    /* =====================================================
-       LRN
-    ===================================================== */
 
     const lrn =
         extractBestLRN(text);
@@ -1511,18 +1391,12 @@ function parseOCR(text) {
 
     }
 
-
-    /* =====================================================
-       ID NUMBER
-    ===================================================== */
-
     let idMatch =
         text.match(
 
             /ID\s*(?:NO|NUMBER)?\s*[:#.\-]?\s*([0-9OoQq]{3,})\s*[-–—\s]\s*([0-9OoQq]{2,})\s*[-–—\s]?\s*([A-Za-z0-9]{2,5})?/i
 
         );
-
 
     if (idMatch) {
 
@@ -1588,18 +1462,12 @@ function parseOCR(text) {
 
     }
 
-
-    /* =====================================================
-       GRADE + SECTION
-    ===================================================== */
-
     let gradeMatch =
         text.match(
 
             /GRADE\s*(?:LEVEL)?\s*(7|8|9|10|11|12|I2|l2)\s*[-–—:]?\s*([A-Za-z0-9][A-Za-z0-9 .'-]*)/i
 
         );
-
 
     if (gradeMatch) {
 
@@ -1614,7 +1482,6 @@ function parseOCR(text) {
             );
 
     }
-
 
     if (!result.grade) {
 
@@ -1640,11 +1507,6 @@ function parseOCR(text) {
         }
 
     }
-
-
-    /* =====================================================
-       NAME
-    ===================================================== */
 
     for (
         const line of lines
@@ -1707,7 +1569,6 @@ function parseOCR(text) {
 
     }
 
-
     console.log(
         "PARSED OCR PASS:",
         result
@@ -1757,12 +1618,6 @@ function mergeOCRResults(
 
     }
 
-
-    /*
-     * A valid LRN is never replaced
-     * by an invalid LRN.
-     */
-
     if (
         !isValidLRN(
             bestResults.lrn
@@ -1776,7 +1631,6 @@ function mergeOCRResults(
             newResults.lrn;
 
     }
-
 
     if (
         !bestResults.id &&
@@ -1802,20 +1656,12 @@ function extractBestLRN(text) {
     const source =
         String(text);
 
-
-    /*
-     * -----------------------------------------------------
-     * 1. Look for an LRN label first.
-     * -----------------------------------------------------
-     */
-
     let match =
         source.match(
 
             /LRN\s*[:#=\-]?\s*([0-9OoQqIiLl|SsBbGg\s]{8,30})/i
 
         );
-
 
     if (match) {
 
@@ -1834,20 +1680,12 @@ function extractBestLRN(text) {
 
     }
 
-
-    /*
-     * -----------------------------------------------------
-     * 2. Look for a long digit-like OCR sequence.
-     * -----------------------------------------------------
-     */
-
     const digitGroups =
         source.match(
 
             /[0-9OoQqIiLl|SsBbGg][0-9OoQqIiLl|SsBbGg\s]{7,30}/g
 
         );
-
 
     if (digitGroups) {
 
@@ -1884,13 +1722,6 @@ function getLRNCandidates(value) {
 
     const candidates = [];
 
-
-    /*
-     * -----------------------------------------------------
-     * EXACT 12 DIGITS
-     * -----------------------------------------------------
-     */
-
     if (
         cleaned.length === 12
     ) {
@@ -1902,22 +1733,6 @@ function getLRNCandidates(value) {
         return candidates;
 
     }
-
-
-    /*
-     * -----------------------------------------------------
-     * MORE THAN 12 DIGITS
-     *
-     * Example:
-     *
-     * 1341021302248
-     *
-     * Possible LRNs:
-     *
-     * 134102130224
-     * 341021302248
-     * -----------------------------------------------------
-     */
 
     if (
         cleaned.length > 12
@@ -2081,7 +1896,6 @@ function normalizeIDNumber(value) {
 
         );
 
-
     if (match) {
 
         let result =
@@ -2104,7 +1918,6 @@ function normalizeIDNumber(value) {
         return result;
 
     }
-
 
     return source
         .replace(
@@ -2202,7 +2015,6 @@ async function checkDatabase() {
     const section =
         sectionField.value.trim();
 
-
     if (
         !isValidLRN(lrn) &&
         !normalizeIDNumber(idNumber) &&
@@ -2218,7 +2030,6 @@ async function checkDatabase() {
         return;
 
     }
-
 
     if (
         DATABASE_URL.includes(
@@ -2237,7 +2048,6 @@ async function checkDatabase() {
 
     }
 
-
     status.textContent =
         "Identifying student...";
 
@@ -2246,7 +2056,6 @@ async function checkDatabase() {
 
     databaseResult.style.display =
         "none";
-
 
     try {
 
@@ -2265,22 +2074,18 @@ async function checkDatabase() {
 
             });
 
-
         const url =
             DATABASE_URL +
             "?" +
             params.toString();
-
 
         console.log(
             "DATABASE REQUEST:",
             url
         );
 
-
         const response =
             await fetch(url);
-
 
         if (!response.ok) {
 
@@ -2291,16 +2096,13 @@ async function checkDatabase() {
 
         }
 
-
         const result =
             await response.json();
-
 
         console.log(
             "DATABASE RESULT:",
             result
         );
-
 
         if (
             result.match === true
@@ -2315,10 +2117,8 @@ async function checkDatabase() {
             databaseStatus.textContent =
                 "🟢 VALID STUDENT";
 
-
             let similarityText =
                 "";
-
 
             if (
                 result.nameSimilarity !==
@@ -2336,7 +2136,6 @@ async function checkDatabase() {
 
             }
 
-
             if (
                 result.sectionSimilarity !==
                 undefined
@@ -2352,7 +2151,6 @@ async function checkDatabase() {
                     "%";
 
             }
-
 
             databaseDetails.innerHTML =
 
@@ -2399,12 +2197,6 @@ async function checkDatabase() {
                     result.student.section
                 );
 
-
-            /*
-             * Once identified, replace
-             * imperfect OCR with database data.
-             */
-
             nameField.value =
                 result.student.name ||
                 "";
@@ -2425,12 +2217,10 @@ async function checkDatabase() {
                 result.student.idNumber ||
                 "";
 
-
             status.textContent =
                 "Student identified successfully.";
 
         }
-
 
         else if (
             result.ambiguous === true
@@ -2445,17 +2235,14 @@ async function checkDatabase() {
             databaseStatus.textContent =
                 "🟠 MATCH IS AMBIGUOUS";
 
-
             databaseDetails.innerHTML =
                 "The scanned information was not unique " +
                 "enough to safely identify one student.";
-
 
             status.textContent =
                 "Multiple possible students found.";
 
         }
-
 
         else {
 
@@ -2467,7 +2254,6 @@ async function checkDatabase() {
 
             databaseStatus.textContent =
                 "🔴 STUDENT NOT FOUND";
-
 
             databaseDetails.innerHTML =
 
@@ -2509,12 +2295,10 @@ async function checkDatabase() {
                     "Not detected"
                 );
 
-
             status.textContent =
                 "No matching student.";
 
         }
-
 
     } catch (error) {
 
@@ -2522,7 +2306,6 @@ async function checkDatabase() {
             "DATABASE ERROR:",
             error
         );
-
 
         databaseResult.style.display =
             "block";
@@ -2532,7 +2315,6 @@ async function checkDatabase() {
 
         databaseStatus.textContent =
             "⚠️ DATABASE CONNECTION FAILED";
-
 
         databaseDetails.innerHTML =
 
@@ -2547,7 +2329,6 @@ async function checkDatabase() {
             ) +
 
             "</small>";
-
 
         status.textContent =
             "Database connection failed.";
@@ -2602,5 +2383,3 @@ function escapeHTML(value) {
 </body>
 </html>
 ```
-
-
