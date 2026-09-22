@@ -4,381 +4,386 @@
 
 <head>
 
-```
 <meta charset="UTF-8">
 
 <meta
-    name="viewport"
-    content="width=device-width, initial-scale=1.0"
+name="viewport"
+content="width=device-width, initial-scale=1.0"
+
 >
 
 <title>Student ID Scanner</title>
 
-<script
-    src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js">
-</script>
+<script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
 
 <style>
 
-    * {
-        box-sizing: border-box;
-    }
+* {
+    box-sizing: border-box;
+}
 
-    body {
-        margin: 0;
-        padding: 20px;
-        font-family: Arial, sans-serif;
-        background: #111;
-        color: white;
-        text-align: center;
-    }
+body {
+    margin: 0;
+    padding: 20px;
 
-    h1 {
-        margin-bottom: 5px;
-    }
+    font-family: Arial, sans-serif;
 
-    .subtitle {
-        color: #aaa;
-        margin-bottom: 20px;
-    }
+    background: #111;
+    color: white;
 
-    .camera-container {
-        position: relative;
-        width: 100%;
-        max-width: 700px;
-        margin: auto;
-        background: black;
-        overflow: hidden;
-        border-radius: 12px;
-    }
+    text-align: center;
+}
 
-    video {
-        display: block;
-        width: 100%;
-        height: auto;
-    }
+h1 {
+    margin-bottom: 5px;
+}
 
-    .scan-guide {
-        position: absolute;
+.subtitle {
+    color: #aaa;
+    margin-bottom: 20px;
+}
 
-        width: 88%;
+.camera-container {
+    position: relative;
 
-        /*
-         * 1850 / 617 = approximately 2.999
-         * This matches the new OCR crop ratio.
-         */
-        aspect-ratio: 1850 / 617;
+    width: 100%;
+    max-width: 700px;
 
-        left: 50%;
-        top: 50%;
+    margin: auto;
 
-        transform:
-            translate(-50%, -50%);
+    background: black;
 
-        border:
-            3px solid #00ff66;
+    overflow: hidden;
 
-        border-radius: 10px;
+    border-radius: 12px;
+}
 
-        box-shadow:
-            0 0 10px #00ff66,
-            inset 0 0 10px rgba(
-                0,
-                255,
-                102,
-                0.2
-            );
+video {
+    display: block;
 
-        pointer-events: none;
-    }
+    width: 100%;
+    height: auto;
+}
 
-    .scan-guide::after {
+.scan-guide {
+    position: absolute;
 
-        content:
-            "ALIGN ID CARD HERE";
+    width: 88%;
 
-        position: absolute;
+    aspect-ratio: 1.586 / 1;
 
-        top: -30px;
+    left: 50%;
+    top: 50%;
 
-        left: 50%;
+    transform:
+        translate(-50%, -50%);
 
-        transform:
-            translateX(-50%);
+    border:
+        3px solid #00ff66;
 
-        font-size: 13px;
+    border-radius: 10px;
 
-        color: #00ff66;
+    box-shadow:
+        0 0 10px #00ff66,
+        inset 0 0 10px rgba(
+            0,
+            255,
+            102,
+            0.2
+        );
 
-        white-space: nowrap;
-    }
+    pointer-events: none;
+}
 
-    .controls {
+.scan-guide::after {
 
-        max-width: 700px;
+    content:
+        "ALIGN ID CARD HERE";
 
-        margin: 20px auto;
+    position: absolute;
 
-        display: flex;
+    top: -30px;
 
-        flex-wrap: wrap;
+    left: 50%;
 
-        justify-content: center;
+    transform:
+        translateX(-50%);
 
-        gap: 10px;
-    }
+    font-size: 13px;
 
-    button {
+    color: #00ff66;
 
-        padding:
-            12px 18px;
+    white-space: nowrap;
+}
 
-        border: none;
+.controls {
 
-        border-radius: 8px;
+    max-width: 700px;
 
-        font-size: 15px;
+    margin: 20px auto;
 
-        font-weight: bold;
+    display: flex;
 
-        cursor: pointer;
-    }
+    flex-wrap: wrap;
 
-    button:disabled {
+    justify-content: center;
 
-        opacity: 0.4;
+    gap: 10px;
+}
 
-        cursor: not-allowed;
-    }
+button {
 
-    #startButton {
+    padding:
+        12px 18px;
 
-        background: #00c853;
-        color: white;
-    }
+    border: none;
 
-    #scanButton {
+    border-radius: 8px;
 
-        background: #2196f3;
-        color: white;
-    }
+    font-size: 15px;
 
-    #stopButton {
+    font-weight: bold;
 
-        background: #f44336;
-        color: white;
-    }
+    cursor: pointer;
+}
 
-    #databaseButton {
+button:disabled {
 
-        background: #9c27b0;
-        color: white;
-    }
+    opacity: 0.4;
 
-    .status {
+    cursor: not-allowed;
+}
 
-        max-width: 700px;
+#startButton {
 
-        margin: 15px auto;
+    background: #00c853;
 
-        padding: 12px;
+    color: white;
+}
 
-        background: #222;
+#scanButton {
 
-        border-radius: 8px;
+    background: #2196f3;
 
-        color: #ddd;
-    }
+    color: white;
+}
 
-    .progress-container {
+#stopButton {
 
-        max-width: 700px;
+    background: #f44336;
 
-        margin: 15px auto;
+    color: white;
+}
 
-        background: #333;
+#databaseButton {
 
-        border-radius: 10px;
+    background: #9c27b0;
 
-        overflow: hidden;
+    color: white;
+}
 
-        height: 12px;
-    }
+.status {
 
-    .progress-bar {
+    max-width: 700px;
 
-        width: 0%;
+    margin: 15px auto;
 
-        height: 100%;
+    padding: 12px;
 
-        background: #00ff66;
+    background: #222;
 
-        transition:
-            width 0.2s;
-    }
+    border-radius: 8px;
 
-    .image-container {
+    color: #ddd;
+}
 
-        max-width: 700px;
+.progress-container {
 
-        margin: 20px auto;
-    }
+    max-width: 700px;
 
-    .image-container h3 {
+    margin: 15px auto;
 
-        margin-bottom: 10px;
-    }
+    background: #333;
 
-    #processedImage {
+    border-radius: 10px;
 
-        max-width: 100%;
+    overflow: hidden;
 
-        border-radius: 8px;
+    height: 12px;
+}
 
-        display: none;
-    }
+.progress-bar {
 
-    .results {
+    width: 0%;
 
-        max-width: 700px;
+    height: 100%;
 
-        margin: 20px auto;
+    background: #00ff66;
 
-        text-align: left;
-    }
+    transition:
+        width 0.2s;
+}
 
-    .results h2 {
+.image-container {
 
-        text-align: center;
-    }
+    max-width: 700px;
 
-    .field {
+    margin: 20px auto;
+}
 
-        margin: 10px 0;
-    }
+.image-container h3 {
 
-    .field label {
+    margin-bottom: 10px;
+}
 
-        display: block;
+#processedImage {
 
-        color: #aaa;
+    max-width: 100%;
 
-        font-size: 13px;
+    border-radius: 8px;
 
-        margin-bottom: 4px;
-    }
+    display: none;
+}
 
-    .field input {
+.results {
 
-        width: 100%;
+    max-width: 700px;
 
-        padding: 11px;
+    margin: 20px auto;
 
-        background: #222;
+    text-align: left;
+}
 
-        color: white;
+.results h2 {
 
-        border: 1px solid #444;
+    text-align: center;
+}
 
-        border-radius: 6px;
+.field {
 
-        font-size: 15px;
-    }
+    margin: 10px 0;
+}
 
-    .database-result {
+.field label {
 
-        display: none;
+    display: block;
 
-        max-width: 700px;
+    color: #aaa;
 
-        margin: 20px auto;
+    font-size: 13px;
 
-        padding: 20px;
+    margin-bottom: 4px;
+}
 
-        border-radius: 10px;
+.field input {
 
-        text-align: center;
-    }
+    width: 100%;
 
-    .database-result.valid {
+    padding: 11px;
 
-        background: #123d20;
+    background: #222;
 
-        border:
-            2px solid #00c853;
-    }
+    color: white;
 
-    .database-result.invalid {
+    border: 1px solid #444;
 
-        background: #421414;
+    border-radius: 6px;
 
-        border:
-            2px solid #f44336;
-    }
+    font-size: 15px;
+}
 
-    #databaseStatus {
+.database-result {
 
-        font-size: 22px;
+    display: none;
 
-        font-weight: bold;
+    max-width: 700px;
 
-        margin-bottom: 15px;
-    }
+    margin: 20px auto;
 
-    #databaseDetails {
+    padding: 20px;
 
-        text-align: left;
+    border-radius: 10px;
 
-        line-height: 1.5;
-    }
+    text-align: center;
+}
 
-    .ocr-debug {
+.database-result.valid {
 
-        max-width: 700px;
+    background: #123d20;
 
-        margin: 20px auto;
+    border:
+        2px solid #00c853;
+}
 
-        text-align: left;
-    }
+.database-result.invalid {
 
-    .ocr-debug h3 {
+    background: #421414;
 
-        text-align: center;
-    }
+    border:
+        2px solid #f44336;
+}
 
-    #rawOCR {
+#databaseStatus {
 
-        width: 100%;
+    font-size: 22px;
 
-        min-height: 150px;
+    font-weight: bold;
 
-        padding: 12px;
+    margin-bottom: 15px;
+}
 
-        background: #080808;
+#databaseDetails {
 
-        color: #00ff66;
+    text-align: left;
 
-        border: 1px solid #333;
+    line-height: 1.5;
+}
 
-        border-radius: 8px;
+.ocr-debug {
 
-        font-family: monospace;
+    max-width: 700px;
 
-        font-size: 14px;
+    margin: 20px auto;
 
-        white-space: pre-wrap;
+    text-align: left;
+}
 
-        overflow-wrap: break-word;
-    }
+.ocr-debug h3 {
+
+    text-align: center;
+}
+
+#rawOCR {
+
+    width: 100%;
+
+    min-height: 150px;
+
+    padding: 12px;
+
+    background: #080808;
+
+    color: #00ff66;
+
+    border: 1px solid #333;
+
+    border-radius: 8px;
+
+    font-family: monospace;
+
+    font-size: 14px;
+
+    white-space: pre-wrap;
+
+    overflow-wrap: break-word;
+}
 
 </style>
-```
 
 </head>
 
 <body>
 
-```
 <h1>
     Student ID Scanner
 </h1>
@@ -387,325 +392,254 @@
     OCR-Based Student Identification System
 </div>
 
-
-<!-- CAMERA -->
-
 <div class="camera-container">
 
-    <video
-        id="video"
-        autoplay
-        playsinline>
-    </video>
+```
+<video
+    id="video"
+    autoplay
+    playsinline>
+</video>
 
-    <div class="scan-guide"></div>
+<div class="scan-guide"></div>
+```
 
 </div>
-
-
-<!-- CONTROLS -->
 
 <div class="controls">
 
-    <button
-        id="startButton">
+```
+<button id="startButton">
+    📷 Start Camera
+</button>
 
-        📷 Start Camera
+<button
+    id="scanButton"
+    disabled>
+    🔍 Scan & Verify
+</button>
 
-    </button>
+<button
+    id="stopButton"
+    disabled>
+    ⛔ Stop Camera
+</button>
 
-
-    <button
-        id="scanButton"
-        disabled>
-
-        🔍 Scan & Verify
-
-    </button>
-
-
-    <button
-        id="stopButton"
-        disabled>
-
-        ⛔ Stop Camera
-
-    </button>
-
-
-    <button
-        id="databaseButton"
-        disabled>
-
-        🔎 Check Database
-
-    </button>
+<button
+    id="databaseButton"
+    disabled>
+    🔎 Check Database
+</button>
+```
 
 </div>
-
-
-<!-- STATUS -->
 
 <div
     class="status"
     id="status">
 
-    Camera not started.
+```
+Camera not started.
+```
 
 </div>
-
-
-<!-- PROGRESS -->
 
 <div class="progress-container">
 
-    <div
-        class="progress-bar"
-        id="progressBar">
-    </div>
+```
+<div
+    class="progress-bar"
+    id="progressBar">
+</div>
+```
 
 </div>
-
-
-<!-- PROCESSED IMAGE -->
 
 <div class="image-container">
 
-    <h3>
-        Processed Image — 1850 × 617
-    </h3>
+```
+<h3>
+    Processed Image
+</h3>
 
-    <img
-        id="processedImage"
-        alt="Processed ID">
+<img
+    id="processedImage"
+    alt="Processed ID">
+```
 
 </div>
-
-
-<!-- RESULTS -->
 
 <div class="results">
 
-    <h2>
-        Scanned Information
-    </h2>
+```
+<h2>
+    Scanned Information
+</h2>
 
+<div class="field">
 
-    <div class="field">
+    <label>
+        NAME
+    </label>
 
-        <label>
-            NAME
-        </label>
-
-        <input
-            id="nameField"
-            type="text"
-            readonly>
-
-    </div>
-
-
-    <div class="field">
-
-        <label>
-            GRADE LEVEL
-        </label>
-
-        <input
-            id="gradeField"
-            type="text"
-            readonly>
-
-    </div>
-
-
-    <div class="field">
-
-        <label>
-            SECTION
-        </label>
-
-        <input
-            id="sectionField"
-            type="text"
-            readonly>
-
-    </div>
-
-
-    <div class="field">
-
-        <label>
-            LRN
-        </label>
-
-        <input
-            id="lrnField"
-            type="text"
-            readonly>
-
-    </div>
-
-
-    <div class="field">
-
-        <label>
-            ID NUMBER
-        </label>
-
-        <input
-            id="idField"
-            type="text"
-            readonly>
-
-    </div>
+    <input
+        id="nameField"
+        type="text"
+        readonly>
 
 </div>
 
+<div class="field">
 
-<!-- DATABASE RESULT -->
+    <label>
+        GRADE LEVEL
+    </label>
+
+    <input
+        id="gradeField"
+        type="text"
+        readonly>
+
+</div>
+
+<div class="field">
+
+    <label>
+        SECTION
+    </label>
+
+    <input
+        id="sectionField"
+        type="text"
+        readonly>
+
+</div>
+
+<div class="field">
+
+    <label>
+        LRN
+    </label>
+
+    <input
+        id="lrnField"
+        type="text"
+        readonly>
+
+</div>
+
+<div class="field">
+
+    <label>
+        ID NUMBER
+    </label>
+
+    <input
+        id="idField"
+        type="text"
+        readonly>
+
+</div>
+```
+
+</div>
 
 <div
     class="database-result"
     id="databaseResult">
 
-    <div id="databaseStatus"></div>
+```
+<div id="databaseStatus"></div>
 
-    <div id="databaseDetails"></div>
+<div id="databaseDetails"></div>
+```
 
 </div>
-
-
-<!-- RAW OCR -->
 
 <div class="ocr-debug">
 
-    <h3>
-        Raw OCR Result
-    </h3>
+```
+<h3>
+    Raw OCR Result
+</h3>
 
-    <div id="rawOCR">
-        No OCR result yet.
-    </div>
+<div id="rawOCR">
+    No OCR result yet.
+</div>
+```
 
 </div>
 
-
-<!-- HIDDEN CANVASES -->
+<canvas
+ id="canvas"
+ style="display:none;"> </canvas>
 
 <canvas
-    id="canvas"
-    style="display:none;">
-</canvas>
-
-
-<canvas
-    id="lrnCanvas"
-    style="display:none;">
-</canvas>
-```
+ id="lrnCanvas"
+ style="display:none;"> </canvas>
 
 <script>
-
 
 /* =========================================================
    ELEMENTS
 ========================================================= */
 
 const video =
-    document.getElementById(
-        "video"
-    );
+    document.getElementById("video");
 
 const canvas =
-    document.getElementById(
-        "canvas"
-    );
+    document.getElementById("canvas");
 
 const lrnCanvas =
-    document.getElementById(
-        "lrnCanvas"
-    );
+    document.getElementById("lrnCanvas");
 
 const processedImage =
-    document.getElementById(
-        "processedImage"
-    );
+    document.getElementById("processedImage");
 
 const startButton =
-    document.getElementById(
-        "startButton"
-    );
+    document.getElementById("startButton");
 
 const scanButton =
-    document.getElementById(
-        "scanButton"
-    );
+    document.getElementById("scanButton");
 
 const stopButton =
-    document.getElementById(
-        "stopButton"
-    );
+    document.getElementById("stopButton");
 
 const databaseButton =
-    document.getElementById(
-        "databaseButton"
-    );
+    document.getElementById("databaseButton");
 
 const status =
-    document.getElementById(
-        "status"
-    );
+    document.getElementById("status");
 
 const progressBar =
-    document.getElementById(
-        "progressBar"
-    );
+    document.getElementById("progressBar");
 
 const nameField =
-    document.getElementById(
-        "nameField"
-    );
+    document.getElementById("nameField");
 
 const gradeField =
-    document.getElementById(
-        "gradeField"
-    );
+    document.getElementById("gradeField");
 
 const sectionField =
-    document.getElementById(
-        "sectionField"
-    );
+    document.getElementById("sectionField");
 
 const lrnField =
-    document.getElementById(
-        "lrnField"
-    );
+    document.getElementById("lrnField");
 
 const idField =
-    document.getElementById(
-        "idField"
-    );
+    document.getElementById("idField");
 
 const databaseResult =
-    document.getElementById(
-        "databaseResult"
-    );
+    document.getElementById("databaseResult");
 
 const databaseStatus =
-    document.getElementById(
-        "databaseStatus"
-    );
+    document.getElementById("databaseStatus");
 
 const databaseDetails =
-    document.getElementById(
-        "databaseDetails"
-    );
+    document.getElementById("databaseDetails");
 
 const rawOCR =
-    document.getElementById(
-        "rawOCR"
-    );
+    document.getElementById("rawOCR");
 
 
 /* =========================================================
@@ -723,23 +657,24 @@ const DATABASE_URL =
 let cameraStream = null;
 
 
+/* =========================================================
+   BUTTONS
+========================================================= */
+
 startButton.addEventListener(
     "click",
     startCamera
 );
-
 
 stopButton.addEventListener(
     "click",
     stopCamera
 );
 
-
 scanButton.addEventListener(
     "click",
     captureAndScan
 );
-
 
 databaseButton.addEventListener(
     "click",
@@ -758,75 +693,35 @@ async function startCamera() {
         status.textContent =
             "Starting camera...";
 
-
         cameraStream =
-            await navigator.mediaDevices
-                .getUserMedia({
+            await navigator.mediaDevices.getUserMedia({
 
-                    audio: false,
+                audio: false,
 
-                    video: {
+                video: {
 
-                        facingMode: {
-                            ideal:
-                                "environment"
-                        },
+                    facingMode: {
+                        ideal: "environment"
+                    },
 
-                        width: {
-                            ideal: 1920
-                        },
+                    width: {
+                        ideal: 1920
+                    },
 
-                        height: {
-                            ideal: 1080
-                        },
+                    height: {
+                        ideal: 1080
+                    },
 
-                        frameRate: {
-                            ideal: 30
-                        }
-
+                    frameRate: {
+                        ideal: 30
                     }
 
-                });
-
-
-        video.srcObject =
-            cameraStream;
-
-
-        const track =
-            cameraStream
-                .getVideoTracks()[0];
-
-
-        try {
-
-            await track.applyConstraints({
-
-                width: {
-                    ideal: 1920
-                },
-
-                height: {
-                    ideal: 1080
-                },
-
-                frameRate: {
-                    ideal: 30
                 }
 
             });
 
-        }
-
-        catch (constraintError) {
-
-            console.log(
-                "Could not apply extra camera constraints:",
-                constraintError
-            );
-
-        }
-
+        video.srcObject =
+            cameraStream;
 
         startButton.disabled =
             true;
@@ -836,7 +731,6 @@ async function startCamera() {
 
         stopButton.disabled =
             false;
-
 
         status.textContent =
             "Camera ready. Align the entire ID inside the green guide.";
@@ -874,25 +768,17 @@ function stopCamera() {
                     track.stop()
             );
 
-        cameraStream =
-            null;
+        cameraStream = null;
 
     }
 
+    video.srcObject = null;
 
-    video.srcObject =
-        null;
+    startButton.disabled = false;
 
+    scanButton.disabled = true;
 
-    startButton.disabled =
-        false;
-
-    scanButton.disabled =
-        true;
-
-    stopButton.disabled =
-        true;
-
+    stopButton.disabled = true;
 
     status.textContent =
         "Camera stopped.";
@@ -916,25 +802,18 @@ async function captureAndScan() {
 
     }
 
+    scanButton.disabled = true;
 
-    scanButton.disabled =
-        true;
-
-    databaseButton.disabled =
-        true;
-
+    databaseButton.disabled = true;
 
     databaseResult.style.display =
         "none";
 
-
     progressBar.style.width =
         "0%";
 
-
     status.textContent =
         "Capturing ID...";
-
 
     try {
 
@@ -955,9 +834,7 @@ async function captureAndScan() {
 
     }
 
-
-    scanButton.disabled =
-        false;
+    scanButton.disabled = false;
 
 }
 
@@ -968,18 +845,17 @@ async function captureAndScan() {
 
 function preprocessCanvas(
     sourceCanvas,
-    contrast = 1.35
+    contrast = 1.35,
+    brightness = 0
 ) {
 
     const ctx =
         sourceCanvas.getContext(
             "2d",
             {
-                willReadFrequently:
-                    true
+                willReadFrequently: true
             }
         );
-
 
     const imageData =
         ctx.getImageData(
@@ -989,10 +865,8 @@ function preprocessCanvas(
             sourceCanvas.height
         );
 
-
     const data =
         imageData.data;
-
 
     const factor =
         (
@@ -1004,34 +878,28 @@ function preprocessCanvas(
             (259 - contrast)
         );
 
-
     for (
         let i = 0;
         i < data.length;
         i += 4
     ) {
 
-        const r =
-            data[i];
-
-        const g =
-            data[i + 1];
-
-        const b =
-            data[i + 2];
-
+        const r = data[i];
+        const g = data[i + 1];
+        const b = data[i + 2];
 
         let gray =
             0.299 * r +
             0.587 * g +
             0.114 * b;
 
+        gray =
+            gray + brightness;
 
         gray =
             factor *
             (gray - 128) +
             128;
-
 
         gray =
             Math.max(
@@ -1042,24 +910,256 @@ function preprocessCanvas(
                 )
             );
 
-
-        data[i] =
-            gray;
-
-        data[i + 1] =
-            gray;
-
-        data[i + 2] =
-            gray;
+        data[i] = gray;
+        data[i + 1] = gray;
+        data[i + 2] = gray;
 
     }
-
 
     ctx.putImageData(
         imageData,
         0,
         0
     );
+
+}
+
+
+/* =========================================================
+   CREATE SHARPENED IMAGE
+========================================================= */
+
+function createSharpenedCanvas(
+    sourceCanvas
+) {
+
+    const result =
+        document.createElement(
+            "canvas"
+        );
+
+    result.width =
+        sourceCanvas.width;
+
+    result.height =
+        sourceCanvas.height;
+
+    const ctx =
+        result.getContext(
+            "2d",
+            {
+                willReadFrequently: true
+            }
+        );
+
+    ctx.drawImage(
+        sourceCanvas,
+        0,
+        0
+    );
+
+    const imageData =
+        ctx.getImageData(
+            0,
+            0,
+            result.width,
+            result.height
+        );
+
+    const data =
+        imageData.data;
+
+    const original =
+        new Uint8ClampedArray(data);
+
+    const w =
+        result.width;
+
+    const h =
+        result.height;
+
+    for (
+        let y = 1;
+        y < h - 1;
+        y++
+    ) {
+
+        for (
+            let x = 1;
+            x < w - 1;
+            x++
+        ) {
+
+            const index =
+                (
+                    y * w + x
+                ) * 4;
+
+            for (
+                let c = 0;
+                c < 3;
+                c++
+            ) {
+
+                const center =
+                    original[
+                        index + c
+                    ];
+
+                const top =
+                    original[
+                        index -
+                        w * 4 +
+                        c
+                    ];
+
+                const bottom =
+                    original[
+                        index +
+                        w * 4 +
+                        c
+                    ];
+
+                const left =
+                    original[
+                        index -
+                        4 +
+                        c
+                    ];
+
+                const right =
+                    original[
+                        index +
+                        4 +
+                        c
+                    ];
+
+                const sharpened =
+                    (
+                        5 * center -
+                        top -
+                        bottom -
+                        left -
+                        right
+                    );
+
+                data[
+                    index + c
+                ] =
+                    Math.max(
+                        0,
+                        Math.min(
+                            255,
+                            sharpened
+                        )
+                    );
+
+            }
+
+        }
+
+    }
+
+    ctx.putImageData(
+        imageData,
+        0,
+        0
+    );
+
+    return result;
+
+}
+
+
+/* =========================================================
+   CREATE THRESHOLD IMAGE
+========================================================= */
+
+function createThresholdCanvas(
+    sourceCanvas
+) {
+
+    const result =
+        document.createElement(
+            "canvas"
+        );
+
+    result.width =
+        sourceCanvas.width;
+
+    result.height =
+        sourceCanvas.height;
+
+    const ctx =
+        result.getContext(
+            "2d",
+            {
+                willReadFrequently: true
+            }
+        );
+
+    ctx.drawImage(
+        sourceCanvas,
+        0,
+        0
+    );
+
+    const imageData =
+        ctx.getImageData(
+            0,
+            0,
+            result.width,
+            result.height
+        );
+
+    const data =
+        imageData.data;
+
+    /*
+     * Soft threshold.
+     *
+     * We deliberately use
+     * 155 instead of an extreme
+     * threshold so thin letters
+     * are not destroyed.
+     */
+
+    for (
+        let i = 0;
+        i < data.length;
+        i += 4
+    ) {
+
+        const gray =
+            (
+                0.299 * data[i] +
+                0.587 * data[i + 1] +
+                0.114 * data[i + 2]
+            );
+
+        const value =
+            gray < 155
+                ? 0
+                : 255;
+
+        data[i] =
+            value;
+
+        data[i + 1] =
+            value;
+
+        data[i + 2] =
+            value;
+
+    }
+
+    ctx.putImageData(
+        imageData,
+        0,
+        0
+    );
+
+    return result;
 
 }
 
@@ -1073,13 +1173,11 @@ async function performOCR() {
     status.textContent =
         "Preparing ID image...";
 
-
     const videoWidth =
         video.videoWidth;
 
     const videoHeight =
         video.videoHeight;
-
 
     if (
         !videoWidth ||
@@ -1094,70 +1192,39 @@ async function performOCR() {
 
 
     /* =====================================================
-       NEW CROP RATIO
-       1850 × 617
-       ===================================================== */
+       CARD CROP
+    ===================================================== */
 
-    const targetWidth =
-        1850;
+    const cropWidth =
+        videoWidth * 0.88;
 
-    const targetHeight =
-        617;
+    const cropHeight =
+        cropWidth / 1.586;
 
-    const targetRatio =
-        targetWidth /
-        targetHeight;
+    let finalCropWidth =
+        cropWidth;
 
-
-    /*
-     * Determine the largest centered
-     * camera crop matching 1850:617.
-     */
-
-    let finalCropWidth;
-    let finalCropHeight;
-
+    let finalCropHeight =
+        cropHeight;
 
     if (
-        videoWidth / videoHeight >
-        targetRatio
+        finalCropHeight >
+        videoHeight * 0.92
     ) {
-
-        /*
-         * Camera is wider than target.
-         */
 
         finalCropHeight =
             videoHeight * 0.92;
 
         finalCropWidth =
-            finalCropHeight *
-            targetRatio;
+            finalCropHeight * 1.586;
 
     }
-
-    else {
-
-        /*
-         * Camera is narrower than target.
-         */
-
-        finalCropWidth =
-            videoWidth * 0.92;
-
-        finalCropHeight =
-            finalCropWidth /
-            targetRatio;
-
-    }
-
 
     const cropX =
         (
             videoWidth -
             finalCropWidth
         ) / 2;
-
 
     const cropY =
         (
@@ -1167,28 +1234,45 @@ async function performOCR() {
 
 
     /* =====================================================
-       EXACT 1850 × 617 OUTPUT
-       ===================================================== */
+       REQUESTED OCR RESOLUTION
+    ===================================================== */
+
+    const OCR_WIDTH =
+        1850;
+
+    const OCR_HEIGHT =
+        617;
+
 
     canvas.width =
-        targetWidth;
+        OCR_WIDTH;
 
     canvas.height =
-        targetHeight;
+        OCR_HEIGHT;
 
+
+    /*
+     * IMPORTANT:
+     *
+     * We capture the frame ONCE.
+     *
+     * Pass 1, Pass 2 and Pass 3
+     * will all use this same frame.
+     *
+     * This prevents Pass 3 from
+     * getting a different/moved ID.
+     */
 
     const ctx =
         canvas.getContext(
             "2d"
         );
 
-
     ctx.imageSmoothingEnabled =
         true;
 
     ctx.imageSmoothingQuality =
         "high";
-
 
     ctx.drawImage(
 
@@ -1203,29 +1287,46 @@ async function performOCR() {
         0,
         0,
 
-        targetWidth,
-        targetHeight
+        OCR_WIDTH,
+        OCR_HEIGHT
 
     );
 
 
-    status.textContent =
-        "Enhancing image...";
+    /* =====================================================
+       MAKE ORIGINAL COPY
+    ===================================================== */
+
+    const originalCanvas =
+        document.createElement(
+            "canvas"
+        );
+
+    originalCanvas.width =
+        OCR_WIDTH;
+
+    originalCanvas.height =
+        OCR_HEIGHT;
+
+    originalCanvas
+        .getContext("2d")
+        .drawImage(
+            canvas,
+            0,
+            0
+        );
 
 
-    /*
-     * Original preprocessing.
-     */
+    /* =====================================================
+       PASS 1 IMAGE
+    ===================================================== */
 
     preprocessCanvas(
         canvas,
-        1.35
+        1.35,
+        0
     );
 
-
-    /*
-     * Display processed image.
-     */
 
     processedImage.src =
         canvas.toDataURL(
@@ -1238,11 +1339,11 @@ async function performOCR() {
 
     /* =====================================================
        OCR PASS 1
+       MAIN IMAGE
     ===================================================== */
 
     status.textContent =
         "Reading ID information...";
-
 
     const result1 =
         await Tesseract.recognize(
@@ -1256,12 +1357,6 @@ async function performOCR() {
                 logger:
                     function(info) {
 
-                        console.log(
-                            "TESSERACT PASS 1:",
-                            info
-                        );
-
-
                         if (
                             info.progress !==
                             undefined
@@ -1272,16 +1367,6 @@ async function performOCR() {
                                     info.progress *
                                     30
                                 ) + "%";
-
-                        }
-
-
-                        if (
-                            info.status
-                        ) {
-
-                            status.textContent =
-                                info.status;
 
                         }
 
@@ -1335,161 +1420,18 @@ async function performOCR() {
 
 
     /* =====================================================
-       OCR PASS 2
-       MILD SHARPEN
+       PASS 2
+       SHARPENED VERSION
     ===================================================== */
 
     status.textContent =
-        "Running second OCR pass...";
+        "Improving text recognition...";
 
 
     const sharpenCanvas =
-        document.createElement(
-            "canvas"
+        createSharpenedCanvas(
+            canvas
         );
-
-
-    sharpenCanvas.width =
-        canvas.width;
-
-    sharpenCanvas.height =
-        canvas.height;
-
-
-    const sharpenCtx =
-        sharpenCanvas.getContext(
-            "2d"
-        );
-
-
-    sharpenCtx.drawImage(
-        canvas,
-        0,
-        0
-    );
-
-
-    const imageData =
-        sharpenCtx.getImageData(
-            0,
-            0,
-            sharpenCanvas.width,
-            sharpenCanvas.height
-        );
-
-
-    const data =
-        imageData.data;
-
-
-    const original =
-        new Uint8ClampedArray(
-            data
-        );
-
-
-    const w =
-        sharpenCanvas.width;
-
-    const h =
-        sharpenCanvas.height;
-
-
-    for (
-        let y = 1;
-        y < h - 1;
-        y++
-    ) {
-
-        for (
-            let x = 1;
-            x < w - 1;
-            x++
-        ) {
-
-            const index =
-                (
-                    y * w + x
-                ) * 4;
-
-
-            for (
-                let c = 0;
-                c < 3;
-                c++
-            ) {
-
-                const center =
-                    original[
-                        index + c
-                    ];
-
-
-                const top =
-                    original[
-                        index -
-                        w * 4 +
-                        c
-                    ];
-
-
-                const bottom =
-                    original[
-                        index +
-                        w * 4 +
-                        c
-                    ];
-
-
-                const left =
-                    original[
-                        index -
-                        4 +
-                        c
-                    ];
-
-
-                const right =
-                    original[
-                        index +
-                        4 +
-                        c
-                    ];
-
-
-                const sharpened =
-                    (
-                        5 * center -
-                        top -
-                        bottom -
-                        left -
-                        right
-                    );
-
-
-                data[
-                    index + c
-                ] =
-                    Math.max(
-                        0,
-                        Math.min(
-                            255,
-                            sharpened
-                        )
-                    );
-
-            }
-
-        }
-
-    }
-
-
-    sharpenCtx.putImageData(
-        imageData,
-        0,
-        0
-    );
 
 
     const result2 =
@@ -1503,12 +1445,6 @@ async function performOCR() {
 
                 logger:
                     function(info) {
-
-                        console.log(
-                            "TESSERACT PASS 2:",
-                            info
-                        );
-
 
                         if (
                             info.progress !==
@@ -1561,73 +1497,34 @@ async function performOCR() {
 
 
     /* =====================================================
-       OCR PASS 3
-       ORIGINAL COLOR IMAGE
-       ===================================================== */
+       PASS 3
+       THRESHOLD VERSION
+    ===================================================== */
+
+    /*
+     * IMPORTANT CHANGE:
+     *
+     * Pass 3 no longer captures
+     * another frame from the camera.
+     *
+     * It is generated from the
+     * EXACT SAME captured image.
+     */
 
     status.textContent =
-        "Running final OCR pass...";
+        "Running final image enhancement...";
 
 
-    const colorCanvas =
-        document.createElement(
-            "canvas"
+    const thresholdCanvas =
+        createThresholdCanvas(
+            canvas
         );
-
-
-    /*
-     * IMPORTANT:
-     * Pass 3 is also EXACTLY 1850 × 617.
-     */
-
-    colorCanvas.width =
-        1850;
-
-    colorCanvas.height =
-        617;
-
-
-    const colorCtx =
-        colorCanvas.getContext(
-            "2d"
-        );
-
-
-    colorCtx.imageSmoothingEnabled =
-        true;
-
-    colorCtx.imageSmoothingQuality =
-        "high";
-
-
-    /*
-     * Re-capture the SAME crop
-     * from the live camera.
-     */
-
-    colorCtx.drawImage(
-
-        video,
-
-        cropX,
-        cropY,
-
-        finalCropWidth,
-        finalCropHeight,
-
-        0,
-        0,
-
-        1850,
-        617
-
-    );
 
 
     const result3 =
         await Tesseract.recognize(
 
-            colorCanvas,
+            thresholdCanvas,
 
             "eng",
 
@@ -1635,12 +1532,6 @@ async function performOCR() {
 
                 logger:
                     function(info) {
-
-                        console.log(
-                            "TESSERACT PASS 3:",
-                            info
-                        );
-
 
                         if (
                             info.progress !==
@@ -1651,7 +1542,7 @@ async function performOCR() {
                                 (
                                     60 +
                                     info.progress *
-                                    20
+                                    25
                                 ) + "%";
 
                         }
@@ -1685,6 +1576,14 @@ async function performOCR() {
         );
 
 
+    /*
+     * Pass 3 is SUPPLEMENTARY.
+     *
+     * It can fill missing fields,
+     * but it cannot replace a valid
+     * LRN found by Pass 1 or Pass 2.
+     */
+
     bestResults =
         mergeOCRResults(
             bestResults,
@@ -1693,7 +1592,7 @@ async function performOCR() {
 
 
     /* =====================================================
-       SHOW ALL OCR RESULTS
+       RAW OCR
     ===================================================== */
 
     rawOCR.textContent =
@@ -1703,44 +1602,24 @@ async function performOCR() {
 
         "\n\n" +
 
-        "[OCR PASS 2]\n" +
+        "[OCR PASS 2 - SHARPENED]\n" +
         textPass2 +
 
         "\n\n" +
 
-        "[OCR PASS 3]\n" +
+        "[OCR PASS 3 - THRESHOLD]\n" +
         textPass3;
 
 
     /* =====================================================
-       PUT MERGED RESULTS INTO TEXTBOXES
+       TARGETED LRN
     ===================================================== */
 
-    nameField.value =
-        bestResults.name;
-
-    gradeField.value =
-        bestResults.grade;
-
-    sectionField.value =
-        bestResults.section;
-
-    lrnField.value =
-        bestResults.lrn;
-
-    idField.value =
-        bestResults.id;
-
-
-    console.log(
-        "FINAL MERGED RESULTS:",
-        bestResults
-    );
-
-
-    /* =====================================================
-       TARGETED LRN OCR
-    ===================================================== */
+    /*
+     * Only run the slower targeted
+     * LRN scan if Pass 1, 2 and 3
+     * failed to produce a valid LRN.
+     */
 
     if (
         !isValidLRN(
@@ -1767,11 +1646,6 @@ async function performOCR() {
             bestResults.lrn =
                 targetedLRN;
 
-
-            lrnField.value =
-                targetedLRN;
-
-
             rawOCR.textContent +=
 
                 "\n\n" +
@@ -1784,7 +1658,7 @@ async function performOCR() {
 
 
     /* =====================================================
-       FINAL RESULTS
+       FINAL TEXTBOXES
     ===================================================== */
 
     nameField.value =
@@ -1803,6 +1677,12 @@ async function performOCR() {
         bestResults.id;
 
 
+    console.log(
+        "FINAL MERGED RESULTS:",
+        bestResults
+    );
+
+
     progressBar.style.width =
         "100%";
 
@@ -1813,13 +1693,12 @@ async function performOCR() {
 
     if (
         isValidLRN(
-            lrnField.value
+            bestResults.lrn
         )
     ) {
 
         status.textContent =
             "OCR complete. Checking database...";
-
 
         await checkDatabase();
 
@@ -1829,7 +1708,6 @@ async function performOCR() {
 
         status.textContent =
             "OCR complete. LRN could not be confidently detected.";
-
 
         databaseButton.disabled =
             false;
@@ -1857,21 +1735,19 @@ async function performTargetedLRNOCR(
     /*
      * LRN area.
      *
-     * This remains based on the
-     * processed 1850 × 617 image.
+     * This remains deliberately
+     * broad so slight ID positioning
+     * does not cut off the LRN.
      */
 
     const x =
         width * 0.05;
 
-
     const y =
         height * 0.25;
 
-
     const cropWidth =
         width * 0.90;
-
 
     const cropHeight =
         height * 0.18;
@@ -1883,15 +1759,12 @@ async function performTargetedLRNOCR(
 
     lrnCanvas.width =
         Math.round(
-            cropWidth *
-            scale
+            cropWidth * scale
         );
-
 
     lrnCanvas.height =
         Math.round(
-            cropHeight *
-            scale
+            cropHeight * scale
         );
 
 
@@ -1899,7 +1772,6 @@ async function performTargetedLRNOCR(
         lrnCanvas.getContext(
             "2d"
         );
-
 
     ctx.imageSmoothingEnabled =
         true;
@@ -1929,7 +1801,8 @@ async function performTargetedLRNOCR(
 
     preprocessCanvas(
         lrnCanvas,
-        1.6
+        1.6,
+        0
     );
 
 
@@ -1947,21 +1820,11 @@ async function performTargetedLRNOCR(
 
             {
 
-                logger:
-                    function(info) {
-
-                        console.log(
-                            "LRN OCR:",
-                            info
-                        );
-
-                    },
-
                 tessedit_pageseg_mode:
                     7,
 
                 tessedit_char_whitelist:
-                    "LRN:0123456789"
+                    "LRN:0123456789OoQqIiLlSsBbGg"
 
             }
 
@@ -2015,7 +1878,9 @@ function parseOCR(text) {
             );
 
 
-    /* LRN */
+    /* =====================================================
+       LRN
+    ===================================================== */
 
     const lrn =
         extractBestLRN(
@@ -2033,7 +1898,9 @@ function parseOCR(text) {
     }
 
 
-    /* ID NUMBER */
+    /* =====================================================
+       ID NUMBER
+    ===================================================== */
 
     let idMatch =
         text.match(
@@ -2050,7 +1917,6 @@ function parseOCR(text) {
             "-" +
             idMatch[2];
 
-
         if (
             idMatch[3]
         ) {
@@ -2058,7 +1924,6 @@ function parseOCR(text) {
             const suffix =
                 idMatch[3]
                     .toUpperCase();
-
 
             if (
                 suffix.length > 0
@@ -2071,7 +1936,6 @@ function parseOCR(text) {
             }
 
         }
-
 
         result.id =
             id;
@@ -2097,7 +1961,6 @@ function parseOCR(text) {
                 "-" +
                 fallbackID[2];
 
-
             if (
                 fallbackID[3]
             ) {
@@ -2114,7 +1977,9 @@ function parseOCR(text) {
     }
 
 
-    /* GRADE + SECTION */
+    /* =====================================================
+       GRADE + SECTION
+    ===================================================== */
 
     let gradeMatch =
         text.match(
@@ -2130,7 +1995,6 @@ function parseOCR(text) {
 
         result.grade =
             gradeMatch[1];
-
 
         result.section =
             cleanSection(
@@ -2159,7 +2023,6 @@ function parseOCR(text) {
             result.grade =
                 fallbackGrade[1];
 
-
             result.section =
                 cleanSection(
                     fallbackGrade[2]
@@ -2170,7 +2033,9 @@ function parseOCR(text) {
     }
 
 
-    /* NAME */
+    /* =====================================================
+       NAME
+    ===================================================== */
 
     for (
         const line of lines
@@ -2233,12 +2098,6 @@ function parseOCR(text) {
     }
 
 
-    console.log(
-        "PARSED OCR PASS:",
-        result
-    );
-
-
     return result;
 
 }
@@ -2253,6 +2112,10 @@ function mergeOCRResults(
     newResults
 ) {
 
+    /*
+     * NAME
+     */
+
     if (
         !bestResults.name &&
         newResults.name
@@ -2263,6 +2126,10 @@ function mergeOCRResults(
 
     }
 
+
+    /*
+     * GRADE
+     */
 
     if (
         !bestResults.grade &&
@@ -2275,6 +2142,10 @@ function mergeOCRResults(
     }
 
 
+    /*
+     * SECTION
+     */
+
     if (
         !bestResults.section &&
         newResults.section
@@ -2285,6 +2156,13 @@ function mergeOCRResults(
 
     }
 
+
+    /*
+     * LRN
+     *
+     * NEVER replace a valid
+     * 12-digit LRN.
+     */
 
     if (
         !isValidLRN(
@@ -2300,6 +2178,10 @@ function mergeOCRResults(
 
     }
 
+
+    /*
+     * ID NUMBER
+     */
 
     if (
         !bestResults.id &&
@@ -2322,6 +2204,11 @@ function mergeOCRResults(
 ========================================================= */
 
 function extractBestLRN(text) {
+
+    /*
+     * METHOD 1
+     * Directly after LRN.
+     */
 
     let match =
         text.match(
@@ -2352,6 +2239,11 @@ function extractBestLRN(text) {
     }
 
 
+    /*
+     * METHOD 2
+     * OCR may damage "LRN".
+     */
+
     match =
         text.match(
 
@@ -2380,6 +2272,11 @@ function extractBestLRN(text) {
 
     }
 
+
+    /*
+     * METHOD 3
+     * Search the entire OCR text.
+     */
 
     const digitGroups =
         text.match(
@@ -2469,9 +2366,7 @@ function cleanDigits(value) {
 function isValidLRN(lrn) {
 
     return /^\d{12}$/.test(
-
         String(lrn).trim()
-
     );
 
 }
@@ -2517,10 +2412,8 @@ async function checkDatabase() {
         status.textContent =
             "No valid 12-digit LRN was detected.";
 
-
         databaseButton.disabled =
             false;
-
 
         return;
 
@@ -2537,10 +2430,8 @@ async function checkDatabase() {
             "Apps Script URL has not been entered."
         );
 
-
         databaseButton.disabled =
             false;
-
 
         return;
 
@@ -2550,10 +2441,8 @@ async function checkDatabase() {
     status.textContent =
         "Checking Google Sheets...";
 
-
     databaseButton.disabled =
         true;
-
 
     databaseResult.style.display =
         "none";
@@ -2610,10 +2499,8 @@ async function checkDatabase() {
             databaseResult.style.display =
                 "block";
 
-
             databaseResult.className =
                 "database-result valid";
-
 
             databaseStatus.textContent =
                 "🟢 VALID STUDENT";
@@ -2660,16 +2547,13 @@ async function checkDatabase() {
 
         }
 
-
         else {
 
             databaseResult.style.display =
                 "block";
 
-
             databaseResult.className =
                 "database-result invalid";
-
 
             databaseStatus.textContent =
                 "🔴 STUDENT NOT FOUND";
@@ -2695,7 +2579,6 @@ async function checkDatabase() {
 
     }
 
-
     catch (error) {
 
         console.error(
@@ -2707,10 +2590,8 @@ async function checkDatabase() {
         databaseResult.style.display =
             "block";
 
-
         databaseResult.className =
             "database-result invalid";
-
 
         databaseStatus.textContent =
             "⚠️ DATABASE CONNECTION FAILED";
@@ -2735,7 +2616,6 @@ async function checkDatabase() {
             "Database connection failed.";
 
     }
-
 
     finally {
 
@@ -2781,7 +2661,6 @@ function escapeHTML(value) {
         );
 
 }
-
 
 </script>
 
