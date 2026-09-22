@@ -1,3 +1,4 @@
+```html
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -786,6 +787,7 @@ function preprocessCanvas(
 
 }
 
+
 /* =========================================================
    MAIN OCR PASS 1 + PASS 2 ONLY
 ========================================================= */
@@ -903,6 +905,7 @@ async function performOCR() {
         canvas,
         1.55
     );
+
 
     processedImage.src =
         canvas.toDataURL(
@@ -1296,11 +1299,6 @@ async function performTargetedLRNOCR(
         fullCanvas.height;
 
 
-    /*
-     * LRN area remains based on your
-     * 1850 × 617 processed image.
-     */
-
     const x =
         width * 0.05;
 
@@ -1406,6 +1404,7 @@ async function performTargetedLRNOCR(
 
 /* =========================================================
    OCR PARSING
+   IMPROVED IDENTIFICATION
 ========================================================= */
 
 function parseOCR(text) {
@@ -1425,10 +1424,12 @@ function parseOCR(text) {
         String(text)
             .split(/\r?\n/)
             .map(
-                line => line.trim()
+                line =>
+                    line.trim()
             )
             .filter(
-                line => line.length > 0
+                line =>
+                    line.length > 0
             );
 
 
@@ -1440,7 +1441,7 @@ function parseOCR(text) {
         extractBestLRN(text);
 
     if (
-        isValidLRN(lrn)
+        lrn
     ) {
 
         result.lrn =
@@ -1453,196 +1454,32 @@ function parseOCR(text) {
        ID NUMBER
     ===================================================== */
 
-    let idMatch =
-        text.match(
-
-            /ID\s*(?:NO|NUMBER)?\s*[:#.\-]?\s*([0-9OoQq]{3,})\s*[-–—\s]\s*([0-9OoQq]{2,})\s*[-–—\s]?\s*([A-Za-z0-9]{2,5})?/i
-
-        );
-
-
-    if (idMatch) {
-
-        let part1 =
-            cleanIDDigits(
-                idMatch[1]
-            );
-
-        let part2 =
-            cleanIDDigits(
-                idMatch[2]
-            );
-
-        let id =
-            part1 +
-            "-" +
-            part2;
-
-        if (idMatch[3]) {
-
-            id +=
-                "-" +
-                normalizeIDSuffix(
-                    idMatch[3]
-                );
-
-        }
-
-        result.id =
-            id;
-
-    } else {
-
-        const fallbackID =
-            text.match(
-
-                /\b([0-9OoQq]{5,})\s*[-–—\s]\s*([0-9OoQq]{2,})\s*[-–—\s]?\s*(SHS|JHS|5H5|JH5)?\b/i
-
-            );
-
-        if (fallbackID) {
-
-            result.id =
-                cleanIDDigits(
-                    fallbackID[1]
-                ) +
-                "-" +
-                cleanIDDigits(
-                    fallbackID[2]
-                );
-
-            if (fallbackID[3]) {
-
-                result.id +=
-                    "-" +
-                    normalizeIDSuffix(
-                        fallbackID[3]
-                    );
-
-            }
-
-        }
-
-    }
+    result.id =
+        parseIDFromText(text);
 
 
     /* =====================================================
        GRADE + SECTION
     ===================================================== */
 
-    let gradeMatch =
-        text.match(
+    const gradeSection =
+        parseGradeAndSection(text);
 
-            /GRADE\s*(?:LEVEL)?\s*(7|8|9|10|11|12|I2|l2)\s*[-–—:]?\s*([A-Za-z0-9][A-Za-z0-9 .'-]*)/i
+    result.grade =
+        gradeSection.grade;
 
-        );
-
-
-    if (gradeMatch) {
-
-        result.grade =
-            normalizeGrade(
-                gradeMatch[1]
-            );
-
-        result.section =
-            cleanSection(
-                gradeMatch[2]
-            );
-
-    }
-
-
-    if (!result.grade) {
-
-        const fallbackGrade =
-            text.match(
-
-                /\b(?:G[A-Z]*R[A-Z]*D[A-Z]*E?)\s*[^0-9]{0,3}(7|8|9|10|11|12|I2|l2)\s*[-–—:]?\s*([A-Za-z0-9 .'-]+)/i
-
-            );
-
-        if (fallbackGrade) {
-
-            result.grade =
-                normalizeGrade(
-                    fallbackGrade[1]
-                );
-
-            result.section =
-                cleanSection(
-                    fallbackGrade[2]
-                );
-
-        }
-
-    }
+    result.section =
+        gradeSection.section;
 
 
     /* =====================================================
        NAME
     ===================================================== */
 
-    for (
-        const line of lines
-    ) {
-
-        const upper =
-            line.toUpperCase();
-
-        if (
-            upper.includes("LRN") ||
-            upper.includes("ID NO") ||
-            upper.includes("ID NUMBER") ||
-            upper.includes("GRADE") ||
-            upper.includes("SECTION")
-        ) {
-
-            continue;
-
-        }
-
-        const cleaned =
-            line
-                .replace(
-                    /[^A-Za-zÀ-ÿ.' -]/g,
-                    ""
-                )
-                .replace(
-                    /\s+/g,
-                    " "
-                )
-                .trim();
-
-        const words =
-            cleaned
-                .split(" ")
-                .filter(
-                    word =>
-                        word.length > 0
-                );
-
-        const letterCount =
-            (
-                cleaned.match(
-                    /[A-Za-zÀ-ÿ]/g
-                ) || []
-            ).length;
-
-        if (
-            words.length >= 2 &&
-            cleaned.length >= 5 &&
-            letterCount >= 4
-        ) {
-
-            result.name =
-                cleaned;
-
-            break;
-
-        }
-
-    }
+    result.name =
+        parseNameFromText(
+            lines
+        );
 
 
     console.log(
@@ -1656,13 +1493,519 @@ function parseOCR(text) {
 
 
 /* =========================================================
+   IMPROVED NAME PARSER
+========================================================= */
+
+function parseNameFromText(lines) {
+
+    if (
+        !Array.isArray(lines)
+    ) {
+
+        return "";
+
+    }
+
+
+    const candidates = [];
+
+
+    for (
+        let i = 0;
+        i < lines.length;
+        i++
+    ) {
+
+        const line =
+            lines[i];
+
+        const upper =
+            line.toUpperCase();
+
+
+        /*
+         * Never consider obvious non-name fields.
+         */
+
+        if (
+            upper.includes("LRN") ||
+            upper.includes("ID NO") ||
+            upper.includes("ID NUMBER") ||
+            upper.includes("GRADE") ||
+            upper.includes("SECTION")
+        ) {
+
+            continue;
+
+        }
+
+
+        const cleaned =
+            line
+                .replace(
+                    /[^A-Za-zÀ-ÿ.' -]/g,
+                    ""
+                )
+                .replace(
+                    /\s+/g,
+                    " "
+                )
+                .trim();
+
+
+        if (
+            !cleaned
+        ) {
+
+            continue;
+
+        }
+
+
+        const words =
+            cleaned
+                .split(/\s+/)
+                .filter(
+                    word =>
+                        word.length > 0
+                );
+
+
+        const letterCount =
+            (
+                cleaned.match(
+                    /[A-Za-zÀ-ÿ]/g
+                ) || []
+            ).length;
+
+
+        if (
+            words.length < 2 ||
+            cleaned.length < 5 ||
+            letterCount < 4
+        ) {
+
+            continue;
+
+        }
+
+
+        /*
+         * Reject lines that look strongly numeric.
+         */
+
+        const digits =
+            (
+                line.match(
+                    /[0-9]/g
+                ) || []
+            ).length;
+
+
+        if (
+            digits > 2
+        ) {
+
+            continue;
+
+        }
+
+
+        let score = 0;
+
+
+        /*
+         * The name is normally near the beginning
+         * of the ID.
+         */
+
+        if (
+            i === 0
+        ) {
+
+            score += 5;
+
+        }
+
+        else if (
+            i === 1
+        ) {
+
+            score += 3;
+
+        }
+
+        else if (
+            i === 2
+        ) {
+
+            score += 1;
+
+        }
+
+
+        /*
+         * Names commonly contain multiple words.
+         */
+
+        if (
+            words.length >= 3
+        ) {
+
+            score += 3;
+
+        }
+
+        else if (
+            words.length === 2
+        ) {
+
+            score += 1;
+
+        }
+
+
+        /*
+         * Penalize lines containing obvious
+         * field-like characters.
+         */
+
+        if (
+            /[:=#]/.test(line)
+        ) {
+
+            score -= 3;
+
+        }
+
+
+        /*
+         * Penalize lines that are mostly uppercase
+         * only when they look like labels.
+         */
+
+        if (
+            /^[A-Z\s.'-]+$/.test(cleaned) &&
+            words.length <= 2
+        ) {
+
+            score -= 1;
+
+        }
+
+
+        candidates.push({
+
+            name: cleaned,
+
+            score: score,
+
+            position: i
+
+        });
+
+    }
+
+
+    if (
+        candidates.length === 0
+    ) {
+
+        return "";
+
+    }
+
+
+    candidates.sort(
+        function(a, b) {
+
+            if (
+                b.score !== a.score
+            ) {
+
+                return b.score -
+                    a.score;
+
+            }
+
+            return a.position -
+                b.position;
+
+        }
+    );
+
+
+    return candidates[0].name;
+
+}
+
+
+/* =========================================================
+   IMPROVED ID NUMBER PARSER
+========================================================= */
+
+function parseIDFromText(text) {
+
+    if (!text) {
+        return "";
+    }
+
+
+    const source =
+        String(text);
+
+
+    /*
+     * Look for ID NO / ID NUMBER first.
+     */
+
+    const labeled =
+        source.match(
+
+            /ID\s*(?:NO|NUMBER)?\s*[:#.\-]?\s*([0-9OoQqIiLl|SsBbGg]{3,})\s*[-–—\s]\s*([0-9OoQqIiLl|SsBbGg]{2,})\s*[-–—\s]?\s*([A-Za-z0-9]{2,5})?/i
+
+        );
+
+
+    if (
+        labeled
+    ) {
+
+        const part1 =
+            cleanIDDigits(
+                labeled[1]
+            );
+
+        const part2 =
+            cleanIDDigits(
+                labeled[2]
+            );
+
+        if (
+            part1.length >= 3 &&
+            part2.length >= 2
+        ) {
+
+            let id =
+                part1 +
+                "-" +
+                part2;
+
+
+            if (
+                labeled[3]
+            ) {
+
+                id +=
+                    "-" +
+                    normalizeIDSuffix(
+                        labeled[3]
+                    );
+
+            }
+
+
+            return id;
+
+        }
+
+    }
+
+
+    /*
+     * Search for the ID structure without
+     * requiring the label.
+     */
+
+    const fallback =
+        source.match(
+
+            /\b([0-9OoQqIiLl|SsBbGg]{5,})\s*[-–—\s]\s*([0-9OoQqIiLl|SsBbGg]{2,})\s*[-–—\s]?\s*(SHS|JHS|5H5|JH5)?\b/i
+
+        );
+
+
+    if (
+        fallback
+    ) {
+
+        const part1 =
+            cleanIDDigits(
+                fallback[1]
+            );
+
+        const part2 =
+            cleanIDDigits(
+                fallback[2]
+            );
+
+
+        if (
+            part1.length >= 5 &&
+            part2.length >= 2
+        ) {
+
+            let id =
+                part1 +
+                "-" +
+                part2;
+
+
+            if (
+                fallback[3]
+            ) {
+
+                id +=
+                    "-" +
+                    normalizeIDSuffix(
+                        fallback[3]
+                    );
+
+            }
+
+
+            return id;
+
+        }
+
+    }
+
+
+    return "";
+
+}
+
+
+/* =========================================================
+   GRADE + SECTION PARSER
+========================================================= */
+
+function parseGradeAndSection(text) {
+
+    if (!text) {
+
+        return {
+            grade: "",
+            section: ""
+        };
+
+    }
+
+
+    const source =
+        String(text);
+
+
+    /*
+     * Normal GRADE pattern.
+     */
+
+    let match =
+        source.match(
+
+            /GRADE\s*(?:LEVEL)?\s*(7|8|9|10|11|12|I2|l2)\s*[-–—:]?\s*([A-Za-z0-9][A-Za-z0-9 .'-]*)/i
+
+        );
+
+
+    /*
+     * OCR-tolerant GRADE pattern.
+     */
+
+    if (
+        !match
+    ) {
+
+        match =
+            source.match(
+
+                /\bG[A-Z0-9]*R[A-Z0-9]*D[A-Z0-9]*E?\s*[^0-9]{0,3}(7|8|9|10|11|12|I2|l2)\s*[-–—:]?\s*([A-Za-z0-9 .'-]+)/i
+
+            );
+
+    }
+
+
+    if (
+        match
+    ) {
+
+        return {
+
+            grade:
+                normalizeGrade(
+                    match[1]
+                ),
+
+            section:
+                cleanSection(
+                    match[2]
+                )
+
+        };
+
+    }
+
+
+    /*
+     * Last fallback for:
+     *
+     * 12 - ROENTGEN
+     */
+
+    const fallback =
+        source.match(
+
+            /\b(7|8|9|10|11|12|I2|l2)\s*[-–—:]\s*([A-Za-z][A-Za-z0-9 .'-]*)/i
+
+        );
+
+
+    if (
+        fallback
+    ) {
+
+        return {
+
+            grade:
+                normalizeGrade(
+                    fallback[1]
+                ),
+
+            section:
+                cleanSection(
+                    fallback[2]
+                )
+
+        };
+
+    }
+
+
+    return {
+
+        grade: "",
+        section: ""
+
+    };
+
+}
+
+
+/* =========================================================
    MERGE OCR RESULTS
+   IMPROVED RESULT SELECTION
 ========================================================= */
 
 function mergeOCRResults(
     bestResults,
     newResults
 ) {
+
+
+    /* =====================================================
+       NAME
+    ===================================================== */
 
     if (
         !bestResults.name &&
@@ -1674,6 +2017,39 @@ function mergeOCRResults(
 
     }
 
+    else if (
+        bestResults.name &&
+        newResults.name
+    ) {
+
+        const oldScore =
+            scoreName(
+                bestResults.name
+            );
+
+        const newScore =
+            scoreName(
+                newResults.name
+            );
+
+
+        if (
+            newScore >
+            oldScore
+        ) {
+
+            bestResults.name =
+                newResults.name;
+
+        }
+
+    }
+
+
+    /* =====================================================
+       GRADE
+    ===================================================== */
+
     if (
         !bestResults.grade &&
         newResults.grade
@@ -1683,6 +2059,11 @@ function mergeOCRResults(
             newResults.grade;
 
     }
+
+
+    /* =====================================================
+       SECTION
+    ===================================================== */
 
     if (
         !bestResults.section &&
@@ -1694,19 +2075,52 @@ function mergeOCRResults(
 
     }
 
+    else if (
+        bestResults.section &&
+        newResults.section
+    ) {
 
-    /*
-     * A valid LRN is never replaced
-     * by an invalid LRN.
-     */
+        if (
+            newResults.section.length >
+            bestResults.section.length
+        ) {
+
+            bestResults.section =
+                newResults.section;
+
+        }
+
+    }
+
+
+    /* =====================================================
+       LRN
+    ===================================================== */
 
     if (
-        !isValidLRN(
-            bestResults.lrn
-        ) &&
         isValidLRN(
             newResults.lrn
         )
+    ) {
+
+        if (
+            !isValidLRN(
+                bestResults.lrn
+            ) ||
+            bestResults.lrn !==
+            newResults.lrn
+        ) {
+
+            bestResults.lrn =
+                newResults.lrn;
+
+        }
+
+    }
+
+    else if (
+        !bestResults.lrn &&
+        newResults.lrn
     ) {
 
         bestResults.lrn =
@@ -1714,6 +2128,10 @@ function mergeOCRResults(
 
     }
 
+
+    /* =====================================================
+       ID NUMBER
+    ===================================================== */
 
     if (
         !bestResults.id &&
@@ -1725,16 +2143,147 @@ function mergeOCRResults(
 
     }
 
+    else if (
+        bestResults.id &&
+        newResults.id
+    ) {
+
+        const oldID =
+            normalizeIDNumber(
+                bestResults.id
+            );
+
+        const newID =
+            normalizeIDNumber(
+                newResults.id
+            );
+
+
+        if (
+            newID.length >
+            oldID.length
+        ) {
+
+            bestResults.id =
+                newResults.id;
+
+        }
+
+    }
+
+
     return bestResults;
 
 }
 
 
 /* =========================================================
+   NAME SCORE
+========================================================= */
+
+function scoreName(name) {
+
+    if (!name) {
+        return 0;
+    }
+
+
+    const words =
+        String(name)
+            .trim()
+            .split(/\s+/)
+            .filter(
+                word =>
+                    word.length > 0
+            );
+
+
+    let score = 0;
+
+
+    if (
+        words.length >= 2
+    ) {
+
+        score += 3;
+
+    }
+
+
+    if (
+        words.length >= 3
+    ) {
+
+        score += 3;
+
+    }
+
+
+    const letters =
+        (
+            String(name)
+                .match(
+                    /[A-Za-zÀ-ÿ]/g
+                ) || []
+        ).length;
+
+
+    score +=
+        Math.min(
+            letters,
+            20
+        ) / 5;
+
+
+    if (
+        String(name)
+            .length >= 10
+    ) {
+
+        score += 1;
+
+    }
+
+
+    if (
+        /\d/.test(
+            String(name)
+        )
+    ) {
+
+        score -= 4;
+
+    }
+
+
+    if (
+        /LRN|ID\s*NO|GRADE|SECTION/i.test(
+            String(name)
+        )
+    ) {
+
+        score -= 10;
+
+    }
+
+
+    return score;
+
+}
+
+
+/* =========================================================
    LRN EXTRACTION
+   Improved to recognize both complete and
+   shorter detected numbers.
 ========================================================= */
 
 function extractBestLRN(text) {
+
+    if (!text) {
+        return "";
+    }
+
 
     const source =
         String(text);
@@ -1742,30 +2291,106 @@ function extractBestLRN(text) {
 
     /*
      * -----------------------------------------------------
-     * 1. Look for an LRN label first.
+     * 1. LRN label has highest priority.
      * -----------------------------------------------------
      */
 
-    let match =
+    const labeledMatches =
         source.match(
 
-            /LRN\s*[:#=\-]?\s*([0-9OoQqIiLl|SsBbGg\s]{8,30})/i
+            /LRN\s*[:#=\-]?\s*([0-9OoQqIiLl|SsBbGg\s]{1,30})/gi
 
         );
 
 
-    if (match) {
+    if (
+        labeledMatches
+    ) {
 
-        const candidates =
-            getLRNCandidates(
-                match[1]
-            );
+        const labeledCandidates = [];
 
-        if (
-            candidates.length > 0
+
+        for (
+            const labeled of labeledMatches
         ) {
 
-            return candidates[0];
+            const numberPart =
+                labeled.replace(
+
+                    /^.*?LRN\s*[:#=\-]?\s*/i,
+
+                    ""
+
+                );
+
+
+            const candidates =
+                getLRNCandidates(
+                    numberPart
+                );
+
+
+            for (
+                const candidate of candidates
+            ) {
+
+                if (
+                    candidate &&
+                    !labeledCandidates.includes(
+                        candidate
+                    )
+                ) {
+
+                    labeledCandidates.push(
+                        candidate
+                    );
+
+                }
+
+            }
+
+        }
+
+
+        /*
+         * Always prefer a complete 12-digit LRN.
+         */
+
+        for (
+            const candidate of labeledCandidates
+        ) {
+
+            if (
+                isValidLRN(candidate)
+            ) {
+
+                return candidate;
+
+            }
+
+        }
+
+
+        /*
+         * If OCR only captured part of the LRN,
+         * return the longest available candidate.
+         */
+
+        labeledCandidates.sort(
+            function(a, b) {
+
+                return b.length -
+                    a.length;
+
+            }
+        );
+
+
+        if (
+            labeledCandidates.length > 0
+        ) {
+
+            return labeledCandidates[0];
 
         }
 
@@ -1774,111 +2399,41 @@ function extractBestLRN(text) {
 
     /*
      * -----------------------------------------------------
-     * 2. Look for a long digit-like OCR sequence.
+     * 2. Search entire OCR text.
      * -----------------------------------------------------
      */
 
     const digitGroups =
         source.match(
 
-            /[0-9OoQqIiLl|SsBbGg][0-9OoQqIiLl|SsBbGg\s]{7,30}/g
+            /[0-9OoQqIiLl|SsBbGg][0-9OoQqIiLl|SsBbGg\s]{0,30}/g
 
         );
 
 
-    if (digitGroups) {
+    if (
+        digitGroups
+    ) {
+
+        const candidates = [];
+
 
         for (
             const group of digitGroups
         ) {
 
-            const candidates =
+            const found =
                 getLRNCandidates(
                     group
                 );
 
-            if (
-                candidates.length > 0
-            ) {
 
-                return candidates[0];
-
-            }
-
-        }
-
-    }
-
-    return "";
-
-}
-
-
-function getLRNCandidates(value) {
-
-    const cleaned =
-        cleanDigits(value);
-
-    const candidates = [];
-
-
-    /*
-     * -----------------------------------------------------
-     * EXACT 12 DIGITS
-     * -----------------------------------------------------
-     */
-
-    if (
-        cleaned.length === 12
-    ) {
-
-        candidates.push(
-            cleaned
-        );
-
-        return candidates;
-
-    }
-
-
-    /*
-     * -----------------------------------------------------
-     * MORE THAN 12 DIGITS
-     *
-     * Example:
-     *
-     * 1341021302248
-     *
-     * Possible LRNs:
-     *
-     * 134102130224
-     * 341021302248
-     * -----------------------------------------------------
-     */
-
-    if (
-        cleaned.length > 12
-    ) {
-
-        for (
-            let i = 0;
-            i <= cleaned.length - 12;
-            i++
-        ) {
-
-            const candidate =
-                cleaned.substring(
-                    i,
-                    i + 12
-                );
-
-            if (
-                /^\d{12}$/.test(
-                    candidate
-                )
+            for (
+                const candidate of found
             ) {
 
                 if (
+                    candidate &&
                     !candidates.includes(
                         candidate
                     )
@@ -1894,7 +2449,135 @@ function getLRNCandidates(value) {
 
         }
 
+
+        /*
+         * Prefer a complete 12-digit candidate.
+         */
+
+        for (
+            const candidate of candidates
+        ) {
+
+            if (
+                isValidLRN(candidate)
+            ) {
+
+                return candidate;
+
+            }
+
+        }
+
+
+        /*
+         * Otherwise use the longest detected
+         * number.
+         */
+
+        candidates.sort(
+            function(a, b) {
+
+                return b.length -
+                    a.length;
+
+            }
+        );
+
+
+        if (
+            candidates.length > 0
+        ) {
+
+            return candidates[0];
+
+        }
+
     }
+
+
+    return "";
+
+}
+
+
+/* =========================================================
+   LRN CANDIDATES
+========================================================= */
+
+function getLRNCandidates(value) {
+
+    const cleaned =
+        cleanDigits(value);
+
+    const candidates = [];
+
+
+    if (
+        !cleaned
+    ) {
+
+        return candidates;
+
+    }
+
+
+    /*
+     * -----------------------------------------------------
+     * 1–12 digits
+     * -----------------------------------------------------
+     */
+
+    if (
+        cleaned.length <= 12
+    ) {
+
+        candidates.push(
+            cleaned
+        );
+
+        return candidates;
+
+    }
+
+
+    /*
+     * -----------------------------------------------------
+     * MORE THAN 12 DIGITS
+     *
+     * Check every possible 12-digit window.
+     * -----------------------------------------------------
+     */
+
+    for (
+        let i = 0;
+        i <= cleaned.length - 12;
+        i++
+    ) {
+
+        const candidate =
+            cleaned.substring(
+                i,
+                i + 12
+            );
+
+
+        if (
+            /^\d{12}$/.test(
+                candidate
+            ) &&
+            !candidates.includes(
+                candidate
+            )
+        ) {
+
+            candidates.push(
+                candidate
+            );
+
+        }
+
+    }
+
 
     return candidates;
 
@@ -1902,12 +2585,14 @@ function getLRNCandidates(value) {
 
 
 /* =========================================================
-   CLEAN LRN
+   CLEAN DIGITS
 ========================================================= */
 
 function cleanDigits(value) {
 
     return String(value)
+
+        .toUpperCase()
 
         .replace(
             /[OoQq]/g,
@@ -2011,6 +2696,7 @@ function normalizeIDNumber(value) {
             .toUpperCase()
             .trim();
 
+
     const match =
         source.match(
 
@@ -2019,7 +2705,9 @@ function normalizeIDNumber(value) {
         );
 
 
-    if (match) {
+    if (
+        match
+    ) {
 
         let result =
             cleanIDDigits(
@@ -2029,7 +2717,10 @@ function normalizeIDNumber(value) {
                 match[2]
             );
 
-        if (match[3]) {
+
+        if (
+            match[3]
+        ) {
 
             result +=
                 normalizeIDSuffix(
@@ -2037,6 +2728,7 @@ function normalizeIDNumber(value) {
                 );
 
         }
+
 
         return result;
 
@@ -2070,10 +2762,12 @@ function normalizeGrade(value) {
                 "0"
             );
 
+
     const match =
         source.match(
             /7|8|9|10|11|12/
         );
+
 
     return match
         ? match[0]
@@ -2219,7 +2913,9 @@ async function checkDatabase() {
             await fetch(url);
 
 
-        if (!response.ok) {
+        if (
+            !response.ok
+        ) {
 
             throw new Error(
                 "HTTP error: " +
@@ -2538,3 +3234,4 @@ function escapeHTML(value) {
 
 </body>
 </html>
+```
