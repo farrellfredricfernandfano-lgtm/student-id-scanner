@@ -1,10 +1,10 @@
+```html
 <!DOCTYPE html>
 
 <html lang="en">
 
 <head>
 
-```
 <meta charset="UTF-8">
 
 <meta
@@ -372,13 +372,11 @@
     }
 
 </style>
-```
 
 </head>
 
 <body>
 
-```
 <h1>
     Student ID Scanner
 </h1>
@@ -603,7 +601,7 @@
     id="lrnCanvas"
     style="display:none;">
 </canvas>
-```
+
 
 <script>
 
@@ -1270,7 +1268,7 @@ async function performOCR() {
                             progressBar.style.width =
                                 (
                                     info.progress *
-                                    30
+                                    45
                                 ) + "%";
 
                         }
@@ -1337,7 +1335,7 @@ async function performOCR() {
     /* =====================================================
        OCR PASS 2
        MILD SHARPEN
-    ===================================================== */
+       ===================================================== */
 
     status.textContent =
         "Running second OCR pass...";
@@ -1517,9 +1515,9 @@ async function performOCR() {
 
                             progressBar.style.width =
                                 (
-                                    30 +
+                                    45 +
                                     info.progress *
-                                    30
+                                    45
                                 ) + "%";
 
                         }
@@ -1560,200 +1558,9 @@ async function performOCR() {
         );
 
 
-
-/* =====================================================
-   OCR PASS 3
-   HIGH-RESOLUTION GRAYSCALE FALLBACK
-   ===================================================== */
-
-status.textContent =
-    "Running final enhanced OCR pass...";
-
-
-/*
- * IMPORTANT:
- *
- * Pass 3 no longer uses the raw color
- * camera image.
- *
- * Instead, it uses the SAME processed
- * 1850 × 617 crop that Pass 1 and Pass 2
- * already use.
- *
- * The image is enlarged before OCR so
- * small characters have more pixels.
- */
-
-const enhancedCanvas =
-    document.createElement(
-        "canvas"
-    );
-
-
-const enhanceScale =
-    1.5;
-
-
-enhancedCanvas.width =
-    Math.round(
-        canvas.width *
-        enhanceScale
-    );
-
-
-enhancedCanvas.height =
-    Math.round(
-        canvas.height *
-        enhanceScale
-    );
-
-
-const enhancedCtx =
-    enhancedCanvas.getContext(
-        "2d",
-        {
-            willReadFrequently:
-                true
-        }
-    );
-
-
-enhancedCtx.imageSmoothingEnabled =
-    true;
-
-
-enhancedCtx.imageSmoothingQuality =
-    "high";
-
-
-/*
- * Copy the already processed
- * grayscale image from Pass 1.
- */
-
-enhancedCtx.drawImage(
-
-    canvas,
-
-    0,
-    0,
-
-    canvas.width,
-    canvas.height,
-
-    0,
-    0,
-
-    enhancedCanvas.width,
-    enhancedCanvas.height
-
-);
-
-
-/*
- * Apply stronger contrast to the
- * enlarged image.
- */
-
-preprocessCanvas(
-    enhancedCanvas,
-    1.55
-);
-
-
-/*
- * OCR Pass 3
- *
- * PSM 11 is useful when the text is
- * separated into different regions.
- *
- * This can help when the ID contains:
- *
- * NAME
- * LRN
- * ID NO.
- * GRADE / SECTION
- */
-
-const result3 =
-    await Tesseract.recognize(
-
-        enhancedCanvas,
-
-        "eng",
-
-        {
-
-            logger:
-                function(info) {
-
-                    console.log(
-                        "TESSERACT PASS 3:",
-                        info
-                    );
-
-
-                    if (
-                        info.progress !==
-                        undefined
-                    ) {
-
-                        progressBar.style.width =
-                            (
-                                60 +
-                                info.progress *
-                                30
-                            ) + "%";
-
-                    }
-
-                },
-
-            tessedit_pageseg_mode:
-                11,
-
-            preserve_interword_spaces:
-                1
-
-        }
-
-    );
-
-
-const textPass3 =
-    result3.data.text;
-
-
-console.log(
-    "OCR PASS 3 - HIGH RESOLUTION:",
-    textPass3
-);
-
-
-const pass3Results =
-    parseOCR(
-        textPass3
-    );
-
-
-/*
- * Only use Pass 3 to fill information
- * that Pass 1 and Pass 2 did not get.
- *
- * This prevents a bad Pass 3 result
- * from replacing a good earlier result.
- */
-
-bestResults =
-    mergeOCRResults(
-        bestResults,
-        pass3Results
-    );
-```
-
     /* =====================================================
        SHOW ALL OCR RESULTS
-    ===================================================== */
+       ===================================================== */
 
     rawOCR.textContent =
 
@@ -1763,17 +1570,12 @@ bestResults =
         "\n\n" +
 
         "[OCR PASS 2]\n" +
-        textPass2 +
-
-        "\n\n" +
-
-        "[OCR PASS 3]\n" +
-        textPass3;
+        textPass2;
 
 
     /* =====================================================
        PUT MERGED RESULTS INTO TEXTBOXES
-    ===================================================== */
+       ===================================================== */
 
     nameField.value =
         bestResults.name;
@@ -1799,7 +1601,7 @@ bestResults =
 
     /* =====================================================
        TARGETED LRN OCR
-    ===================================================== */
+       ===================================================== */
 
     if (
         !isValidLRN(
@@ -1844,7 +1646,7 @@ bestResults =
 
     /* =====================================================
        FINAL RESULTS
-    ===================================================== */
+       ===================================================== */
 
     nameField.value =
         bestResults.name;
@@ -1868,7 +1670,7 @@ bestResults =
 
     /* =====================================================
        DATABASE
-    ===================================================== */
+       ===================================================== */
 
     if (
         isValidLRN(
@@ -2847,3 +2649,5 @@ function escapeHTML(value) {
 </body>
 
 </html>
+```
+
