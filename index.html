@@ -955,11 +955,12 @@ async function captureAndScan() {
 
 /* =========================================================
    IMAGE PREPROCESSING
+   STRONGER CHARACTER / BACKGROUND CONTRAST
 ========================================================= */
 
 function preprocessCanvas(
     sourceCanvas,
-    contrast = 1.35
+    contrast = 1.55
 ) {
 
     const ctx =
@@ -984,6 +985,13 @@ function preprocessCanvas(
     const data =
         imageData.data;
 
+
+    /*
+     * Stronger contrast formula.
+     *
+     * This increases the difference between
+     * dark characters and lighter backgrounds.
+     */
 
     const factor =
         (
@@ -1012,11 +1020,22 @@ function preprocessCanvas(
             data[i + 2];
 
 
+        /*
+         * Convert RGB to grayscale.
+         *
+         * This removes color information that
+         * can interfere with OCR.
+         */
+
         let gray =
             0.299 * r +
             0.587 * g +
             0.114 * b;
 
+
+        /*
+         * Apply stronger contrast.
+         */
 
         gray =
             factor *
@@ -1033,6 +1052,53 @@ function preprocessCanvas(
                 )
             );
 
+
+        /*
+         * STRONG CHARACTER / BACKGROUND SEPARATION
+         *
+         * Very dark pixels become pure black.
+         * Very bright pixels become pure white.
+         *
+         * The middle range is preserved so that
+         * thin/anti-aliased characters aren't
+         * completely destroyed.
+         */
+
+        if (
+            gray <= 70
+        ) {
+
+            gray = 0;
+
+        }
+
+        else if (
+            gray >= 215
+        ) {
+
+            gray = 255;
+
+        }
+
+        else {
+
+            /*
+             * Stretch the remaining middle range
+             * between black and white.
+             */
+
+            gray =
+                (
+                    (gray - 70) /
+                    (215 - 70)
+                ) * 255;
+
+        }
+
+
+        /*
+         * Keep the image grayscale.
+         */
 
         data[i] =
             gray;
@@ -1500,7 +1566,7 @@ async function performOCR() {
 
     preprocessCanvas(
         canvas,
-        1.35
+        1.55
     );
 
 
