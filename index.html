@@ -29,6 +29,10 @@ h1 {
     margin-bottom: 25px;
 }
 
+/* =========================================================
+   CAMERA
+========================================================= */
+
 .camera-container {
     position: relative;
     width: 95%;
@@ -37,22 +41,50 @@ h1 {
     background: #000;
     overflow: hidden;
     border-radius: 12px;
+
+    /* Keep camera preview from being stretched */
+    aspect-ratio: 16 / 9;
 }
 
 video {
     width: 100%;
+    height: 100%;
     display: block;
+
+    /* IMPORTANT:
+       Preserve the actual camera proportions.
+       Do NOT stretch the video.
+    */
+    object-fit: contain;
+    background: #000;
 }
+
+/* =========================================================
+   ID GUIDE
+========================================================= */
 
 .scan-guide {
     position: absolute;
+
+    /*
+       Actual ID-card shape.
+       This is NOT 1851:617.
+
+       1851x617 is the OCR canvas resolution.
+       The physical ID crop keeps its own aspect ratio.
+    */
     width: 88%;
-    aspect-ratio: 1851 / 617;
+    aspect-ratio: 1.586 / 1;
+
     border: 4px solid #00ff66;
     border-radius: 8px;
+
     top: 50%;
     left: 50%;
-    transform: translate(-50%, -50%);
+
+    transform:
+        translate(-50%, -50%);
+
     box-sizing: border-box;
     pointer-events: none;
 }
@@ -206,7 +238,11 @@ OCR-Based Student Identification System
 
 <div class="camera-container">
 
-    <video id="video" autoplay playsinline></video>
+    <video
+        id="video"
+        autoplay
+        playsinline>
+    </video>
 
     <div class="scan-guide"></div>
 
@@ -264,65 +300,45 @@ OCR-Based Student Identification System
 
     <h2>Scanned Information</h2>
 
-
     <div class="field">
-
         <label>NAME</label>
-
         <input
             id="nameField"
             type="text"
             readonly>
-
     </div>
 
-
     <div class="field">
-
         <label>GRADE LEVEL</label>
-
         <input
             id="gradeField"
             type="text"
             readonly>
-
     </div>
 
-
     <div class="field">
-
         <label>SECTION</label>
-
         <input
             id="sectionField"
             type="text"
             readonly>
-
     </div>
 
-
     <div class="field">
-
         <label>LRN</label>
-
         <input
             id="lrnField"
             type="text"
             maxlength="12"
             readonly>
-
     </div>
 
-
     <div class="field">
-
         <label>ID NUMBER</label>
-
         <input
             id="idField"
             type="text"
             readonly>
-
     </div>
 
 </div>
@@ -363,7 +379,6 @@ OCR-Based Student Identification System
 
 
 <script>
-
 
 /* =========================================================
    ELEMENTS
@@ -436,23 +451,25 @@ let cameraStream = null;
 
 
 /* =========================================================
-   CAMERA CROP SETTINGS
+   CAMERA / OCR SETTINGS
 ========================================================= */
 
 /*
-   EXACT OCR IMAGE RESOLUTION:
+   IMPORTANT:
 
-   1851 × 617
+   Physical ID crop:
+   1.586 : 1
 
-   The source camera crop uses the SAME
-   aspect ratio, so the image is NOT stretched.
+   OCR output:
+   EXACTLY 1851 × 617
+
+   The ID is NOT stretched.
 */
+
+const ID_ASPECT = 1.586;
 
 const CROP_WIDTH = 1851;
 const CROP_HEIGHT = 617;
-
-const CROP_ASPECT =
-    CROP_WIDTH / CROP_HEIGHT;
 
 
 /* =========================================================
@@ -522,6 +539,9 @@ async function startCamera() {
 
         video.srcObject =
             cameraStream;
+
+
+        await video.play();
 
 
         const track =
@@ -721,14 +741,9 @@ function preprocessCanvas(
         i += 4
     ) {
 
-        const r =
-            data[i];
-
-        const g =
-            data[i + 1];
-
-        const b =
-            data[i + 2];
+        const r = data[i];
+        const g = data[i + 1];
+        const b = data[i + 2];
 
 
         let gray =
@@ -753,14 +768,9 @@ function preprocessCanvas(
             );
 
 
-        data[i] =
-            gray;
-
-        data[i + 1] =
-            gray;
-
-        data[i + 2] =
-            gray;
+        data[i] = gray;
+        data[i + 1] = gray;
+        data[i + 2] = gray;
 
     }
 
@@ -888,14 +898,9 @@ function createSharpenedCanvas(
                 );
 
 
-            data[index] =
-                value;
-
-            data[index + 1] =
-                value;
-
-            data[index + 2] =
-                value;
+            data[index] = value;
+            data[index + 1] = value;
+            data[index + 2] = value;
 
         }
 
@@ -917,21 +922,6 @@ function createSharpenedCanvas(
 /* =========================================================
    PASS 3 IMAGE
 ========================================================= */
-
-/*
-   PASS 3 IS NOT RAW COLOR.
-
-   It uses a fresh image derived from the original
-   grayscale image, with:
-
-   - stronger contrast
-   - mild sharpening
-   - slightly larger OCR image
-   - PSM 6
-
-   This gives Tesseract another representation
-   without destroying the text with hard thresholding.
-*/
 
 function createPass3Canvas(
     sourceCanvas
@@ -983,20 +973,11 @@ function createPass3Canvas(
     );
 
 
-    /*
-       Stronger contrast than Pass 1,
-       but not extreme.
-    */
-
     preprocessCanvas(
         pass3Canvas,
         1.55
     );
 
-
-    /*
-       Mild sharpen after enlargement.
-    */
 
     return createSharpenedCanvas(
         pass3Canvas
@@ -1032,42 +1013,57 @@ async function performOCR() {
 
     /*
        ======================================================
-       TRUE 1851 × 617 CROP
+       PHYSICAL CAMERA CROP
        ======================================================
+
+       This follows the actual ID-card shape.
+
+       NOTHING HERE IS 1851:617.
+
+       We crop the ID without stretching it.
     */
+
 
     let cropWidth =
         videoWidth * 0.88;
 
 
     let cropHeight =
-        cropWidth / CROP_ASPECT;
+        cropWidth / ID_ASPECT;
 
+
+    /*
+       Make sure crop fits vertically.
+    */
 
     if (
         cropHeight >
-        videoHeight * 0.92
+        videoHeight * 0.82
     ) {
 
         cropHeight =
-            videoHeight * 0.92;
+            videoHeight * 0.82;
 
         cropWidth =
-            cropHeight * CROP_ASPECT;
+            cropHeight * ID_ASPECT;
 
     }
 
 
+    /*
+       Make sure crop fits horizontally.
+    */
+
     if (
         cropWidth >
-        videoWidth * 0.96
+        videoWidth * 0.94
     ) {
 
         cropWidth =
-            videoWidth * 0.96;
+            videoWidth * 0.94;
 
         cropHeight =
-            cropWidth / CROP_ASPECT;
+            cropWidth / ID_ASPECT;
 
     }
 
@@ -1081,8 +1077,18 @@ async function performOCR() {
 
 
     /*
-       EXACT OUTPUT:
+       ======================================================
+       EXACT OCR CANVAS
+       ======================================================
+
+       Canvas is exactly:
+
        1851 × 617
+
+       BUT THE ID IS NOT STRETCHED.
+
+       We place the ID into this canvas while preserving
+       its original aspect ratio.
     */
 
     canvas.width =
@@ -1104,8 +1110,79 @@ async function performOCR() {
 
 
     /*
-       Source and destination have
-       exactly the same aspect ratio.
+       Clear canvas.
+    */
+
+    ctx.fillStyle =
+        "#ffffff";
+
+    ctx.fillRect(
+        0,
+        0,
+        CROP_WIDTH,
+        CROP_HEIGHT
+    );
+
+
+    /*
+       ======================================================
+       PRESERVE ID ASPECT RATIO
+       ======================================================
+
+       Instead of stretching 1.586:1 into 3:1,
+       calculate the largest ID image that fits
+       inside 1851×617.
+
+       This adds side padding instead of distortion.
+    */
+
+    const outputAspect =
+        CROP_WIDTH / CROP_HEIGHT;
+
+
+    let destinationWidth;
+    let destinationHeight;
+
+
+    if (
+        ID_ASPECT > outputAspect
+    ) {
+
+        /*
+           ID is wider than OCR canvas.
+        */
+
+        destinationWidth =
+            CROP_WIDTH;
+
+        destinationHeight =
+            CROP_WIDTH / ID_ASPECT;
+
+    } else {
+
+        /*
+           ID is taller than OCR canvas.
+        */
+
+        destinationHeight =
+            CROP_HEIGHT;
+
+        destinationWidth =
+            CROP_HEIGHT * ID_ASPECT;
+
+    }
+
+
+    const destinationX =
+        (CROP_WIDTH - destinationWidth) / 2;
+
+
+    const destinationY =
+        (CROP_HEIGHT - destinationHeight) / 2;
+
+
+    /*
+       Draw without distortion.
     */
 
     ctx.drawImage(
@@ -1117,10 +1194,10 @@ async function performOCR() {
         cropWidth,
         cropHeight,
 
-        0,
-        0,
-        CROP_WIDTH,
-        CROP_HEIGHT
+        destinationX,
+        destinationY,
+        destinationWidth,
+        destinationHeight
 
     );
 
@@ -1226,11 +1303,9 @@ async function performOCR() {
         );
 
 
-    /*
-       =====================================================
+    /* =====================================================
        PASS 2
-       =====================================================
-    */
+    ===================================================== */
 
     status.textContent =
         "Improving image... Pass 2";
@@ -1302,16 +1377,9 @@ async function performOCR() {
         );
 
 
-    /*
-       =====================================================
-       PASS 3 — OPTIMIZED FALLBACK
-       =====================================================
-
-       This always gets a chance if Pass 1 + Pass 2
-       have not found BOTH LRN and ID.
-
-       It is deliberately different from Pass 1/2.
-    */
+    /* =====================================================
+       PASS 3
+    ===================================================== */
 
     if (
         !(
@@ -1343,11 +1411,6 @@ async function performOCR() {
                 {
 
                     tessedit_pageseg_mode: 6,
-
-                    /*
-                       Helps Tesseract focus on
-                       normal ID-card characters.
-                    */
 
                     preserve_interword_spaces: 1,
 
@@ -1408,7 +1471,7 @@ async function performOCR() {
 
 
     /* =====================================================
-       RAW OCR DEBUG
+       RAW OCR
     ===================================================== */
 
     rawOCR.textContent =
@@ -1692,38 +1755,14 @@ function extractBestLRN(text) {
 
     let cleaned =
         text
-            .replace(
-                /O/gi,
-                "0"
-            )
-            .replace(
-                /Q/gi,
-                "0"
-            )
-            .replace(
-                /I/gi,
-                "1"
-            )
-            .replace(
-                /L/gi,
-                "1"
-            )
-            .replace(
-                /\|/g,
-                "1"
-            )
-            .replace(
-                /S/gi,
-                "5"
-            )
-            .replace(
-                /B/gi,
-                "8"
-            )
-            .replace(
-                /G/gi,
-                "6"
-            );
+            .replace(/O/gi, "0")
+            .replace(/Q/gi, "0")
+            .replace(/I/gi, "1")
+            .replace(/L/gi, "1")
+            .replace(/\|/g, "1")
+            .replace(/S/gi, "5")
+            .replace(/B/gi, "8")
+            .replace(/G/gi, "6");
 
 
     const digitSequences =
@@ -2051,46 +2090,30 @@ async function checkDatabase() {
                 data.student;
 
 
-            if (
-                student.name
-            ) {
-
+            if (student.name) {
                 nameField.value =
                     student.name;
-
             }
 
 
-            if (
-                student.grade
-            ) {
-
+            if (student.grade) {
                 gradeField.value =
                     student.grade;
-
             }
 
 
-            if (
-                student.section
-            ) {
-
+            if (student.section) {
                 sectionField.value =
                     student.section;
-
             }
 
 
-            if (
-                student.idNumber
-            ) {
+            if (student.idNumber) {
 
                 idField.value =
                     student.idNumber;
 
-            } else if (
-                student.id
-            ) {
+            } else if (student.id) {
 
                 idField.value =
                     student.id;
@@ -2166,26 +2189,11 @@ async function checkDatabase() {
 function escapeHTML(value) {
 
     return String(value || "")
-        .replace(
-            /&/g,
-            "&amp;"
-        )
-        .replace(
-            /</g,
-            "&lt;"
-        )
-        .replace(
-            />/g,
-            "&gt;"
-        )
-        .replace(
-            /"/g,
-            "&quot;"
-        )
-        .replace(
-            /'/g,
-            "&#039;"
-        );
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
 
 }
 
