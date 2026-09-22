@@ -1750,7 +1750,7 @@ async function performTargetedLRNOCR(
                     7,
 
                 tessedit_char_whitelist:
-                    "LRN:0123456789OoQqIiLlSsBbGg"
+                    "LRN:0123456789"
 
             }
 
@@ -2152,32 +2152,30 @@ function extractBestLRN(text) {
 
 
     /*
-     * 1. Explicit LRN label.
+     * -----------------------------------------------------
+     * 1. Look for an LRN label first.
+     * -----------------------------------------------------
      */
 
     let match =
         source.match(
-
-            /LRN\s*[:#=\-]?\s*([0-9OoQqIiLl|SsBbGg\s]{8,24})/i
-
+            /LRN\s*[:#=\-]?\s*([0-9OoQqIiLl|SsBbGg\s]{8,30})/i
         );
 
 
-    if (
-        match
-    ) {
+    if (match) {
 
-        const digits =
-            cleanDigits(
+        const candidates =
+            getLRNCandidates(
                 match[1]
             );
 
 
         if (
-            isValidLRN(digits)
+            candidates.length > 0
         ) {
 
-            return digits;
+            return candidates[0];
 
         }
 
@@ -2185,70 +2183,35 @@ function extractBestLRN(text) {
 
 
     /*
-     * 2. OCR may have damaged the label.
-     */
-
-    match =
-        source.match(
-
-            /\b[A-Z]{2,5}\s*[:#=\-]?\s*([0-9OoQqIiLl|SsBbGg\s]{8,24})\b/i
-
-        );
-
-
-    if (
-        match
-    ) {
-
-        const digits =
-            cleanDigits(
-                match[1]
-            );
-
-
-        if (
-            isValidLRN(digits)
-        ) {
-
-            return digits;
-
-        }
-
-    }
-
-
-    /*
-     * 3. Search for long digit-like groups.
+     * -----------------------------------------------------
+     * 2. Look for a long digit-like OCR sequence.
+     * -----------------------------------------------------
      */
 
     const digitGroups =
         source.match(
-
-            /[0-9OoQqIiLl|SsBbGg][0-9OoQqIiLl|SsBbGg\s]{7,24}/g
-
+            /[0-9OoQqIiLl|SsBbGg][0-9OoQqIiLl|SsBbGg\s]{7,30}/g
         );
 
 
-    if (
-        digitGroups
-    ) {
+    if (digitGroups) {
 
         for (
             const group
             of digitGroups
         ) {
 
-            const digits =
-                cleanDigits(
+            const candidates =
+                getLRNCandidates(
                     group
                 );
 
 
             if (
-                isValidLRN(digits)
+                candidates.length > 0
             ) {
 
-                return digits;
+                return candidates[0];
 
             }
 
@@ -2257,19 +2220,56 @@ function extractBestLRN(text) {
     }
 
 
-    /*
-     * 4. Last-resort search after
-     * removing OCR noise.
-     */
+    return "";
+
+}
+    function getLRNCandidates(value) {
 
     const cleaned =
         cleanDigits(
-            source
+            value
         );
 
 
+    const candidates = [];
+
+
+    /*
+     * -----------------------------------------------------
+     * EXACT 12 DIGITS
+     * -----------------------------------------------------
+     */
+
     if (
-        cleaned.length >= 12
+        cleaned.length === 12
+    ) {
+
+        candidates.push(
+            cleaned
+        );
+
+        return candidates;
+
+    }
+
+
+    /*
+     * -----------------------------------------------------
+     * MORE THAN 12 DIGITS
+     *
+     * Example:
+     *
+     * 1341021302248
+     *
+     * Possible LRNs:
+     *
+     * 134102130224
+     * 341021302248
+     * -----------------------------------------------------
+     */
+
+    if (
+        cleaned.length > 12
     ) {
 
         for (
@@ -2286,12 +2286,22 @@ function extractBestLRN(text) {
 
 
             if (
-                isValidLRN(
+                /^\d{12}$/.test(
                     candidate
                 )
             ) {
 
-                return candidate;
+                if (
+                    !candidates.includes(
+                        candidate
+                    )
+                ) {
+
+                    candidates.push(
+                        candidate
+                    );
+
+                }
 
             }
 
@@ -2300,10 +2310,9 @@ function extractBestLRN(text) {
     }
 
 
-    return "";
+    return candidates;
 
 }
-
 
 /* =========================================================
    CLEAN LRN
