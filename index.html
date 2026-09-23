@@ -1,5 +1,5 @@
+```html
 <!DOCTYPE html>
-
 <html lang="en">
 <head>
 <meta charset="UTF-8">
@@ -252,18 +252,13 @@ button:disabled {
     OCR-Based Student Identification System
 </div>
 
-<!-- CAMERA -->
-
 <div class="camera-container">
     <video id="video" autoplay playsinline></video>
     <div class="scan-guide"></div>
 </div>
 
-<!-- CONTROLS -->
-
 <div class="controls">
 
-```
 <button id="startButton">
     📷 Start Camera
 </button>
@@ -279,23 +274,16 @@ button:disabled {
 <button id="databaseButton" disabled>
     🔎 Check Database
 </button>
-```
 
 </div>
-
-<!-- STATUS -->
 
 <div class="status" id="status">
     Camera not started.
 </div>
 
-<!-- PROGRESS -->
-
 <div class="progress-container">
     <div class="progress-bar" id="progressBar"></div>
 </div>
-
-<!-- SCAN TIME -->
 
 <div id="scanTime" style="
     max-width: 700px;
@@ -310,18 +298,13 @@ button:disabled {
     ⏱ Scan Time: —
 </div>
 
-<!-- PROCESSED IMAGE -->
-
 <div class="image-container">
     <h3>Processed Image — 1850 × 617</h3>
     <img id="processedImage" alt="Processed ID">
 </div>
 
-<!-- RESULTS -->
-
 <div class="results">
 
-```
 <h2>Scanned Information</h2>
 
 <div class="field">
@@ -348,39 +331,29 @@ button:disabled {
     <label>ID NUMBER</label>
     <input id="idField" type="text" readonly>
 </div>
-```
 
 </div>
-
-<!-- DATABASE RESULT -->
 
 <div class="database-result" id="databaseResult">
 
-```
 <div id="databaseStatus"></div>
 
 <div id="databaseDetails"></div>
-```
 
 </div>
 
-<!-- RAW OCR -->
-
 <div class="ocr-debug">
 
-```
 <h3>Raw OCR Result</h3>
 
 <div id="rawOCR">
     No OCR result yet.
 </div>
-```
 
 </div>
 
-<!-- HIDDEN CANVASES -->
-
-<canvas id="canvas" style="display:none;"></canvas> <canvas id="lrnCanvas" style="display:none;"></canvas>
+<canvas id="canvas" style="display:none;"></canvas>
+<canvas id="lrnCanvas" style="display:none;"></canvas>
 
 <script>
 
@@ -390,7 +363,6 @@ button:disabled {
 
 const video = document.getElementById("video");
 const canvas = document.getElementById("canvas");
-
 
 const processedImage =
     document.getElementById("processedImage");
@@ -592,10 +564,6 @@ function stopCamera() {
 
     }
 
-
-
-
-
     video.srcObject = null;
 
     startButton.disabled = false;
@@ -677,13 +645,11 @@ async function captureAndScan() {
 
 /* =========================================================
    IMAGE PREPROCESSING
-   STRONGER CHARACTER / BACKGROUND CONTRAST
 ========================================================= */
 
 function preprocessCanvas(
     sourceCanvas,
     contrast = 1.55
-
 ) {
 
     const ctx =
@@ -695,7 +661,6 @@ function preprocessCanvas(
             }
         );
 
-
     const imageData =
         ctx.getImageData(
             0,
@@ -704,10 +669,8 @@ function preprocessCanvas(
             sourceCanvas.height
         );
 
-
     const data =
         imageData.data;
-
 
     const factor =
         (
@@ -718,7 +681,6 @@ function preprocessCanvas(
             255 *
             (259 - contrast)
         );
-
 
     for (
         let i = 0;
@@ -791,7 +753,6 @@ function preprocessCanvas(
 
     }
 
-
     ctx.putImageData(
         imageData,
         0,
@@ -799,6 +760,7 @@ function preprocessCanvas(
     );
 
 }
+
 
 /* =========================================================
    MAIN OCR PASS 1 + PASS 2 ONLY
@@ -825,11 +787,6 @@ async function performOCR() {
         );
 
     }
-
-
-    /* =====================================================
-       1850 × 617 CROP
-    ===================================================== */
 
     const targetWidth = 1850;
     const targetHeight = 617;
@@ -873,11 +830,6 @@ async function performOCR() {
         (videoHeight -
         finalCropHeight) / 2;
 
-
-    /* =====================================================
-       EXACT 1850 × 617 OUTPUT
-    ===================================================== */
-
     canvas.width =
         targetWidth;
 
@@ -908,7 +860,6 @@ async function performOCR() {
         targetHeight
 
     );
-
 
     status.textContent =
         "Enhancing image...";
@@ -1142,7 +1093,6 @@ async function performOCR() {
         0
     );
 
-
     const result2 =
         await Tesseract.recognize(
             sharpenCanvas,
@@ -1296,13 +1246,6 @@ async function performOCR() {
 
 
 /* =========================================================
-   TARGETED LRN OCR
-========================================================= */
-
-
-
-
-/* =========================================================
    OCR PARSING
 ========================================================= */
 
@@ -1318,7 +1261,6 @@ function parseOCR(text) {
 
     };
 
-
     const lines =
         String(text)
             .split(/\r?\n/)
@@ -1330,9 +1272,7 @@ function parseOCR(text) {
             );
 
 
-    /* =====================================================
-       LRN
-    ===================================================== */
+    /* LRN */
 
     const lrn =
         extractBestLRN(text);
@@ -1347,9 +1287,7 @@ function parseOCR(text) {
     }
 
 
-    /* =====================================================
-       ID NUMBER
-    ===================================================== */
+    /* ID NUMBER */
 
     let idMatch =
         text.match(
@@ -1357,7 +1295,6 @@ function parseOCR(text) {
             /ID\s*(?:NO|NUMBER)?\s*[:#.\-]?\s*([0-9OoQq]{3,})\s*[-–—\s]\s*([0-9OoQq]{2,})\s*[-–—\s]?\s*([A-Za-z0-9]{2,5})?/i
 
         );
-
 
     if (idMatch) {
 
@@ -1424,9 +1361,7 @@ function parseOCR(text) {
     }
 
 
-    /* =====================================================
-       GRADE + SECTION
-    ===================================================== */
+    /* GRADE + SECTION */
 
     let gradeMatch =
         text.match(
@@ -1434,7 +1369,6 @@ function parseOCR(text) {
             /GRADE\s*(?:LEVEL)?\s*(7|8|9|10|11|12|I2|l2)\s*[-–—:]?\s*([A-Za-z0-9][A-Za-z0-9 .'-]*)/i
 
         );
-
 
     if (gradeMatch) {
 
@@ -1449,7 +1383,6 @@ function parseOCR(text) {
             );
 
     }
-
 
     if (!result.grade) {
 
@@ -1477,9 +1410,7 @@ function parseOCR(text) {
     }
 
 
-    /* =====================================================
-       NAME
-    ===================================================== */
+    /* NAME */
 
     for (
         const line of lines
@@ -1542,7 +1473,6 @@ function parseOCR(text) {
 
     }
 
-
     console.log(
         "PARSED OCR PASS:",
         result
@@ -1592,7 +1522,6 @@ function mergeOCRResults(
 
     }
 
-
     if (
         !isValidLRN(
             bestResults.lrn
@@ -1606,7 +1535,6 @@ function mergeOCRResults(
             newResults.lrn;
 
     }
-
 
     if (
         !bestResults.id &&
@@ -1632,14 +1560,12 @@ function extractBestLRN(text) {
     const source =
         String(text);
 
-
     let match =
         source.match(
 
             /LRN\s*[:#=\-]?\s*([0-9OoQqIiLl|SsBbGg\s]{8,30})/i
 
         );
-
 
     if (match) {
 
@@ -1658,14 +1584,12 @@ function extractBestLRN(text) {
 
     }
 
-
     const digitGroups =
         source.match(
 
             /[0-9OoQqIiLl|SsBbGg][0-9OoQqIiLl|SsBbGg\s]{7,30}/g
 
         );
-
 
     if (digitGroups) {
 
@@ -1702,7 +1626,6 @@ function getLRNCandidates(value) {
 
     const candidates = [];
 
-
     if (
         cleaned.length === 12
     ) {
@@ -1714,7 +1637,6 @@ function getLRNCandidates(value) {
         return candidates;
 
     }
-
 
     if (
         cleaned.length > 12
@@ -1878,7 +1800,6 @@ function normalizeIDNumber(value) {
 
         );
 
-
     if (match) {
 
         let result =
@@ -1901,7 +1822,6 @@ function normalizeIDNumber(value) {
         return result;
 
     }
-
 
     return source
         .replace(
@@ -1985,6 +1905,9 @@ function isValidLRN(lrn) {
 async function checkDatabase() {
 
     const lrn =
+        extractBestLRN(
+            lrnField.value
+        ) ||
         lrnField.value.trim();
 
     const idNumber =
@@ -2000,11 +1923,6 @@ async function checkDatabase() {
         sectionField.value.trim();
 
 
-    /*
-     * A student can now be identified using
-     * ANY useful combination of the five fields.
-     */
-
     if (
         !isValidLRN(lrn) &&
         !normalizeIDNumber(idNumber) &&
@@ -2015,24 +1933,6 @@ async function checkDatabase() {
 
         status.textContent =
             "No usable student information was detected.";
-
-        databaseButton.disabled =
-            false;
-
-        return;
-
-    }
-
-
-    if (
-        DATABASE_URL.includes(
-            "PASTE_YOUR"
-        )
-    ) {
-
-        alert(
-            "Apps Script URL has not been entered."
-        );
 
         databaseButton.disabled =
             false;
@@ -2070,20 +1970,12 @@ async function checkDatabase() {
             });
 
 
-        const url =
-            DATABASE_URL +
-            "?" +
-            params.toString();
-
-
-        console.log(
-            "DATABASE REQUEST:",
-            url
-        );
-
-
         const response =
-            await fetch(url);
+            await fetch(
+                DATABASE_URL +
+                "?" +
+                params.toString()
+            );
 
 
         if (!response.ok) {
@@ -2106,9 +1998,61 @@ async function checkDatabase() {
         );
 
 
+        /* =================================================
+           SUCCESSFUL DATABASE MATCH
+        ================================================= */
+
         if (
+            result.success === true &&
             result.match === true
         ) {
+
+            /*
+             * Apps Script returns these values directly:
+             *
+             * result.lrn
+             * result.name
+             * result.id
+             * result.grade
+             * result.section
+             */
+
+            const studentLRN =
+                result.lrn || "";
+
+            const studentName =
+                result.name || "";
+
+            const studentID =
+                result.id || "";
+
+            const studentGrade =
+                result.grade || "";
+
+            const studentSection =
+                result.section || "";
+
+
+            /* Update the OCR fields with
+               the authoritative database data */
+
+            nameField.value =
+                studentName;
+
+            gradeField.value =
+                studentGrade;
+
+            sectionField.value =
+                studentSection;
+
+            lrnField.value =
+                studentLRN;
+
+            idField.value =
+                studentID;
+
+
+            /* Show successful result */
 
             databaseResult.style.display =
                 "block";
@@ -2119,200 +2063,111 @@ async function checkDatabase() {
             databaseStatus.textContent =
                 "🟢 VALID STUDENT";
 
-
-            let similarityText =
-                "";
-
-
-            if (
-                result.nameSimilarity !==
-                undefined
-            ) {
-
-                similarityText +=
-                    "<br><strong>Name similarity:</strong> " +
-                    escapeHTML(
-                        String(
-                            result.nameSimilarity
-                        )
-                    ) +
-                    "%";
-
-            }
-
-
-            if (
-                result.sectionSimilarity !==
-                undefined
-            ) {
-
-                similarityText +=
-                    "<br><strong>Section similarity:</strong> " +
-                    escapeHTML(
-                        String(
-                            result.sectionSimilarity
-                        )
-                    ) +
-                    "%";
-
-            }
-
-
             databaseDetails.innerHTML =
-
-                "<strong>Identification method:</strong> " +
-                escapeHTML(
-                    result.method ||
-                    "Database match"
-                ) +
-
-                similarityText +
-
-                "<br><br>" +
 
                 "<strong>Name:</strong> " +
                 escapeHTML(
-                    result.student.name
+                    studentName
                 ) +
 
                 "<br><br>" +
 
                 "<strong>LRN:</strong> " +
                 escapeHTML(
-                    result.student.lrn
+                    studentLRN
                 ) +
 
                 "<br><br>" +
 
                 "<strong>ID Number:</strong> " +
                 escapeHTML(
-                    result.student.idNumber
+                    studentID
                 ) +
 
                 "<br><br>" +
 
                 "<strong>Grade:</strong> " +
                 escapeHTML(
-                    result.student.grade
+                    studentGrade
                 ) +
 
                 "<br><br>" +
 
                 "<strong>Section:</strong> " +
                 escapeHTML(
-                    result.student.section
+                    studentSection
                 );
 
 
-            nameField.value =
-                result.student.name ||
-                "";
-
-            gradeField.value =
-                result.student.grade ||
-                "";
-
-            sectionField.value =
-                result.student.section ||
-                "";
-
-            lrnField.value =
-                result.student.lrn ||
-                "";
-
-            idField.value =
-                result.student.idNumber ||
-                "";
-
+            progressBar.style.width =
+                "100%";
 
             status.textContent =
-                "Student identified successfully.";
+                "Student identified successfully. Scan logged.";
+
+            return true;
 
         }
 
 
-        else if (
-            result.ambiguous === true
-        ) {
+        /* =================================================
+           STUDENT NOT FOUND
+        ================================================= */
 
-            databaseResult.style.display =
-                "block";
+        databaseResult.style.display =
+            "block";
 
-            databaseResult.className =
-                "database-result invalid";
+        databaseResult.className =
+            "database-result invalid";
 
-            databaseStatus.textContent =
-                "🟠 MATCH IS AMBIGUOUS";
+        databaseStatus.textContent =
+            "🔴 STUDENT NOT FOUND";
 
+        databaseDetails.innerHTML =
 
-            databaseDetails.innerHTML =
-                "The scanned information was not unique " +
-                "enough to safely identify one student.";
+            "<strong>Name:</strong> " +
+            escapeHTML(
+                name ||
+                "Not detected"
+            ) +
 
+            "<br>" +
 
-            status.textContent =
-                "Multiple possible students found.";
+            "<strong>LRN:</strong> " +
+            escapeHTML(
+                lrn ||
+                "Not detected"
+            ) +
 
-        }
+            "<br>" +
 
+            "<strong>ID Number:</strong> " +
+            escapeHTML(
+                idNumber ||
+                "Not detected"
+            ) +
 
-        else {
+            "<br>" +
 
-            databaseResult.style.display =
-                "block";
+            "<strong>Grade:</strong> " +
+            escapeHTML(
+                grade ||
+                "Not detected"
+            ) +
 
-            databaseResult.className =
-                "database-result invalid";
+            "<br>" +
 
-            databaseStatus.textContent =
-                "🔴 STUDENT NOT FOUND";
-
-
-            databaseDetails.innerHTML =
-
-                "<strong>Name:</strong> " +
-                escapeHTML(
-                    name ||
-                    "Not detected"
-                ) +
-
-                "<br>" +
-
-                "<strong>LRN:</strong> " +
-                escapeHTML(
-                    lrn ||
-                    "Not detected"
-                ) +
-
-                "<br>" +
-
-                "<strong>ID Number:</strong> " +
-                escapeHTML(
-                    idNumber ||
-                    "Not detected"
-                ) +
-
-                "<br>" +
-
-                "<strong>Grade:</strong> " +
-                escapeHTML(
-                    grade ||
-                    "Not detected"
-                ) +
-
-                "<br>" +
-
-                "<strong>Section:</strong> " +
-                escapeHTML(
-                    section ||
-                    "Not detected"
-                );
+            "<strong>Section:</strong> " +
+            escapeHTML(
+                section ||
+                "Not detected"
+            );
 
 
-            status.textContent =
-                "No matching student.";
+        status.textContent =
+            "No matching student.";
 
-        }
+        return false;
 
 
     } catch (error) {
@@ -2332,7 +2187,6 @@ async function checkDatabase() {
         databaseStatus.textContent =
             "⚠️ DATABASE CONNECTION FAILED";
 
-
         databaseDetails.innerHTML =
 
             "Could not connect to Google Apps Script." +
@@ -2350,6 +2204,9 @@ async function checkDatabase() {
 
         status.textContent =
             "Database connection failed.";
+
+        return false;
+
 
     } finally {
 
@@ -2376,7 +2233,7 @@ function escapeHTML(value) {
 
         .replace(
             /</g,
-            "&lt;" 
+            "&lt;"
         )
 
         .replace(
@@ -2401,4 +2258,4 @@ function escapeHTML(value) {
 </body>
 </html>
 ```
-HI
+hi
