@@ -582,18 +582,11 @@ async function captureAndScan() {
    IMAGE PREPROCESSING
 ========================================================= */
 
-function preprocessCanvas(
-    sourceCanvas,
-    contrast = 1.55
-) {
-
+function preprocessCanvas(sourceCanvas, contrast = 1.55) {
     const ctx =
-        sourceCanvas.getContext(
-            "2d",
-            {
-                willReadFrequently: true
-            }
-        );
+        sourceCanvas.getContext("2d", {
+            willReadFrequently: true
+        });
 
     const imageData =
         ctx.getImageData(
@@ -603,18 +596,13 @@ function preprocessCanvas(
             sourceCanvas.height
         );
 
-    const data =
-        imageData.data;
+    const data = imageData.data;
 
     const factor =
         (259 * (contrast + 255)) /
         (255 * (259 - contrast));
 
-    for (
-        let i = 0;
-        i < data.length;
-        i += 4
-    ) {
+    for (let i = 0; i < data.length; i += 4) {
 
         const r = data[i];
         const g = data[i + 1];
@@ -625,43 +613,28 @@ function preprocessCanvas(
             0.587 * g +
             0.114 * b;
 
+        /* EXISTING CONTRAST */
+
         gray =
-            factor * (gray - 128) +
-            128;
+            factor * (gray - 128) + 128;
 
         gray =
             Math.max(
                 0,
-                Math.min(
-                    255,
-                    gray
-                )
+                Math.min(255, gray)
             );
 
-        if (gray <= 70) {
+        /* TRUE BINARIZATION */
 
+        if (gray < 128) {
             gray = 0;
-
-        } else if (gray >= 215) {
-
-            gray = 255;
-
         } else {
-
-            gray =
-                ((gray - 70) /
-                (215 - 70)) *
-                255;
+            gray = 255;
         }
 
-        data[i] =
-            gray;
-
-        data[i + 1] =
-            gray;
-
-        data[i + 2] =
-            gray;
+        data[i] = gray;
+        data[i + 1] = gray;
+        data[i + 2] = gray;
     }
 
     ctx.putImageData(
@@ -670,7 +643,6 @@ function preprocessCanvas(
         0
     );
 }
-
 
 /* =========================================================
    MAIN OCR PASS 1 + PASS 2 ONLY
