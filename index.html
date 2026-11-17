@@ -62,7 +62,7 @@ video {
 }
 
 .scan-guide::after {
-    content: "ALIGN ID CARD HERE";
+    content: "ALIGN ENTIRE ID CARD HERE";
     position: absolute;
     top: -30px;
     left: 50%;
@@ -297,7 +297,7 @@ button:disabled {
 </div>
 
 <div class="image-container">
-    <h3>Processed Image — 1850 × 617</h3>
+    <h3>Captured ID Image — Original Color</h3>
     <img id="processedImage" alt="Captured ID">
 </div>
 
@@ -419,6 +419,80 @@ const DATABASE_URL =
 
 
 /* =========================================================
+   OCR WORKER
+========================================================= */
+
+let ocrWorker = null;
+let ocrWorkerLoading = null;
+
+
+/* Initialize only once and reuse between scans */
+
+async function getOCRWorker() {
+
+    if (ocrWorker) {
+        return ocrWorker;
+    }
+
+    if (ocrWorkerLoading) {
+        return await ocrWorkerLoading;
+    }
+
+    ocrWorkerLoading = (async function() {
+
+        status.textContent =
+            "Initializing OCR engine...";
+
+        const worker =
+            await Tesseract.createWorker(
+                "eng",
+                1,
+                {
+                    logger: function(info) {
+
+                        if (
+                            info.status &&
+                            info.progress !== undefined
+                        ) {
+
+                            const percent =
+                                Math.round(info.progress * 100);
+
+                            status.textContent =
+                                info.status +
+                                " (" + percent + "%)";
+
+                        }
+
+                    }
+                }
+            );
+
+        await worker.setParameters({
+            tessedit_pageseg_mode: "7",
+            preserve_interword_spaces: "1"
+        });
+
+        ocrWorker = worker;
+
+        return worker;
+
+    })();
+
+    try {
+
+        return await ocrWorkerLoading;
+
+    } finally {
+
+        ocrWorkerLoading = null;
+
+    }
+
+}
+
+
+/* =========================================================
    CAMERA
 ========================================================= */
 
@@ -488,6 +562,7 @@ async function startCamera() {
             "Could not access camera: " + error.message;
 
     }
+
 }
 
 
@@ -555,6 +630,9 @@ async function captureAndScan() {
         status.textContent =
             "Scanning failed: " + error.message;
 
+        rawOCR.textContent =
+            "OCR ERROR: " + error.message;
+
     }
 
     const scanEndTime = performance.now();
@@ -573,14 +651,11 @@ async function captureAndScan() {
 
 
 /* =========================================================
-   MAIN OCR PROCESS
-   ORIGINAL COLOR IMAGE
-   NO IMAGE PREPROCESSING
+   CAPTURE IMAGE USING THE GREEN GUIDE
+   WITH ADDITIONAL MARGINS
 ========================================================= */
 
-async function performOCR() {
-
-    status.textContent = "Preparing original ID image...";
+function captureIDImage() {
 
     const videoWidth = video.videoWidth;
     const videoHeight = video.videoHeight;
@@ -591,52 +666,116 @@ async function performOCR() {
 
     }
 
-    const targetWidth = 1850;
-    const targetHeight = 617;
+    const videoRect =
+        video.getBoundingClientRect();
 
-    const targetRatio = targetWidth / targetHeight;
+    const guide =
+        document.querySelector(".scan-guide");
 
-    let finalCropWidth;
-    let finalCropHeight;
+    const guideRect =
+        guide.getBoundingClientRect();
 
-    if (videoWidth / videoHeight > targetRatio) {
+    if (
+        !videoRect.width ||
+        !videoRect.height ||
+        !guideRect.width ||
+        !guideRect.height
+    ) {
 
-        finalCropHeight = videoHeight * 0.92;
-
-        finalCropWidth =
-            finalCropHeight * targetRatio;
-
-    } else {
-
-        finalCropWidth = videoWidth * 0.92;
-
-        finalCropHeight =
-            finalCropWidth / targetRatio;
+        throw new Error("Could not calculate the scan area.");
 
     }
 
-    const cropX =
-        (videoWidth - finalCropWidth) / 2;
 
-    const cropY =
-        (videoHeight - finalCropHeight) / 2;
+    /*
+       Convert the green guide's screen coordinates
+       into the original camera image coordinates.
+    */
 
-    canvas.width = targetWidth;
-    canvas.height = targetHeight;
+    const scaleX =
+        videoWidth / videoRect.width;
 
-    const ctx = canvas.getContext("2d");
+    const scaleY =
+        videoHeight / videoRect.height;
+
+
+    /*
+       Add margins around the guide.
+
+       This prevents characters close to the edges
+       from being removed by the crop.
+    */
+
+    const marginX =
+        guideRect.width * 0.07;
+
+    const marginY =
+        guideRect.height * 0.12;
+
+
+    let cropX =
+        (guideRect.left - videoRect.left - marginX) * scaleX;
+
+    let cropY =
+        (guideRect.top - videoRect.top - marginY) * scaleY;
+
+    let cropWidth =
+        (guideRect.width + marginX * 2) * scaleX;
+
+    let cropHeight =
+        (guideRect.height + marginY * 2) * scaleY;
+
+
+    /* Keep crop within the actual camera frame */
+
+    cropX = Math.max(0, cropX);
+    cropY = Math.max(0, cropY);
+
+    cropWidth =
+        Math.min(cropWidth, videoWidth - cropX);
+
+    cropHeight =
+        Math.min(cropHeight, videoHeight - cropY);
+
+
+    if (cropWidth <= 0 || cropHeight <= 0) {
+
+        throw new Error("Invalid camera crop dimensions.");
+
+    }
+
+
+    /*
+       Preserve the crop's aspect ratio.
+
+       The output is enlarged without stretching.
+    */
+
+    const outputWidth = 2400;
+
+    const outputHeight =
+        Math.round(
+            outputWidth * (cropHeight / cropWidth)
+        );
+
+    canvas.width = outputWidth;
+    canvas.height = outputHeight;
+
+    const ctx =
+        canvas.getContext("2d");
 
     ctx.imageSmoothingEnabled = true;
     ctx.imageSmoothingQuality = "high";
 
+
     /*
-       CAPTURE ORIGINAL COLOR IMAGE.
+       ORIGINAL COLOR CAPTURE.
 
        No grayscale.
        No thresholding.
        No binarization.
-       No contrast enhancement.
-       No sharpening.
+       No forced 1850 × 617 crop.
+       No aggressive sharpening.
        No inversion.
     */
 
@@ -644,16 +783,16 @@ async function performOCR() {
         video,
         cropX,
         cropY,
-        finalCropWidth,
-        finalCropHeight,
+        cropWidth,
+        cropHeight,
         0,
         0,
-        targetWidth,
-        targetHeight
+        outputWidth,
+        outputHeight
     );
 
 
-    /* DISPLAY ORIGINAL COLOR IMAGE */
+    /* Display captured image */
 
     processedImage.src =
         canvas.toDataURL("image/png");
@@ -661,87 +800,332 @@ async function performOCR() {
     processedImage.style.display = "block";
 
 
-    /* OCR — ORIGINAL COLOR IMAGE */
+    /*
+       Calculate the green guide's position
+       inside the captured image.
+
+       The four text rows are then cropped
+       relative to the guide, not the whole image.
+    */
+
+    const guideTop =
+        (
+            (guideRect.top - videoRect.top) * scaleY -
+            cropY
+        ) / cropHeight * outputHeight;
+
+    const guideHeight =
+        guideRect.height * scaleY /
+        cropHeight * outputHeight;
+
+    return {
+        guideTop: guideTop,
+        guideHeight: guideHeight,
+        width: outputWidth,
+        height: outputHeight
+    };
+
+}
+
+
+/* =========================================================
+   CREATE INDIVIDUAL TEXT LINE IMAGES
+========================================================= */
+
+function createLineCanvas(
+    captureInfo,
+    startPercent,
+    endPercent
+) {
+
+    const guideTop =
+        captureInfo.guideTop;
+
+    const guideHeight =
+        captureInfo.guideHeight;
+
+    const startY =
+        Math.floor(
+            guideTop +
+            guideHeight * startPercent
+        );
+
+    const endY =
+        Math.ceil(
+            guideTop +
+            guideHeight * endPercent
+        );
+
+    const y =
+        Math.max(0, startY);
+
+    const bottom =
+        Math.min(canvas.height, endY);
+
+    const height =
+        bottom - y;
+
+    if (height <= 0) {
+
+        throw new Error("Invalid text-line crop.");
+
+    }
+
+    const lineCanvas =
+        document.createElement("canvas");
+
+    lineCanvas.width = canvas.width;
+    lineCanvas.height = height;
+
+    const ctx =
+        lineCanvas.getContext("2d");
+
+    ctx.drawImage(
+        canvas,
+        0,
+        y,
+        canvas.width,
+        height,
+        0,
+        0,
+        lineCanvas.width,
+        lineCanvas.height
+    );
+
+    return lineCanvas;
+
+}
+
+
+/* =========================================================
+   RECOGNIZE ONE TEXT LINE
+========================================================= */
+
+async function recognizeLine(
+    worker,
+    lineCanvas,
+    whitelist,
+    label
+) {
 
     status.textContent =
-        "Reading ID information using original color image...";
+        "Reading " + label + "...";
+
+    await worker.setParameters({
+
+        tessedit_pageseg_mode: "7",
+
+        preserve_interword_spaces: "1",
+
+        tessedit_char_whitelist: whitelist
+
+    });
 
     const result =
-        await Tesseract.recognize(
-            canvas,
-            "eng",
-            {
-                logger: function(info) {
+        await worker.recognize(lineCanvas);
 
-                    console.log("TESSERACT:", info);
+    return {
+        text: result.data.text || "",
+        confidence: result.data.confidence || 0
+    };
 
-                    if (info.progress !== undefined) {
+}
 
-                        progressBar.style.width =
-                            (info.progress * 100) + "%";
 
-                    }
+/* =========================================================
+   MAIN OCR PROCESS
+========================================================= */
 
-                    if (info.status) {
+async function performOCR() {
 
-                        status.textContent = info.status;
+    status.textContent =
+        "Capturing ID image with margins...";
 
-                    }
+    const captureInfo =
+        captureIDImage();
 
-                },
 
-                tessedit_pageseg_mode: 6,
-                preserve_interword_spaces: 1
-            }
+    /* Initialize or reuse OCR worker */
+
+    const worker =
+        await getOCRWorker();
+
+
+    /*
+       Each text line is processed independently.
+
+       The percentages refer to the green guide area:
+
+       NAME:         6% - 36%
+       LRN:         36% - 56%
+       ID NUMBER:   55% - 76%
+       GRADE:       73% - 98%
+    */
+
+
+    const nameCanvas =
+        createLineCanvas(
+            captureInfo,
+            0.06,
+            0.36
+        );
+
+    const lrnCanvas =
+        createLineCanvas(
+            captureInfo,
+            0.36,
+            0.56
+        );
+
+    const idCanvas =
+        createLineCanvas(
+            captureInfo,
+            0.55,
+            0.76
+        );
+
+    const gradeCanvas =
+        createLineCanvas(
+            captureInfo,
+            0.73,
+            0.98
         );
 
 
-    /* RAW OCR RESULT */
+    /* NAME */
 
-    const recognizedText = result.data.text;
-
-    console.log("RAW OCR RESULT:", recognizedText);
-
-
-    /* PARSE OCR */
-
-    const bestResults = parseOCR(recognizedText);
-
-
-    /* DISPLAY RAW OCR */
-
-    rawOCR.textContent = recognizedText;
+    const nameOCR =
+        await recognizeLine(
+            worker,
+            nameCanvas,
+            "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz.'- ",
+            "student name"
+        );
 
 
-    /* DISPLAY SCANNED INFORMATION */
+    /* LRN */
 
-    nameField.value = bestResults.name;
-    gradeField.value = bestResults.grade;
-    sectionField.value = bestResults.section;
-    lrnField.value = bestResults.lrn;
-    idField.value = bestResults.id;
+    const lrnOCR =
+        await recognizeLine(
+            worker,
+            lrnCanvas,
+            "0123456789OQIlLSBGlq ",
+            "LRN"
+        );
 
-    console.log("OCR RESULTS:", bestResults);
+
+    /* ID NUMBER */
+
+    const idOCR =
+        await recognizeLine(
+            worker,
+            idCanvas,
+            "0123456789OQIlLSBGSHJ- ",
+            "ID number"
+        );
 
 
-    /* DATABASE IDENTIFICATION */
+    /* GRADE AND SECTION */
 
-    const hasLRN = isValidLRN(bestResults.lrn);
+    const gradeOCR =
+        await recognizeLine(
+            worker,
+            gradeCanvas,
+            "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-' ",
+            "grade and section"
+        );
+
+
+    /*
+       Combine the separate results.
+
+       The labels are included to make
+       the raw OCR easier to inspect.
+    */
+
+    const recognizedText =
+
+        "NAME:\n" +
+        nameOCR.text.trim() +
+
+        "\n\nLRN:\n" +
+        lrnOCR.text.trim() +
+
+        "\n\nID NUMBER:\n" +
+        idOCR.text.trim() +
+
+        "\n\nGRADE AND SECTION:\n" +
+        gradeOCR.text.trim();
+
+
+    console.log(
+        "INDIVIDUAL OCR RESULTS:",
+        {
+            nameOCR,
+            lrnOCR,
+            idOCR,
+            gradeOCR
+        }
+    );
+
+
+    rawOCR.textContent =
+        recognizedText;
+
+
+    /* Parse individual fields */
+
+    const bestResults =
+        parseOCRLines({
+            name: nameOCR.text,
+            lrn: lrnOCR.text,
+            id: idOCR.text,
+            grade: gradeOCR.text
+        });
+
+
+    console.log(
+        "FINAL OCR RESULTS:",
+        bestResults
+    );
+
+
+    /* Display fields */
+
+    nameField.value =
+        bestResults.name;
+
+    gradeField.value =
+        bestResults.grade;
+
+    sectionField.value =
+        bestResults.section;
+
+    lrnField.value =
+        bestResults.lrn;
+
+    idField.value =
+        bestResults.id;
+
+
+    /* Database identification */
+
+    const hasLRN =
+        isValidLRN(bestResults.lrn);
 
     const hasID =
-        normalizeIDNumber(bestResults.id).length > 0;
+        isValidIDNumber(bestResults.id);
 
     const hasName =
         bestResults.name.trim().length >= 5;
 
-    const hasSupportingInfo =
-        bestResults.grade.trim().length > 0 ||
-        bestResults.section.trim().length > 0;
+    const hasGrade =
+        bestResults.grade.trim().length > 0;
 
     if (
         hasLRN ||
         hasID ||
-        (hasName && hasSupportingInfo)
+        (hasName && hasGrade)
     ) {
 
         status.textContent =
@@ -754,7 +1138,7 @@ async function performOCR() {
         progressBar.style.width = "100%";
 
         status.textContent =
-            "OCR complete. No usable identifier was detected.";
+            "OCR complete. Some information could not be recognized.";
 
         databaseButton.disabled = false;
 
@@ -764,10 +1148,10 @@ async function performOCR() {
 
 
 /* =========================================================
-   OCR PARSING
+   FIELD EXTRACTION
 ========================================================= */
 
-function parseOCR(text) {
+function parseOCRLines(lines) {
 
     const result = {
         name: "",
@@ -777,160 +1161,84 @@ function parseOCR(text) {
         id: ""
     };
 
-    const lines =
-        String(text)
-            .split(/\r?\n/)
-            .map(line => line.trim())
-            .filter(line => line.length > 0);
+
+    /* NAME */
+
+    result.name =
+        cleanName(lines.name);
 
 
     /* LRN */
 
-    const lrn = extractBestLRN(text);
-
-    if (isValidLRN(lrn)) {
-
-        result.lrn = lrn;
-
-    }
+    result.lrn =
+        extractLRNFromLine(lines.lrn);
 
 
     /* ID NUMBER */
 
-    let idMatch =
-        text.match(
-            /ID\s*(?:NO|NUMBER)?\s*[:#.\-]?\s*([0-9OoQq]{3,})\s*[-–—\s]\s*([0-9OoQq]{2,})\s*[-–—\s]?\s*([A-Za-z0-9]{2,5})?/i
-        );
-
-    if (idMatch) {
-
-        let part1 = cleanIDDigits(idMatch[1]);
-
-        let part2 = cleanIDDigits(idMatch[2]);
-
-        let id = part1 + "-" + part2;
-
-        if (idMatch[3]) {
-
-            id += "-" + normalizeIDSuffix(idMatch[3]);
-
-        }
-
-        result.id = id;
-
-    } else {
-
-        const fallbackID =
-            text.match(
-                /\b([0-9OoQq]{5,})\s*[-–—\s]\s*([0-9OoQq]{2,})\s*[-–—\s]?\s*(SHS|JHS|5H5|JH5)?\b/i
-            );
-
-        if (fallbackID) {
-
-            result.id =
-                cleanIDDigits(fallbackID[1]) +
-                "-" +
-                cleanIDDigits(fallbackID[2]);
-
-            if (fallbackID[3]) {
-
-                result.id +=
-                    "-" +
-                    normalizeIDSuffix(fallbackID[3]);
-
-            }
-
-        }
-
-    }
+    result.id =
+        extractIDFromLine(lines.id);
 
 
     /* GRADE AND SECTION */
 
-    let gradeMatch =
-        text.match(
-            /GRADE\s*(?:LEVEL)?\s*(7|8|9|10|11|12|I2|l2)\s*[-–—:]?\s*([A-Za-z0-9][A-Za-z0-9 .'-]*)/i
-        );
+    const gradeInfo =
+        extractGradeAndSection(lines.grade);
 
-    if (gradeMatch) {
+    result.grade =
+        gradeInfo.grade;
 
-        result.grade =
-            normalizeGrade(gradeMatch[1]);
+    result.section =
+        gradeInfo.section;
 
-        result.section =
-            cleanSection(gradeMatch[2]);
-
-    }
-
-    if (!result.grade) {
-
-        const fallbackGrade =
-            text.match(
-                /\b(?:G[A-Z]*R[A-Z]*D[A-Z]*E?)\s*[^0-9]{0,3}(7|8|9|10|11|12|I2|l2)\s*[-–—:]?\s*([A-Za-z0-9 .'-]+)/i
-            );
-
-        if (fallbackGrade) {
-
-            result.grade =
-                normalizeGrade(fallbackGrade[1]);
-
-            result.section =
-                cleanSection(fallbackGrade[2]);
-
-        }
-
-    }
-
-
-    /* NAME */
-
-    for (const line of lines) {
-
-        const upper = line.toUpperCase();
-
-        if (
-            upper.includes("LRN") ||
-            upper.includes("ID NO") ||
-            upper.includes("ID NUMBER") ||
-            upper.includes("GRADE") ||
-            upper.includes("SECTION")
-        ) {
-
-            continue;
-
-        }
-
-        const cleaned =
-            line
-                .replace(/[^A-Za-zÀ-ÿ.' -]/g, "")
-                .replace(/\s+/g, " ")
-                .trim();
-
-        const words =
-            cleaned
-                .split(" ")
-                .filter(word => word.length > 0);
-
-        const letterCount =
-            (cleaned.match(/[A-Za-zÀ-ÿ]/g) || []).length;
-
-        if (
-            words.length >= 2 &&
-            cleaned.length >= 5 &&
-            letterCount >= 4
-        ) {
-
-            result.name = cleaned;
-
-            break;
-
-        }
-
-    }
-
-    console.log("PARSED OCR RESULT:", result);
 
     return result;
+
+}
+
+
+/* =========================================================
+   NAME EXTRACTION
+========================================================= */
+
+function cleanName(value) {
+
+    let text =
+        String(value || "")
+            .replace(/\r?\n/g, " ")
+            .replace(/\s+/g, " ")
+            .trim();
+
+    text =
+        text.replace(
+            /^(NAME|STUDENT NAME)\s*[:\-]?\s*/i,
+            ""
+        );
+
+    text =
+        text.replace(
+            /[^A-Za-zÀ-ÿ.' -]/g,
+            ""
+        );
+
+    text =
+        text.replace(/\s+/g, " ").trim();
+
+    const words =
+        text.split(" ").filter(Boolean);
+
+    if (words.length < 2) {
+        return "";
+    }
+
+    const letterCount =
+        (text.match(/[A-Za-zÀ-ÿ]/g) || []).length;
+
+    if (letterCount < 5) {
+        return "";
+    }
+
+    return text;
 
 }
 
@@ -939,192 +1247,187 @@ function parseOCR(text) {
    LRN EXTRACTION
 ========================================================= */
 
-function extractBestLRN(text) {
+function extractLRNFromLine(value) {
 
-    const source = String(text);
+    let text =
+        String(value || "")
+            .toUpperCase()
+            .trim();
 
-    let match =
-        source.match(
-            /LRN\s*[:#=\-]?\s*([0-9OoQqIiLl|SsBbGg\s]{8,30})/i
+    text =
+        text.replace(
+            /^.*?\bLRN\b\s*[:#=\-]?\s*/i,
+            ""
         );
 
-    if (match) {
+    /*
+       Convert common OCR substitutions.
 
-        const candidates =
-            getLRNCandidates(match[1]);
+       These conversions are only applied to
+       the LRN line, not to names or sections.
+    */
 
-        if (candidates.length > 0) {
+    const cleaned =
+        text
+            .replace(/[OQ]/g, "0")
+            .replace(/[IL|]/g, "1")
+            .replace(/S/g, "5")
+            .replace(/B/g, "8")
+            .replace(/G/g, "6")
+            .replace(/[^0-9]/g, "");
 
-            return candidates[0];
 
-        }
-
+    if (cleaned.length === 12) {
+        return cleaned;
     }
 
-    const digitGroups =
-        source.match(
-            /[0-9OoQqIiLl|SsBbGg][0-9OoQqIiLl|SsBbGg\s]{7,30}/g
-        );
 
-    if (digitGroups) {
+    /*
+       Do not invent missing digits.
 
-        for (const group of digitGroups) {
-
-            const candidates =
-                getLRNCandidates(group);
-
-            if (candidates.length > 0) {
-
-                return candidates[0];
-
-            }
-
-        }
-
-    }
+       If OCR reads fewer or more than 12 digits,
+       leave the field empty rather than guessing.
+    */
 
     return "";
 
 }
 
 
-function getLRNCandidates(value) {
-
-    const cleaned = cleanDigits(value);
-
-    const candidates = [];
-
-    if (cleaned.length === 12) {
-
-        candidates.push(cleaned);
-
-        return candidates;
-
-    }
-
-    if (cleaned.length > 12) {
-
-        for (
-            let i = 0;
-            i <= cleaned.length - 12;
-            i++
-        ) {
-
-            const candidate =
-                cleaned.substring(i, i + 12);
-
-            if (/^\d{12}$/.test(candidate)) {
-
-                if (!candidates.includes(candidate)) {
-
-                    candidates.push(candidate);
-
-                }
-
-            }
-
-        }
-
-    }
-
-    return candidates;
-
-}
-
-
 /* =========================================================
-   CLEAN LRN
+   ID NUMBER EXTRACTION
 ========================================================= */
 
-function cleanDigits(value) {
+function extractIDFromLine(value) {
 
-    return String(value)
-        .replace(/[OoQq]/g, "0")
-        .replace(/[IiLl|]/g, "1")
-        .replace(/[Ss]/g, "5")
-        .replace(/[Bb]/g, "8")
-        .replace(/[Gg]/g, "6")
-        .replace(/[^0-9]/g, "");
-
-}
-
-
-/* =========================================================
-   ID NUMBER NORMALIZATION
-========================================================= */
-
-function cleanIDDigits(value) {
-
-    return String(value)
-        .toUpperCase()
-        .replace(/[OoQq]/g, "0")
-        .replace(/[IiLl]/g, "1")
-        .replace(/[Bb]/g, "8")
-        .replace(/[Gg]/g, "6")
-        .replace(/[^0-9]/g, "");
-
-}
-
-
-function normalizeIDSuffix(value) {
-
-    return String(value)
-        .toUpperCase()
-        .replace(/5H5/g, "SHS")
-        .replace(/JH5/g, "JHS")
-        .replace(/[^A-Z0-9]/g, "");
-
-}
-
-
-function normalizeIDNumber(value) {
-
-    const source =
-        String(value)
+    let text =
+        String(value || "")
             .toUpperCase()
             .trim();
 
-    const match =
-        source.match(
-            /^([0-9OoQq]{3,})[\s\-._]*([0-9OoQq]{2,})[\s\-._]*([A-Z0-9]{2,5})?$/
+    text =
+        text.replace(
+            /^.*?\bID\s*(?:NO|NUMBER)?\s*[:#.\-]?\s*/i,
+            ""
         );
 
-    if (match) {
 
-        let result =
-            cleanIDDigits(match[1]) +
-            cleanIDDigits(match[2]);
+    /*
+       Expected format:
 
-        if (match[3]) {
+       305015-397-SHS
 
-            result += normalizeIDSuffix(match[3]);
+       The first and second numeric groups
+       are preserved separately.
+    */
 
-        }
+    const match =
+        text.match(
+            /([0-9OQILSBG]{3,})\s*[-–— ]\s*([0-9OQILSBG]{2,})\s*[-–— ]?\s*(SHS|JHS|5H5|JH5)?/i
+        );
 
-        return result;
+    if (!match) {
+        return "";
+    }
+
+    const first =
+        cleanIDDigits(match[1]);
+
+    const second =
+        cleanIDDigits(match[2]);
+
+    if (
+        first.length < 3 ||
+        second.length < 2
+    ) {
+        return "";
+    }
+
+    let suffix = "";
+
+    if (match[3]) {
+
+        suffix =
+            normalizeIDSuffix(match[3]);
 
     }
 
-    return source.replace(/[^A-Z0-9]/g, "");
+    return first + "-" + second +
+        (suffix ? "-" + suffix : "");
 
 }
 
 
 /* =========================================================
-   GRADE NORMALIZATION
+   GRADE AND SECTION EXTRACTION
 ========================================================= */
 
-function normalizeGrade(value) {
+function extractGradeAndSection(value) {
 
-    const source =
-        String(value)
+    let text =
+        String(value || "")
             .toUpperCase()
-            .replace(/[IiLl]/g, "1")
-            .replace(/[OoQ]/g, "0");
+            .replace(/\s+/g, " ")
+            .trim();
 
-    const match = source.match(/7|8|9|10|11|12/);
 
-    return match ? match[0] : "";
+    /*
+       Correct common OCR errors in the grade number.
+    */
+
+    text =
+        text.replace(
+            /\b[I|L]2\b/g,
+            "12"
+        );
+
+    text =
+        text.replace(
+            /\bO([0-9])\b/g,
+            "0$1"
+        );
+
+
+    const match =
+        text.match(
+            /GRADE\s*(?:LEVEL)?\s*(7|8|9|10|11|12)\s*[-–—:]?\s*(.*)/i
+        );
+
+    if (!match) {
+
+        /*
+           Also accept the line when OCR misses
+           the word GRADE but recognizes the number.
+        */
+
+        const fallback =
+            text.match(
+                /\b(7|8|9|10|11|12)\s*[-–—:]\s*([A-Z][A-Z0-9 -]*)/i
+            );
+
+        if (!fallback) {
+
+            return {
+                grade: "",
+                section: ""
+            };
+
+        }
+
+        return {
+            grade: fallback[1],
+            section: cleanSection(fallback[2])
+        };
+
+    }
+
+    return {
+
+        grade: match[1],
+
+        section: cleanSection(match[2])
+
+    };
 
 }
 
@@ -1133,25 +1436,115 @@ function normalizeGrade(value) {
    SECTION CLEANING
 ========================================================= */
 
-function cleanSection(section) {
+function cleanSection(value) {
 
-    return String(section)
-        .replace(/\s+/g, " ")
-        .replace(/^[\-–—:\s]+/, "")
-        .trim();
+    let text =
+        String(value || "")
+            .toUpperCase()
+            .replace(/[^A-Z0-9 -]/g, "")
+            .replace(/\s+/g, " ")
+            .trim();
+
+    text =
+        text.replace(/^[-–—:\s]+/, "");
+
+    text =
+        text.replace(/[-–—:\s]+$/, "");
+
+    return text;
 
 }
 
 
 /* =========================================================
-   LRN VALIDATION
+   DIGIT CLEANING
 ========================================================= */
 
-function isValidLRN(lrn) {
+function cleanIDDigits(value) {
+
+    return String(value)
+        .toUpperCase()
+        .replace(/[OQ]/g, "0")
+        .replace(/[IL|]/g, "1")
+        .replace(/B/g, "8")
+        .replace(/G/g, "6")
+        .replace(/[^0-9]/g, "");
+
+}
+
+
+/* =========================================================
+   ID SUFFIX NORMALIZATION
+========================================================= */
+
+function normalizeIDSuffix(value) {
+
+    return String(value)
+        .toUpperCase()
+        .replace(/5H5/g, "SHS")
+        .replace(/JH5/g, "JHS")
+        .replace(/[^A-Z]/g, "");
+
+}
+
+
+/* =========================================================
+   ID NUMBER NORMALIZATION
+========================================================= */
+
+function normalizeIDNumber(value) {
+
+    const source =
+        String(value || "")
+            .toUpperCase()
+            .trim();
+
+    const match =
+        source.match(
+            /^([0-9OQILSBG]{3,})[\s\-._]*([0-9OQILSBG]{2,})[\s\-._]*(SHS|JHS|5H5|JH5)?$/
+        );
+
+    if (!match) {
+        return "";
+    }
+
+    const first =
+        cleanIDDigits(match[1]);
+
+    const second =
+        cleanIDDigits(match[2]);
+
+    if (
+        first.length < 3 ||
+        second.length < 2
+    ) {
+        return "";
+    }
+
+    const suffix =
+        normalizeIDSuffix(match[3] || "");
+
+    return first + second + suffix;
+
+}
+
+
+/* =========================================================
+   VALIDATION
+========================================================= */
+
+function isValidLRN(value) {
 
     return /^\d{12}$/.test(
-        String(lrn).trim()
+        String(value || "").trim()
     );
+
+}
+
+
+function isValidIDNumber(value) {
+
+    return normalizeIDNumber(value).length >= 5;
 
 }
 
@@ -1162,22 +1555,26 @@ function isValidLRN(lrn) {
 
 async function checkDatabase() {
 
-    const lrn = lrnField.value.trim();
+    const lrn =
+        lrnField.value.trim();
 
-    const idNumber = idField.value.trim();
+    const idNumber =
+        idField.value.trim();
 
-    const name = nameField.value.trim();
+    const name =
+        nameField.value.trim();
 
-    const grade = gradeField.value.trim();
+    const grade =
+        gradeField.value.trim();
 
-    const section = sectionField.value.trim();
+    const section =
+        sectionField.value.trim();
+
 
     if (
         !isValidLRN(lrn) &&
-        !normalizeIDNumber(idNumber) &&
-        name.length < 5 &&
-        grade.length === 0 &&
-        section.length === 0
+        !isValidIDNumber(idNumber) &&
+        name.length < 5
     ) {
 
         status.textContent =
@@ -1189,11 +1586,14 @@ async function checkDatabase() {
 
     }
 
-    status.textContent = "Identifying student...";
+
+    status.textContent =
+        "Identifying student...";
 
     databaseButton.disabled = true;
 
     databaseResult.style.display = "none";
+
 
     try {
 
@@ -1201,19 +1601,31 @@ async function checkDatabase() {
             new URLSearchParams({
 
                 lrn: lrn,
+
                 id: idNumber,
+
                 name: name,
+
                 grade: grade,
+
                 section: section
 
             });
 
+
         const url =
             DATABASE_URL + "?" + params.toString();
 
-        console.log("DATABASE REQUEST:", url);
 
-        const response = await fetch(url);
+        console.log(
+            "DATABASE REQUEST:",
+            url
+        );
+
+
+        const response =
+            await fetch(url);
+
 
         if (!response.ok) {
 
@@ -1223,9 +1635,15 @@ async function checkDatabase() {
 
         }
 
-        const result = await response.json();
 
-        console.log("DATABASE RESULT:", result);
+        const result =
+            await response.json();
+
+
+        console.log(
+            "DATABASE RESULT:",
+            result
+        );
 
 
         /* SUCCESSFUL DATABASE MATCH */
@@ -1236,7 +1654,9 @@ async function checkDatabase() {
             result.student
         ) {
 
-            const student = result.student;
+            const student =
+                result.student;
+
 
             nameField.value =
                 String(student.name || "");
@@ -1253,13 +1673,16 @@ async function checkDatabase() {
             idField.value =
                 String(student.idNumber || "");
 
-            databaseResult.style.display = "block";
+
+            databaseResult.style.display =
+                "block";
 
             databaseResult.className =
                 "database-result valid";
 
             databaseStatus.textContent =
                 "🟢 VALID STUDENT";
+
 
             databaseDetails.innerHTML =
 
@@ -1286,22 +1709,27 @@ async function checkDatabase() {
                 "<strong>Section:</strong> " +
                 escapeHTML(student.section || "");
 
+
             status.textContent =
                 "Student identified successfully.";
 
-            progressBar.style.width = "100%";
+            progressBar.style.width =
+                "100%";
 
         } else {
 
+
             /* STUDENT NOT FOUND */
 
-            databaseResult.style.display = "block";
+            databaseResult.style.display =
+                "block";
 
             databaseResult.className =
                 "database-result invalid";
 
             databaseStatus.textContent =
                 "🔴 STUDENT NOT FOUND";
+
 
             databaseDetails.innerHTML =
 
@@ -1328,15 +1756,23 @@ async function checkDatabase() {
                 "<strong>Section:</strong> " +
                 escapeHTML(section || "Not detected");
 
-            status.textContent = "No matching student.";
+
+            status.textContent =
+                "No matching student.";
 
         }
 
+
     } catch (error) {
 
-        console.error("DATABASE ERROR:", error);
+        console.error(
+            "DATABASE ERROR:",
+            error
+        );
 
-        databaseResult.style.display = "block";
+
+        databaseResult.style.display =
+            "block";
 
         databaseResult.className =
             "database-result invalid";
@@ -1344,11 +1780,17 @@ async function checkDatabase() {
         databaseStatus.textContent =
             "⚠️ DATABASE CONNECTION FAILED";
 
+
         databaseDetails.innerHTML =
+
             "Could not connect to Google Apps Script." +
+
             "<br><br><small>" +
+
             escapeHTML(error.message) +
+
             "</small>";
+
 
         status.textContent =
             "Database connection failed.";
