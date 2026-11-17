@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -55,9 +56,8 @@ video {
     transform: translate(-50%, -50%);
     border: 3px solid #00ff66;
     border-radius: 10px;
-    box-shadow:
-        0 0 10px #00ff66,
-        inset 0 0 10px rgba(0, 255, 102, 0.2);
+    box-shadow: 0 0 10px #00ff66,
+                inset 0 0 10px rgba(0, 255, 102, 0.2);
     pointer-events: none;
 }
 
@@ -256,21 +256,23 @@ button:disabled {
 </div>
 
 <div class="controls">
-    <button id="startButton">
-        📷 Start Camera
-    </button>
 
-    <button id="scanButton" disabled>
-        🔍 Scan & Verify
-    </button>
+<button id="startButton">
+    📷 Start Camera
+</button>
 
-    <button id="stopButton" disabled>
-        ⛔ Stop Camera
-    </button>
+<button id="scanButton" disabled>
+    🔍 Scan & Verify
+</button>
 
-    <button id="databaseButton" disabled>
-        🔎 Check Database
-    </button>
+<button id="stopButton" disabled>
+    ⛔ Stop Camera
+</button>
+
+<button id="databaseButton" disabled>
+    🔎 Check Database
+</button>
+
 </div>
 
 <div class="status" id="status">
@@ -295,37 +297,39 @@ button:disabled {
 </div>
 
 <div class="image-container">
-    <h3>Processed Grayscale Image — 1850 × 617</h3>
+    <h3>Processed Image — 1850 × 617</h3>
     <img id="processedImage" alt="Processed ID">
 </div>
 
 <div class="results">
-    <h2>Scanned Information</h2>
 
-    <div class="field">
-        <label>NAME</label>
-        <input id="nameField" type="text" readonly>
-    </div>
+<h2>Scanned Information</h2>
 
-    <div class="field">
-        <label>GRADE LEVEL</label>
-        <input id="gradeField" type="text" readonly>
-    </div>
+<div class="field">
+    <label>NAME</label>
+    <input id="nameField" type="text" readonly>
+</div>
 
-    <div class="field">
-        <label>SECTION</label>
-        <input id="sectionField" type="text" readonly>
-    </div>
+<div class="field">
+    <label>GRADE LEVEL</label>
+    <input id="gradeField" type="text" readonly>
+</div>
 
-    <div class="field">
-        <label>LRN</label>
-        <input id="lrnField" type="text" readonly>
-    </div>
+<div class="field">
+    <label>SECTION</label>
+    <input id="sectionField" type="text" readonly>
+</div>
 
-    <div class="field">
-        <label>ID NUMBER</label>
-        <input id="idField" type="text" readonly>
-    </div>
+<div class="field">
+    <label>LRN</label>
+    <input id="lrnField" type="text" readonly>
+</div>
+
+<div class="field">
+    <label>ID NUMBER</label>
+    <input id="idField" type="text" readonly>
+</div>
+
 </div>
 
 <div class="database-result" id="databaseResult">
@@ -334,11 +338,13 @@ button:disabled {
 </div>
 
 <div class="ocr-debug">
-    <h3>Raw OCR Result</h3>
 
-    <div id="rawOCR">
-        No OCR result yet.
-    </div>
+<h3>Raw OCR Result</h3>
+
+<div id="rawOCR">
+    No OCR result yet.
+</div>
+
 </div>
 
 <canvas id="canvas" style="display:none;"></canvas>
@@ -575,35 +581,30 @@ async function captureAndScan() {
 
 
 /* =========================================================
-   IMAGE PREPROCESSING — GRAYSCALE, NO HARD BINARIZATION
+   IMAGE PREPROCESSING — GRAYSCALE ONLY
+   NO BINARIZATION
 ========================================================= */
 
-function createGrayscaleVariant(sourceCanvas, options = {}) {
+function preprocessCanvas(sourceCanvas, contrast = 1.55) {
 
-    const {
-        contrast = 1.25,
-        invert = false
-    } = options;
+    const ctx =
+        sourceCanvas.getContext("2d", {
+            willReadFrequently: true
+        });
 
-    const outputCanvas = document.createElement("canvas");
-
-    outputCanvas.width = sourceCanvas.width;
-    outputCanvas.height = sourceCanvas.height;
-
-    const outputCtx = outputCanvas.getContext("2d", {
-        willReadFrequently: true
-    });
-
-    outputCtx.drawImage(sourceCanvas, 0, 0);
-
-    const imageData = outputCtx.getImageData(
-        0,
-        0,
-        outputCanvas.width,
-        outputCanvas.height
-    );
+    const imageData =
+        ctx.getImageData(
+            0,
+            0,
+            sourceCanvas.width,
+            sourceCanvas.height
+        );
 
     const data = imageData.data;
+
+    const factor =
+        (259 * (contrast + 255)) /
+        (255 * (259 - contrast));
 
     for (let i = 0; i < data.length; i += 4) {
 
@@ -616,30 +617,38 @@ function createGrayscaleVariant(sourceCanvas, options = {}) {
             0.587 * g +
             0.114 * b;
 
-        // Moderate contrast enhancement while preserving gray levels.
-        gray = (gray - 128) * contrast + 128;
+        gray =
+            factor * (gray - 128) + 128;
 
-        gray = Math.max(0, Math.min(255, gray));
+        gray =
+            Math.max(
+                0,
+                Math.min(255, gray)
+            );
 
-        // Invert tones without converting the image into black and white.
-        if (invert) {
-            gray = 255 - gray;
-        }
+        /*
+           KEEP GRAYSCALE DETAIL.
+           NO THRESHOLDING.
+           NO BLACK-AND-WHITE CONVERSION.
+        */
 
         data[i] = gray;
         data[i + 1] = gray;
         data[i + 2] = gray;
-        data[i + 3] = 255;
     }
 
-    outputCtx.putImageData(imageData, 0, 0);
-
-    return outputCanvas;
+    ctx.putImageData(
+        imageData,
+        0,
+        0
+    );
 }
 
 
 /* =========================================================
-   MAIN OCR — NORMAL + INVERTED GRAYSCALE VARIANTS
+   MAIN OCR PROCESS
+   PASS 1: NORMAL GRAYSCALE
+   PASS 2: INVERTED GRAYSCALE
 ========================================================= */
 
 async function performOCR() {
@@ -653,14 +662,15 @@ async function performOCR() {
     const videoHeight =
         video.videoHeight;
 
-    if (!videoWidth || !videoHeight) {
+    if (
+        !videoWidth ||
+        !videoHeight
+    ) {
 
         throw new Error(
             "Camera image is not ready."
         );
     }
-
-    // Keep the existing fixed 1850 × 617 center crop.
 
     const targetWidth = 1850;
     const targetHeight = 617;
@@ -671,7 +681,10 @@ async function performOCR() {
     let finalCropWidth;
     let finalCropHeight;
 
-    if (videoWidth / videoHeight > targetRatio) {
+    if (
+        videoWidth / videoHeight >
+        targetRatio
+    ) {
 
         finalCropHeight =
             videoHeight * 0.92;
@@ -697,7 +710,8 @@ async function performOCR() {
     canvas.width = targetWidth;
     canvas.height = targetHeight;
 
-    const ctx = canvas.getContext("2d");
+    const ctx =
+        canvas.getContext("2d");
 
     ctx.imageSmoothingEnabled = true;
     ctx.imageSmoothingQuality = "high";
@@ -715,176 +729,196 @@ async function performOCR() {
     );
 
     status.textContent =
-        "Creating grayscale OCR images...";
+        "Enhancing image using grayscale...";
 
-    // PASS 1: Normal grayscale.
-
-    const normalCanvas =
-        createGrayscaleVariant(canvas, {
-            contrast: 1.25,
-            invert: false
-        });
-
-    // PASS 2: Inverted grayscale.
-
-    const invertedCanvas =
-        createGrayscaleVariant(canvas, {
-            contrast: 1.25,
-            invert: true
-        });
-
-    // Display normal grayscale image.
+    preprocessCanvas(
+        canvas,
+        1.55
+    );
 
     processedImage.src =
-        normalCanvas.toDataURL("image/png");
+        canvas.toDataURL("image/png");
 
     processedImage.style.display = "block";
 
 
-    /* OCR CONFIGURATION */
-
-    const ocrOptions = (
-        passNumber,
-        progressStart,
-        progressSpan
-    ) => ({
-
-        logger: function(info) {
-
-            console.log(
-                `TESSERACT PASS ${passNumber}:`,
-                info
-            );
-
-            if (info.progress !== undefined) {
-
-                progressBar.style.width =
-                    (
-                        progressStart +
-                        info.progress * progressSpan
-                    ) + "%";
-            }
-
-            if (info.status) {
-
-                status.textContent =
-                    `OCR Pass ${passNumber}: ${info.status}`;
-            }
-        },
-
-        tessedit_pageseg_mode: 6,
-
-        preserve_interword_spaces: 1
-    });
-
-
-    /* =====================================================
+    /* =========================================
        OCR PASS 1 — NORMAL GRAYSCALE
-    ===================================================== */
+    ========================================= */
 
     status.textContent =
-        "Reading normal grayscale image...";
+        "Reading ID information (normal grayscale)...";
 
     const result1 =
         await Tesseract.recognize(
-            normalCanvas,
+            canvas,
             "eng",
-            ocrOptions(1, 0, 45)
+            {
+                logger: function(info) {
+
+                    console.log(
+                        "TESSERACT PASS 1:",
+                        info
+                    );
+
+                    if (
+                        info.progress !== undefined
+                    ) {
+
+                        progressBar.style.width =
+                            (info.progress * 40) + "%";
+                    }
+
+                    if (info.status) {
+
+                        status.textContent =
+                            info.status;
+                    }
+                },
+
+                tessedit_pageseg_mode: 6,
+                preserve_interword_spaces: 1
+            }
         );
 
     const textPass1 =
-        result1.data.text || "";
+        result1.data.text;
 
-    const confidence1 =
-        Number(result1.data.confidence) || 0;
+    console.log(
+        "OCR PASS 1:",
+        textPass1
+    );
 
     const pass1Results =
         parseOCR(textPass1);
 
-    console.log(
-        "OCR PASS 1 TEXT:",
-        textPass1
-    );
+    let bestResults = {
 
-    console.log(
-        "OCR PASS 1 CONFIDENCE:",
-        confidence1
-    );
+        name: pass1Results.name,
+        grade: pass1Results.grade,
+        section: pass1Results.section,
+        lrn: pass1Results.lrn,
+        id: pass1Results.id
+    };
 
 
-    /* =====================================================
+    /* =========================================
        OCR PASS 2 — INVERTED GRAYSCALE
-    ===================================================== */
+    ========================================= */
 
     status.textContent =
-        "Reading inverted grayscale image...";
+        "Running second OCR pass (inverted image)...";
+
+    const invertedCanvas =
+        document.createElement("canvas");
+
+    invertedCanvas.width = canvas.width;
+    invertedCanvas.height = canvas.height;
+
+    const invertedCtx =
+        invertedCanvas.getContext("2d", {
+            willReadFrequently: true
+        });
+
+    invertedCtx.drawImage(
+        canvas,
+        0,
+        0
+    );
+
+    const invertedImageData =
+        invertedCtx.getImageData(
+            0,
+            0,
+            invertedCanvas.width,
+            invertedCanvas.height
+        );
+
+    const invertedData =
+        invertedImageData.data;
+
+    for (
+        let i = 0;
+        i < invertedData.length;
+        i += 4
+    ) {
+
+        const gray =
+            invertedData[i];
+
+        const invertedGray =
+            255 - gray;
+
+        invertedData[i] = invertedGray;
+        invertedData[i + 1] = invertedGray;
+        invertedData[i + 2] = invertedGray;
+    }
+
+    invertedCtx.putImageData(
+        invertedImageData,
+        0,
+        0
+    );
 
     const result2 =
         await Tesseract.recognize(
             invertedCanvas,
             "eng",
-            ocrOptions(2, 45, 45)
+            {
+                logger: function(info) {
+
+                    console.log(
+                        "TESSERACT PASS 2 (INVERTED):",
+                        info
+                    );
+
+                    if (
+                        info.progress !== undefined
+                    ) {
+
+                        progressBar.style.width =
+                            (40 + info.progress * 40) + "%";
+                    }
+                },
+
+                tessedit_pageseg_mode: 6,
+                preserve_interword_spaces: 1
+            }
         );
 
     const textPass2 =
-        result2.data.text || "";
+        result2.data.text;
 
-    const confidence2 =
-        Number(result2.data.confidence) || 0;
+    console.log(
+        "OCR PASS 2:",
+        textPass2
+    );
 
     const pass2Results =
         parseOCR(textPass2);
 
-    console.log(
-        "OCR PASS 2 TEXT:",
-        textPass2
-    );
-
-    console.log(
-        "OCR PASS 2 CONFIDENCE:",
-        confidence2
-    );
-
-
-    /* =====================================================
-       MERGE OCR RESULTS
-    ===================================================== */
-
-    const bestResults =
+    bestResults =
         mergeOCRResults(
-            pass1Results,
-            pass2Results,
-            confidence1,
-            confidence2
+            bestResults,
+            pass2Results
         );
 
 
-    /* =====================================================
-       DISPLAY RAW OCR
-    ===================================================== */
+    /* =========================================
+       DISPLAY BOTH OCR RESULTS
+    ========================================= */
 
     rawOCR.textContent =
-
-        "[OCR PASS 1 — NORMAL GRAYSCALE]" +
-        "\nConfidence: " +
-        confidence1.toFixed(2) +
-        "%\n" +
+        "[OCR PASS 1 — NORMAL GRAYSCALE]\n" +
         textPass1 +
-
-        "\n\n[OCR PASS 2 — INVERTED GRAYSCALE]" +
-        "\nConfidence: " +
-        confidence2.toFixed(2) +
-        "%\n" +
-        textPass2 +
-
-        "\n\n[SELECTED RESULTS — " +
-        (confidence1 >= confidence2 ? "PASS 1" : "PASS 2") +
-        "]";
+        "\n\n" +
+        "[OCR PASS 2 — INVERTED GRAYSCALE]\n" +
+        textPass2;
 
 
-    /* =====================================================
-       POPULATE SCANNED INFORMATION
-    ===================================================== */
+    /* =========================================
+       DISPLAY SCANNED INFORMATION
+    ========================================= */
 
     nameField.value =
         bestResults.name;
@@ -907,9 +941,9 @@ async function performOCR() {
     );
 
 
-    /* =====================================================
+    /* =========================================
        DATABASE IDENTIFICATION
-    ===================================================== */
+    ========================================= */
 
     const hasLRN =
         isValidLRN(bestResults.lrn);
@@ -927,7 +961,10 @@ async function performOCR() {
     if (
         hasLRN ||
         hasID ||
-        (hasName && hasSupportingInfo)
+        (
+            hasName &&
+            hasSupportingInfo
+        )
     ) {
 
         status.textContent =
@@ -954,7 +991,6 @@ async function performOCR() {
 function parseOCR(text) {
 
     const result = {
-
         name: "",
         grade: "",
         section: "",
@@ -1085,14 +1121,8 @@ function parseOCR(text) {
 
         const cleaned =
             line
-                .replace(
-                    /[^A-Za-zÀ-ÿ.' -]/g,
-                    ""
-                )
-                .replace(
-                    /\s+/g,
-                    " "
-                )
+                .replace(/[^A-Za-zÀ-ÿ.' -]/g, "")
+                .replace(/\s+/g, " ")
                 .trim();
 
         const words =
@@ -1112,7 +1142,6 @@ function parseOCR(text) {
         ) {
 
             result.name = cleaned;
-
             break;
         }
     }
@@ -1127,69 +1156,60 @@ function parseOCR(text) {
 
 
 /* =========================================================
-   MERGE OCR RESULTS USING OVERALL PASS CONFIDENCE
+   MERGE OCR RESULTS
 ========================================================= */
 
 function mergeOCRResults(
-    pass1,
-    pass2,
-    confidence1 = 0,
-    confidence2 = 0
+    bestResults,
+    newResults
 ) {
 
-    const preferred =
-        confidence2 > confidence1
-            ? pass2
-            : pass1;
+    if (
+        !bestResults.name &&
+        newResults.name
+    ) {
 
-    const secondary =
-        confidence2 > confidence1
-            ? pass1
-            : pass2;
-
-    const merged = {
-
-        name:
-            preferred.name ||
-            secondary.name ||
-            "",
-
-        grade:
-            preferred.grade ||
-            secondary.grade ||
-            "",
-
-        section:
-            preferred.section ||
-            secondary.section ||
-            "",
-
-        lrn:
-            preferred.lrn ||
-            secondary.lrn ||
-            "",
-
-        id:
-            preferred.id ||
-            secondary.id ||
-            ""
-    };
-
-    // Prefer a valid 12-digit LRN if only one pass produced one.
-
-    if (!isValidLRN(merged.lrn)) {
-
-        if (isValidLRN(pass1.lrn)) {
-
-            merged.lrn = pass1.lrn;
-
-        } else if (isValidLRN(pass2.lrn)) {
-
-            merged.lrn = pass2.lrn;
-        }
+        bestResults.name =
+            newResults.name;
     }
 
-    return merged;
+    if (
+        !bestResults.grade &&
+        newResults.grade
+    ) {
+
+        bestResults.grade =
+            newResults.grade;
+    }
+
+    if (
+        !bestResults.section &&
+        newResults.section
+    ) {
+
+        bestResults.section =
+            newResults.section;
+    }
+
+    if (
+        !isValidLRN(bestResults.lrn) &&
+        isValidLRN(newResults.lrn)
+    ) {
+
+        bestResults.lrn =
+            newResults.lrn;
+    }
+
+    if (
+        !bestResults.id &&
+        newResults.id
+    ) {
+
+        bestResults.id =
+            newResults.id;
+    }
+
+    return bestResults;
 }
 
 
@@ -1251,7 +1271,6 @@ function getLRNCandidates(value) {
     if (cleaned.length === 12) {
 
         candidates.push(cleaned);
-
         return candidates;
     }
 
@@ -1349,10 +1368,7 @@ function normalizeIDNumber(value) {
         return result;
     }
 
-    return source.replace(
-        /[^A-Z0-9]/g,
-        ""
-    );
+    return source.replace(/[^A-Z0-9]/g, "");
 }
 
 
@@ -1435,7 +1451,6 @@ async function checkDatabase() {
             "No usable student information was detected.";
 
         databaseButton.disabled = false;
-
         return;
     }
 
@@ -1452,13 +1467,9 @@ async function checkDatabase() {
             new URLSearchParams({
 
                 lrn: lrn,
-
                 id: idNumber,
-
                 name: name,
-
                 grade: grade,
-
                 section: section
             });
 
@@ -1492,9 +1503,7 @@ async function checkDatabase() {
         );
 
 
-        /* =========================================
-           SUCCESSFUL DATABASE MATCH
-        ========================================= */
+        /* SUCCESSFUL DATABASE MATCH */
 
         if (
             result.success === true &&
@@ -1504,8 +1513,6 @@ async function checkDatabase() {
 
             const student =
                 result.student;
-
-            /* USE DATABASE VALUES */
 
             nameField.value =
                 String(student.name || "");
@@ -1521,9 +1528,6 @@ async function checkDatabase() {
 
             idField.value =
                 String(student.idNumber || "");
-
-
-            /* SHOW VALID RESULT */
 
             databaseResult.style.display = "block";
 
@@ -1565,9 +1569,7 @@ async function checkDatabase() {
 
         } else {
 
-            /* =====================================
-               STUDENT NOT FOUND
-            ===================================== */
+            /* STUDENT NOT FOUND */
 
             databaseResult.style.display = "block";
 
@@ -1645,15 +1647,10 @@ async function checkDatabase() {
 function escapeHTML(value) {
 
     return String(value)
-
         .replace(/&/g, "&amp;")
-
         .replace(/</g, "&lt;")
-
         .replace(/>/g, "&gt;")
-
         .replace(/"/g, "&quot;")
-
         .replace(/'/g, "&#039;");
 }
 
