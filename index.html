@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -534,14 +533,14 @@ async function performOCR() {
         targetHeight
     );
 
-    status.textContent = "Converting image to grayscale...";
+  status.textContent = "Displaying original camera capture...";
 
-    // Only grayscale conversion is applied here.
-    preprocessCanvas(canvas);
+// Display the original image BEFORE grayscale processing.
+processedImage.src = canvas.toDataURL("image/png");
+processedImage.style.display = "block";
 
-    // Display the actual grayscale image sent to OCR Pass 1.
-    processedImage.src = canvas.toDataURL("image/png");
-    processedImage.style.display = "block";
+// Then convert the image to grayscale.
+preprocessCanvas(canvas);
 
 
     /* OCR PASS 1 — NORMAL GRAYSCALE */
