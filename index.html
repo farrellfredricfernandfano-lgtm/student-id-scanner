@@ -5,13 +5,10 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Student ID Scanner</title>
-
 <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
 
 <style>
-* {
-    box-sizing: border-box;
-}
+* { box-sizing: border-box; }
 
 body {
     margin: 0;
@@ -22,9 +19,7 @@ body {
     text-align: center;
 }
 
-h1 {
-    margin-bottom: 5px;
-}
+h1 { margin-bottom: 5px; }
 
 .subtitle {
     color: #aaa;
@@ -57,7 +52,7 @@ video {
     border: 3px solid #00ff66;
     border-radius: 10px;
     box-shadow: 0 0 10px #00ff66,
-                inset 0 0 10px rgba(0, 255, 102, 0.2);
+                inset 0 0 10px rgba(0,255,102,0.2);
     pointer-events: none;
 }
 
@@ -95,25 +90,10 @@ button:disabled {
     cursor: not-allowed;
 }
 
-#startButton {
-    background: #00c853;
-    color: white;
-}
-
-#scanButton {
-    background: #2196f3;
-    color: white;
-}
-
-#stopButton {
-    background: #f44336;
-    color: white;
-}
-
-#databaseButton {
-    background: #9c27b0;
-    color: white;
-}
+#startButton { background: #00c853; color: white; }
+#scanButton { background: #2196f3; color: white; }
+#stopButton { background: #f44336; color: white; }
+#databaseButton { background: #9c27b0; color: white; }
 
 .status {
     max-width: 700px;
@@ -145,9 +125,7 @@ button:disabled {
     margin: 20px auto;
 }
 
-.image-container h3 {
-    margin-bottom: 10px;
-}
+.image-container h3 { margin-bottom: 10px; }
 
 #processedImage {
     max-width: 100%;
@@ -161,13 +139,8 @@ button:disabled {
     text-align: left;
 }
 
-.results h2 {
-    text-align: center;
-}
-
-.field {
-    margin: 10px 0;
-}
+.results h2 { text-align: center; }
+.field { margin: 10px 0; }
 
 .field label {
     display: block;
@@ -222,9 +195,7 @@ button:disabled {
     text-align: left;
 }
 
-.ocr-debug h3 {
-    text-align: center;
-}
+.ocr-debug h3 { text-align: center; }
 
 #rawOCR {
     width: 100%;
@@ -256,23 +227,10 @@ button:disabled {
 </div>
 
 <div class="controls">
-
-<button id="startButton">
-    📷 Start Camera
-</button>
-
-<button id="scanButton" disabled>
-    🔍 Scan & Verify
-</button>
-
-<button id="stopButton" disabled>
-    ⛔ Stop Camera
-</button>
-
-<button id="databaseButton" disabled>
-    🔎 Check Database
-</button>
-
+    <button id="startButton">📷 Start Camera</button>
+    <button id="scanButton" disabled>🔍 Scan & Verify</button>
+    <button id="stopButton" disabled>⛔ Stop Camera</button>
+    <button id="databaseButton" disabled>🔎 Check Database</button>
 </div>
 
 <div class="status" id="status">
@@ -284,14 +242,14 @@ button:disabled {
 </div>
 
 <div id="scanTime" style="
-    max-width: 700px;
-    margin: 10px auto;
-    padding: 10px;
-    background: #222;
-    border-radius: 8px;
-    color: #00ff66;
-    font-size: 16px;
-    font-weight: bold;
+    max-width:700px;
+    margin:10px auto;
+    padding:10px;
+    background:#222;
+    border-radius:8px;
+    color:#00ff66;
+    font-size:16px;
+    font-weight:bold;
 ">
     ⏱ Scan Time: —
 </div>
@@ -302,34 +260,32 @@ button:disabled {
 </div>
 
 <div class="results">
+    <h2>Scanned Information</h2>
 
-<h2>Scanned Information</h2>
+    <div class="field">
+        <label>NAME</label>
+        <input id="nameField" type="text" readonly>
+    </div>
 
-<div class="field">
-    <label>NAME</label>
-    <input id="nameField" type="text" readonly>
-</div>
+    <div class="field">
+        <label>GRADE LEVEL</label>
+        <input id="gradeField" type="text" readonly>
+    </div>
 
-<div class="field">
-    <label>GRADE LEVEL</label>
-    <input id="gradeField" type="text" readonly>
-</div>
+    <div class="field">
+        <label>SECTION</label>
+        <input id="sectionField" type="text" readonly>
+    </div>
 
-<div class="field">
-    <label>SECTION</label>
-    <input id="sectionField" type="text" readonly>
-</div>
+    <div class="field">
+        <label>LRN</label>
+        <input id="lrnField" type="text" readonly>
+    </div>
 
-<div class="field">
-    <label>LRN</label>
-    <input id="lrnField" type="text" readonly>
-</div>
-
-<div class="field">
-    <label>ID NUMBER</label>
-    <input id="idField" type="text" readonly>
-</div>
-
+    <div class="field">
+        <label>ID NUMBER</label>
+        <input id="idField" type="text" readonly>
+    </div>
 </div>
 
 <div class="database-result" id="databaseResult">
@@ -338,90 +294,48 @@ button:disabled {
 </div>
 
 <div class="ocr-debug">
-
-<h3>Raw OCR Result</h3>
-
-<div id="rawOCR">
-    No OCR result yet.
-</div>
-
+    <h3>Raw OCR Result</h3>
+    <div id="rawOCR">No OCR result yet.</div>
 </div>
 
 <canvas id="canvas" style="display:none;"></canvas>
-<canvas id="lrnCanvas" style="display:none;"></canvas>
 
 <script>
 
-/* =========================================================
-   ELEMENTS
-========================================================= */
+/* ELEMENTS */
 
 const video = document.getElementById("video");
 const canvas = document.getElementById("canvas");
+const processedImage = document.getElementById("processedImage");
 
-const processedImage =
-    document.getElementById("processedImage");
+const startButton = document.getElementById("startButton");
+const scanButton = document.getElementById("scanButton");
+const stopButton = document.getElementById("stopButton");
+const databaseButton = document.getElementById("databaseButton");
 
-const startButton =
-    document.getElementById("startButton");
+const status = document.getElementById("status");
+const progressBar = document.getElementById("progressBar");
+const scanTime = document.getElementById("scanTime");
 
-const scanButton =
-    document.getElementById("scanButton");
+const nameField = document.getElementById("nameField");
+const gradeField = document.getElementById("gradeField");
+const sectionField = document.getElementById("sectionField");
+const lrnField = document.getElementById("lrnField");
+const idField = document.getElementById("idField");
 
-const stopButton =
-    document.getElementById("stopButton");
-
-const databaseButton =
-    document.getElementById("databaseButton");
-
-const status =
-    document.getElementById("status");
-
-const progressBar =
-    document.getElementById("progressBar");
-
-const scanTime =
-    document.getElementById("scanTime");
-
-const nameField =
-    document.getElementById("nameField");
-
-const gradeField =
-    document.getElementById("gradeField");
-
-const sectionField =
-    document.getElementById("sectionField");
-
-const lrnField =
-    document.getElementById("lrnField");
-
-const idField =
-    document.getElementById("idField");
-
-const databaseResult =
-    document.getElementById("databaseResult");
-
-const databaseStatus =
-    document.getElementById("databaseStatus");
-
-const databaseDetails =
-    document.getElementById("databaseDetails");
-
-const rawOCR =
-    document.getElementById("rawOCR");
+const databaseResult = document.getElementById("databaseResult");
+const databaseStatus = document.getElementById("databaseStatus");
+const databaseDetails = document.getElementById("databaseDetails");
+const rawOCR = document.getElementById("rawOCR");
 
 
-/* =========================================================
-   GOOGLE APPS SCRIPT
-========================================================= */
+/* GOOGLE APPS SCRIPT */
 
 const DATABASE_URL =
-    "https://script.google.com/macros/s/AKfycby8SQH20dz2PK6Covm_GOy4sG1WigvDaxZr8a--gbrI_LBKE1KJoQO7AMzaKZR_3mQ/exec";
+"https://script.google.com/macros/s/AKfycby8SQH20dz2PK6Covm_GOy4sG1WigvDaxZr8a--gbrI_LBKE1KJoQO7AMzaKZR_3mQ/exec";
 
 
-/* =========================================================
-   CAMERA
-========================================================= */
+/* CAMERA */
 
 let cameraStream = null;
 
@@ -431,46 +345,32 @@ scanButton.addEventListener("click", captureAndScan);
 databaseButton.addEventListener("click", checkDatabase);
 
 
-/* START CAMERA */
-
 async function startCamera() {
-
     try {
+        status.textContent = "Starting camera...";
 
-        status.textContent =
-            "Starting camera...";
-
-        cameraStream =
-            await navigator.mediaDevices.getUserMedia({
-                audio: false,
-                video: {
-                    facingMode: { ideal: "environment" },
-                    width: { ideal: 1920 },
-                    height: { ideal: 1080 },
-                    frameRate: { ideal: 30 }
-                }
-            });
+        cameraStream = await navigator.mediaDevices.getUserMedia({
+            audio: false,
+            video: {
+                facingMode: { ideal: "environment" },
+                width: { ideal: 1920 },
+                height: { ideal: 1080 },
+                frameRate: { ideal: 30 }
+            }
+        });
 
         video.srcObject = cameraStream;
 
-        const track =
-            cameraStream.getVideoTracks()[0];
+        const track = cameraStream.getVideoTracks()[0];
 
         try {
-
             await track.applyConstraints({
                 width: { ideal: 1920 },
                 height: { ideal: 1080 },
                 frameRate: { ideal: 30 }
             });
-
         } catch (constraintError) {
-
-            console.log(
-                "Could not apply extra camera constraints:",
-                constraintError
-            );
-
+            console.log("Could not apply extra camera constraints:", constraintError);
         }
 
         startButton.disabled = true;
@@ -481,29 +381,15 @@ async function startCamera() {
             "Camera ready. Align the entire ID inside the green guide.";
 
     } catch (error) {
-
-        console.error(
-            "CAMERA ERROR:",
-            error
-        );
-
-        status.textContent =
-            "Could not access camera: " +
-            error.message;
+        console.error("CAMERA ERROR:", error);
+        status.textContent = "Could not access camera: " + error.message;
     }
 }
 
 
-/* STOP CAMERA */
-
 function stopCamera() {
-
     if (cameraStream) {
-
-        cameraStream
-            .getTracks()
-            .forEach(track => track.stop());
-
+        cameraStream.getTracks().forEach(track => track.stop());
         cameraStream = null;
     }
 
@@ -513,135 +399,83 @@ function stopCamera() {
     scanButton.disabled = true;
     stopButton.disabled = true;
 
-    status.textContent =
-        "Camera stopped.";
+    status.textContent = "Camera stopped.";
 }
 
 
-/* CAPTURE + SCAN */
+/* CAPTURE AND SCAN */
 
 async function captureAndScan() {
-
     if (!cameraStream) {
-
-        alert(
-            "Please start the camera first."
-        );
-
+        alert("Please start the camera first.");
         return;
     }
 
-    const scanStartTime =
-        performance.now();
+    const scanStartTime = performance.now();
 
-    scanTime.textContent =
-        "⏱ Scan Time: Scanning...";
-
+    scanTime.textContent = "⏱ Scan Time: Scanning...";
     scanButton.disabled = true;
     databaseButton.disabled = true;
 
-    databaseResult.style.display =
-        "none";
-
-    progressBar.style.width =
-        "0%";
-
-    status.textContent =
-        "Capturing ID...";
+    databaseResult.style.display = "none";
+    progressBar.style.width = "0%";
+    status.textContent = "Capturing ID...";
 
     try {
-
         await performOCR();
-
     } catch (error) {
-
-        console.error(
-            "SCAN ERROR:",
-            error
-        );
-
-        status.textContent =
-            "Scanning failed: " +
-            error.message;
+        console.error("SCAN ERROR:", error);
+        status.textContent = "Scanning failed: " + error.message;
     }
 
-    const scanEndTime =
-        performance.now();
-
     const elapsedSeconds =
-        (scanEndTime - scanStartTime) / 1000;
+        (performance.now() - scanStartTime) / 1000;
 
     scanTime.textContent =
-        "⏱ Scan Time: " +
-        elapsedSeconds.toFixed(2) +
-        " seconds";
+        "⏱ Scan Time: " + elapsedSeconds.toFixed(2) + " seconds";
 
     scanButton.disabled = false;
 }
 
 
 /* =========================================================
-   IMAGE PREPROCESSING — GRAYSCALE ONLY
+   IMAGE PREPROCESSING — PURE GRAYSCALE
    NO BINARIZATION
+   NO CONTRAST ENHANCEMENT
+   NO SHARPENING
 ========================================================= */
 
-function preprocessCanvas(sourceCanvas, contrast = 1.55) {
+function preprocessCanvas(sourceCanvas) {
+    const ctx = sourceCanvas.getContext("2d", {
+        willReadFrequently: true
+    });
 
-    const ctx =
-        sourceCanvas.getContext("2d", {
-            willReadFrequently: true
-        });
-
-    const imageData =
-        ctx.getImageData(
-            0,
-            0,
-            sourceCanvas.width,
-            sourceCanvas.height
-        );
+    const imageData = ctx.getImageData(
+        0,
+        0,
+        sourceCanvas.width,
+        sourceCanvas.height
+    );
 
     const data = imageData.data;
 
-    const factor =
-        (259 * (contrast + 255)) /
-        (255 * (259 - contrast));
-
     for (let i = 0; i < data.length; i += 4) {
-
         const r = data[i];
         const g = data[i + 1];
         const b = data[i + 2];
 
-        let gray =
+        const gray = Math.round(
             0.299 * r +
             0.587 * g +
-            0.114 * b;
-
-        gray =
-            factor * (gray - 128) + 128;
-
-        gray =
-            Math.max(
-                0,
-                Math.min(255, gray)
-            );
-
-        /*
-           KEEP GRAYSCALE DETAIL.
-           NO THRESHOLDING.
-           NO BLACK-AND-WHITE CONVERSION.
-        */
+            0.114 * b
+        );
 
         data[i] = gray;
         data[i + 1] = gray;
         data[i + 2] = gray;
     }
 
-    ctx.putImageData(
-        imageData,
-        0,
-        0
-    );
+    ctx.putImageData(imageData, 0, 0);
 }
 
 
@@ -652,66 +486,38 @@ function preprocessCanvas(sourceCanvas, contrast = 1.55) {
 ========================================================= */
 
 async function performOCR() {
+    status.textContent = "Preparing ID image...";
 
-    status.textContent =
-        "Preparing ID image...";
+    const videoWidth = video.videoWidth;
+    const videoHeight = video.videoHeight;
 
-    const videoWidth =
-        video.videoWidth;
-
-    const videoHeight =
-        video.videoHeight;
-
-    if (
-        !videoWidth ||
-        !videoHeight
-    ) {
-
-        throw new Error(
-            "Camera image is not ready."
-        );
+    if (!videoWidth || !videoHeight) {
+        throw new Error("Camera image is not ready.");
     }
 
     const targetWidth = 1850;
     const targetHeight = 617;
 
-    const targetRatio =
-        targetWidth / targetHeight;
+    const targetRatio = targetWidth / targetHeight;
 
     let finalCropWidth;
     let finalCropHeight;
 
-    if (
-        videoWidth / videoHeight >
-        targetRatio
-    ) {
-
-        finalCropHeight =
-            videoHeight * 0.92;
-
-        finalCropWidth =
-            finalCropHeight * targetRatio;
-
+    if (videoWidth / videoHeight > targetRatio) {
+        finalCropHeight = videoHeight * 0.92;
+        finalCropWidth = finalCropHeight * targetRatio;
     } else {
-
-        finalCropWidth =
-            videoWidth * 0.92;
-
-        finalCropHeight =
-            finalCropWidth / targetRatio;
+        finalCropWidth = videoWidth * 0.92;
+        finalCropHeight = finalCropWidth / targetRatio;
     }
 
-    const cropX =
-        (videoWidth - finalCropWidth) / 2;
-
-    const cropY =
-        (videoHeight - finalCropHeight) / 2;
+    const cropX = (videoWidth - finalCropWidth) / 2;
+    const cropY = (videoHeight - finalCropHeight) / 2;
 
     canvas.width = targetWidth;
     canvas.height = targetHeight;
 
-    const ctx =
-        canvas.getContext("2d");
+    const ctx = canvas.getContext("2d");
 
     ctx.imageSmoothingEnabled = true;
     ctx.imageSmoothingQuality = "high";
@@ -728,72 +534,49 @@ async function performOCR() {
         targetHeight
     );
 
-    status.textContent =
-        "Enhancing image using grayscale...";
+    status.textContent = "Converting image to grayscale...";
 
-    preprocessCanvas(
-        canvas,
-        1.55
-    );
+    // Only grayscale conversion is applied here.
+    preprocessCanvas(canvas);
 
-    processedImage.src =
-        canvas.toDataURL("image/png");
-
+    // Display the actual grayscale image sent to OCR Pass 1.
+    processedImage.src = canvas.toDataURL("image/png");
     processedImage.style.display = "block";
 
 
-    /* =========================================
-       OCR PASS 1 — NORMAL GRAYSCALE
-    ========================================= */
+    /* OCR PASS 1 — NORMAL GRAYSCALE */
 
-    status.textContent =
-        "Reading ID information (normal grayscale)...";
+    status.textContent = "Reading ID information (normal grayscale)...";
 
-    const result1 =
-        await Tesseract.recognize(
-            canvas,
-            "eng",
-            {
-                logger: function(info) {
+    const result1 = await Tesseract.recognize(
+        canvas,
+        "eng",
+        {
+            logger: function(info) {
+                console.log("TESSERACT PASS 1:", info);
 
-                    console.log(
-                        "TESSERACT PASS 1:",
-                        info
-                    );
+                if (info.progress !== undefined) {
+                    progressBar.style.width =
+                        (info.progress * 40) + "%";
+                }
 
-                    if (
-                        info.progress !== undefined
-                    ) {
+                if (info.status) {
+                    status.textContent = info.status;
+                }
+            },
 
-                        progressBar.style.width =
-                            (info.progress * 40) + "%";
-                    }
-
-                    if (info.status) {
-
-                        status.textContent =
-                            info.status;
-                    }
-                },
-
-                tessedit_pageseg_mode: 6,
-                preserve_interword_spaces: 1
-            }
-        );
-
-    const textPass1 =
-        result1.data.text;
-
-    console.log(
-        "OCR PASS 1:",
-        textPass1
+            tessedit_pageseg_mode: 6,
+            preserve_interword_spaces: 1
+        }
     );
 
-    const pass1Results =
-        parseOCR(textPass1);
+    const textPass1 = result1.data.text;
+
+    console.log("OCR PASS 1:", textPass1);
+
+    const pass1Results = parseOCR(textPass1);
 
     let bestResults = {
-
         name: pass1Results.name,
         grade: pass1Results.grade,
         section: pass1Results.section,
@@ -802,111 +585,69 @@ async function performOCR() {
     };
 
 
-    /* =========================================
-       OCR PASS 2 — INVERTED GRAYSCALE
-    ========================================= */
+    /* OCR PASS 2 — INVERTED GRAYSCALE */
 
-    status.textContent =
-        "Running second OCR pass (inverted image)...";
+    status.textContent = "Running second OCR pass (inverted grayscale)...";
 
-    const invertedCanvas =
-        document.createElement("canvas");
+    const invertedCanvas = document.createElement("canvas");
 
     invertedCanvas.width = canvas.width;
     invertedCanvas.height = canvas.height;
 
-    const invertedCtx =
-        invertedCanvas.getContext("2d", {
-            willReadFrequently: true
-        });
+    const invertedCtx = invertedCanvas.getContext("2d", {
+        willReadFrequently: true
+    });
 
-    invertedCtx.drawImage(
-        canvas,
+    invertedCtx.drawImage(canvas, 0, 0);
+
+    const invertedImageData = invertedCtx.getImageData(
         0,
-        0
+        0,
+        invertedCanvas.width,
+        invertedCanvas.height
     );
 
-    const invertedImageData =
-        invertedCtx.getImageData(
-            0,
-            0,
-            invertedCanvas.width,
-            invertedCanvas.height
-        );
+    const invertedData = invertedImageData.data;
 
-    const invertedData =
-        invertedImageData.data;
-
-    for (
-        let i = 0;
-        i < invertedData.length;
-        i += 4
-    ) {
-
-        const gray =
-            invertedData[i];
-
-        const invertedGray =
-            255 - gray;
+    for (let i = 0; i < invertedData.length; i += 4) {
+        const gray = invertedData[i];
+        const invertedGray = 255 - gray;
 
         invertedData[i] = invertedGray;
         invertedData[i + 1] = invertedGray;
         invertedData[i + 2] = invertedGray;
     }
 
-    invertedCtx.putImageData(
-        invertedImageData,
-        0,
-        0
+    invertedCtx.putImageData(invertedImageData, 0, 0);
+
+    const result2 = await Tesseract.recognize(
+        invertedCanvas,
+        "eng",
+        {
+            logger: function(info) {
+                console.log("TESSERACT PASS 2 (INVERTED):", info);
+
+                if (info.progress !== undefined) {
+                    progressBar.style.width =
+                        (40 + info.progress * 40) + "%";
+                }
+            },
+
+            tessedit_pageseg_mode: 6,
+            preserve_interword_spaces: 1
+        }
     );
 
-    const result2 =
-        await Tesseract.recognize(
-            invertedCanvas,
-            "eng",
-            {
-                logger: function(info) {
+    const textPass2 = result2.data.text;
 
-                    console.log(
-                        "TESSERACT PASS 2 (INVERTED):",
-                        info
-                    );
+    console.log("OCR PASS 2:", textPass2);
 
-                    if (
-                        info.progress !== undefined
-                    ) {
+    const pass2Results = parseOCR(textPass2);
 
-                        progressBar.style.width =
-                            (40 + info.progress * 40) + "%";
-                    }
-                },
-
-                tessedit_pageseg_mode: 6,
-                preserve_interword_spaces: 1
-            }
-        );
-
-    const textPass2 =
-        result2.data.text;
-
-    console.log(
-        "OCR PASS 2:",
-        textPass2
-    );
-
-    const pass2Results =
-        parseOCR(textPass2);
-
-    bestResults =
-        mergeOCRResults(
-            bestResults,
-            pass2Results
-        );
+    bestResults = mergeOCRResults(bestResults, pass2Results);
 
 
-    /* =========================================
-       DISPLAY BOTH OCR RESULTS
-    ========================================= */
+    /* DISPLAY BOTH OCR RESULTS */
 
     rawOCR.textContent =
         "[OCR PASS 1 — NORMAL GRAYSCALE]\n" +
@@ -916,43 +657,22 @@ async function performOCR() {
         textPass2;
 
 
-    /* =========================================
-       DISPLAY SCANNED INFORMATION
-    ========================================= */
+    /* DISPLAY SCANNED INFORMATION */
 
-    nameField.value =
-        bestResults.name;
+    nameField.value = bestResults.name;
+    gradeField.value = bestResults.grade;
+    sectionField.value = bestResults.section;
+    lrnField.value = bestResults.lrn;
+    idField.value = bestResults.id;
 
-    gradeField.value =
-        bestResults.grade;
-
-    sectionField.value =
-        bestResults.section;
-
-    lrnField.value =
-        bestResults.lrn;
-
-    idField.value =
-        bestResults.id;
-
-    console.log(
-        "MERGED OCR RESULTS:",
-        bestResults
-    );
+    console.log("MERGED OCR RESULTS:", bestResults);
 
 
-    /* =========================================
-       DATABASE IDENTIFICATION
-    ========================================= */
+    /* DATABASE IDENTIFICATION */
 
-    const hasLRN =
-        isValidLRN(bestResults.lrn);
-
-    const hasID =
-        normalizeIDNumber(bestResults.id).length > 0;
-
-    const hasName =
-        bestResults.name.trim().length >= 5;
+    const hasLRN = isValidLRN(bestResults.lrn);
+    const hasID = normalizeIDNumber(bestResults.id).length > 0;
+    const hasName = bestResults.name.trim().length >= 5;
 
     const hasSupportingInfo =
         bestResults.grade.trim().length > 0 ||
@@ -961,21 +681,12 @@ async function performOCR() {
     if (
         hasLRN ||
         hasID ||
-        (
-            hasName &&
-            hasSupportingInfo
-        )
+        (hasName && hasSupportingInfo)
     ) {
-
-        status.textContent =
-            "OCR complete. Identifying student...";
-
+        status.textContent = "OCR complete. Identifying student...";
         await checkDatabase();
-
     } else {
-
         progressBar.style.width = "100%";
-
         status.textContent =
             "OCR complete. No usable identifier was detected.";
 
@@ -989,7 +700,6 @@ async function performOCR() {
 ========================================================= */
 
 function parseOCR(text) {
-
     const result = {
         name: "",
         grade: "",
@@ -998,105 +708,76 @@ function parseOCR(text) {
         id: ""
     };
 
-    const lines =
-        String(text)
-            .split(/\r?\n/)
-            .map(line => line.trim())
-            .filter(line => line.length > 0);
+    const lines = String(text)
+        .split(/\r?\n/)
+        .map(line => line.trim())
+        .filter(line => line.length > 0);
 
 
     /* LRN */
 
-    const lrn =
-        extractBestLRN(text);
+    const lrn = extractBestLRN(text);
 
     if (isValidLRN(lrn)) {
-
         result.lrn = lrn;
     }
 
 
     /* ID NUMBER */
 
-    let idMatch =
-        text.match(
-            /ID\s*(?:NO|NUMBER)?\s*[:#.\-]?\s*([0-9OoQq]{3,})\s*[-–—\s]\s*([0-9OoQq]{2,})\s*[-–—\s]?\s*([A-Za-z0-9]{2,5})?/i
-        );
+    let idMatch = text.match(
+        /ID\s*(?:NO|NUMBER)?\s*[:#.\-]?\s*([0-9OoQq]{3,})\s*[-–—\s]\s*([0-9OoQq]{2,})\s*[-–—\s]?\s*([A-Za-z0-9]{2,5})?/i
+    );
 
     if (idMatch) {
+        let part1 = cleanIDDigits(idMatch[1]);
+        let part2 = cleanIDDigits(idMatch[2]);
 
-        let part1 =
-            cleanIDDigits(idMatch[1]);
-
-        let part2 =
-            cleanIDDigits(idMatch[2]);
-
-        let id =
-            part1 + "-" + part2;
+        let id = part1 + "-" + part2;
 
         if (idMatch[3]) {
-
-            id +=
-                "-" +
-                normalizeIDSuffix(idMatch[3]);
+            id += "-" + normalizeIDSuffix(idMatch[3]);
         }
 
         result.id = id;
 
     } else {
-
-        const fallbackID =
-            text.match(
-                /\b([0-9OoQq]{5,})\s*[-–—\s]\s*([0-9OoQq]{2,})\s*[-–—\s]?\s*(SHS|JHS|5H5|JH5)?\b/i
-            );
+        const fallbackID = text.match(
+            /\b([0-9OoQq]{5,})\s*[-–—\s]\s*([0-9OoQq]{2,})\s*[-–—\s]?\s*(SHS|JHS|5H5|JH5)?\b/i
+        );
 
         if (fallbackID) {
-
             result.id =
                 cleanIDDigits(fallbackID[1]) +
                 "-" +
                 cleanIDDigits(fallbackID[2]);
 
             if (fallbackID[3]) {
-
-                result.id +=
-                    "-" +
-                    normalizeIDSuffix(fallbackID[3]);
+                result.id += "-" + normalizeIDSuffix(fallbackID[3]);
             }
         }
     }
 
 
-    /* GRADE + SECTION */
+    /* GRADE AND SECTION */
 
-    let gradeMatch =
-        text.match(
-            /GRADE\s*(?:LEVEL)?\s*(7|8|9|10|11|12|I2|l2)\s*[-–—:]?\s*([A-Za-z0-9][A-Za-z0-9 .'-]*)/i
-        );
+    let gradeMatch = text.match(
+        /GRADE\s*(?:LEVEL)?\s*(7|8|9|10|11|12|I2|l2)\s*[-–—:]?\s*([A-Za-z0-9][A-Za-z0-9 .'-]*)/i
+    );
 
     if (gradeMatch) {
-
-        result.grade =
-            normalizeGrade(gradeMatch[1]);
-
-        result.section =
-            cleanSection(gradeMatch[2]);
+        result.grade = normalizeGrade(gradeMatch[1]);
+        result.section = cleanSection(gradeMatch[2]);
     }
 
     if (!result.grade) {
-
-        const fallbackGrade =
-            text.match(
-                /\b(?:G[A-Z]*R[A-Z]*D[A-Z]*E?)\s*[^0-9]{0,3}(7|8|9|10|11|12|I2|l2)\s*[-–—:]?\s*([A-Za-z0-9 .'-]+)/i
-            );
+        const fallbackGrade = text.match(
+            /\b(?:G[A-Z]*R[A-Z]*D[A-Z]*E?)\s*[^0-9]{0,3}(7|8|9|10|11|12|I2|l2)\s*[-–—:]?\s*([A-Za-z0-9 .'-]+)/i
+        );
 
         if (fallbackGrade) {
-
-            result.grade =
-                normalizeGrade(fallbackGrade[1]);
-
-            result.section =
-                cleanSection(fallbackGrade[2]);
+            result.grade = normalizeGrade(fallbackGrade[1]);
+            result.section = cleanSection(fallbackGrade[2]);
         }
     }
 
@@ -1104,9 +785,7 @@ function parseOCR(text) {
     /* NAME */
 
     for (const line of lines) {
-
-        const upper =
-            line.toUpperCase();
+        const upper = line.toUpperCase();
 
         if (
             upper.includes("LRN") ||
@@ -1115,143 +794,93 @@ function parseOCR(text) {
             upper.includes("GRADE") ||
             upper.includes("SECTION")
         ) {
-
             continue;
         }
 
-        const cleaned =
-            line
-                .replace(/[^A-Za-zÀ-ÿ.' -]/g, "")
-                .replace(/\s+/g, " ")
-                .trim();
+        const cleaned = line
+            .replace(/[^A-Za-zÀ-ÿ.' -]/g, "")
+            .replace(/\s+/g, " ")
+            .trim();
 
-        const words =
-            cleaned
-                .split(" ")
-                .filter(word => word.length > 0);
+        const words = cleaned
+            .split(" ")
+            .filter(word => word.length > 0);
 
         const letterCount =
-            (
-                cleaned.match(/[A-Za-zÀ-ÿ]/g) || []
-            ).length;
+            (cleaned.match(/[A-Za-zÀ-ÿ]/g) || []).length;
 
         if (
             words.length >= 2 &&
             cleaned.length >= 5 &&
             letterCount >= 4
         ) {
-
             result.name = cleaned;
             break;
         }
     }
 
-    console.log(
-        "PARSED OCR PASS:",
-        result
-    );
+    console.log("PARSED OCR PASS:", result);
 
     return result;
 }
 
 
-/* =========================================================
-   MERGE OCR RESULTS
-========================================================= */
+/* MERGE OCR RESULTS */
 
-function mergeOCRResults(
-    bestResults,
-    newResults
-) {
-
-    if (
-        !bestResults.name &&
-        newResults.name
-    ) {
-
-        bestResults.name =
-            newResults.name;
+function mergeOCRResults(bestResults, newResults) {
+    if (!bestResults.name && newResults.name) {
+        bestResults.name = newResults.name;
     }
 
-    if (
-        !bestResults.grade &&
-        newResults.grade
-    ) {
-
-        bestResults.grade =
-            newResults.grade;
+    if (!bestResults.grade && newResults.grade) {
+        bestResults.grade = newResults.grade;
     }
 
-    if (
-        !bestResults.section &&
-        newResults.section
-    ) {
-
-        bestResults.section =
-            newResults.section;
+    if (!bestResults.section && newResults.section) {
+        bestResults.section = newResults.section;
     }
 
     if (
         !isValidLRN(bestResults.lrn) &&
         isValidLRN(newResults.lrn)
     ) {
-
-        bestResults.lrn =
-            newResults.lrn;
+        bestResults.lrn = newResults.lrn;
     }
 
-    if (
-        !bestResults.id &&
-        newResults.id
-    ) {
-
-        bestResults.id =
-            newResults.id;
+    if (!bestResults.id && newResults.id) {
+        bestResults.id = newResults.id;
     }
 
     return bestResults;
 }
 
 
-/* =========================================================
-   LRN EXTRACTION
-========================================================= */
+/* LRN EXTRACTION */
 
 function extractBestLRN(text) {
+    const source = String(text);
 
-    const source =
-        String(text);
-
-    let match =
-        source.match(
-            /LRN\s*[:#=\-]?\s*([0-9OoQqIiLl|SsBbGg\s]{8,30})/i
-        );
+    let match = source.match(
+        /LRN\s*[:#=\-]?\s*([0-9OoQqIiLl|SsBbGg\s]{8,30})/i
+    );
 
     if (match) {
-
-        const candidates =
-            getLRNCandidates(match[1]);
+        const candidates = getLRNCandidates(match[1]);
 
         if (candidates.length > 0) {
-
             return candidates[0];
         }
     }
 
-    const digitGroups =
-        source.match(
-            /[0-9OoQqIiLl|SsBbGg][0-9OoQqIiLl|SsBbGg\s]{7,30}/g
-        );
+    const digitGroups = source.match(
+        /[0-9OoQqIiLl|SsBbGg][0-9OoQqIiLl|SsBbGg\s]{7,30}/g
+    );
 
     if (digitGroups) {
-
         for (const group of digitGroups) {
-
-            const candidates =
-                getLRNCandidates(group);
+            const candidates = getLRNCandidates(group);
 
             if (candidates.length > 0) {
-
                 return candidates[0];
             }
         }
@@ -1262,33 +891,20 @@ function extractBestLRN(text) {
 
 
 function getLRNCandidates(value) {
-
-    const cleaned =
-        cleanDigits(value);
-
+    const cleaned = cleanDigits(value);
     const candidates = [];
 
     if (cleaned.length === 12) {
-
         candidates.push(cleaned);
         return candidates;
     }
 
     if (cleaned.length > 12) {
-
-        for (
-            let i = 0;
-            i <= cleaned.length - 12;
-            i++
-        ) {
-
-            const candidate =
-                cleaned.substring(i, i + 12);
+        for (let i = 0; i <= cleaned.length - 12; i++) {
+            const candidate = cleaned.substring(i, i + 12);
 
             if (/^\d{12}$/.test(candidate)) {
-
                 if (!candidates.includes(candidate)) {
-
                     candidates.push(candidate);
                 }
             }
@@ -1299,12 +915,9 @@ function getLRNCandidates(value) {
 }
 
 
-/* =========================================================
-   CLEAN LRN
-========================================================= */
+/* CLEAN LRN */
 
 function cleanDigits(value) {
-
     return String(value)
         .replace(/[OoQq]/g, "0")
         .replace(/[IiLl|]/g, "1")
@@ -1315,12 +928,9 @@ function cleanDigits(value) {
 }
 
 
-/* =========================================================
-   ID NUMBER NORMALIZATION
-========================================================= */
+/* ID NUMBER NORMALIZATION */
 
 function cleanIDDigits(value) {
-
     return String(value)
         .toUpperCase()
         .replace(/[OoQq]/g, "0")
@@ -1332,7 +942,6 @@ function cleanIDDigits(value) {
 
 
 function normalizeIDSuffix(value) {
-
     return String(value)
         .toUpperCase()
         .replace(/5H5/g, "SHS")
@@ -1342,27 +951,19 @@ function normalizeIDSuffix(value) {
 
 
 function normalizeIDNumber(value) {
+    const source = String(value).toUpperCase().trim();
 
-    const source =
-        String(value)
-            .toUpperCase()
-            .trim();
-
-    const match =
-        source.match(
-            /^([0-9OoQq]{3,})[\s\-._]*([0-9OoQq]{2,})[\s\-._]*([A-Z0-9]{2,5})?$/
-        );
+    const match = source.match(
+        /^([0-9OoQq]{3,})[\s\-._]*([0-9OoQq]{2,})[\s\-._]*([A-Z0-9]{2,5})?$/
+    );
 
     if (match) {
-
         let result =
             cleanIDDigits(match[1]) +
             cleanIDDigits(match[2]);
 
         if (match[3]) {
-
-            result +=
-                normalizeIDSuffix(match[3]);
+            result += normalizeIDSuffix(match[3]);
         }
 
         return result;
@@ -1372,33 +973,23 @@ function normalizeIDNumber(value) {
 }
 
 
-/* =========================================================
-   GRADE NORMALIZATION
-========================================================= */
+/* GRADE NORMALIZATION */
 
 function normalizeGrade(value) {
+    const source = String(value)
+        .toUpperCase()
+        .replace(/[IiLl]/g, "1")
+        .replace(/[OoQ]/g, "0");
 
-    const source =
-        String(value)
-            .toUpperCase()
-            .replace(/[IiLl]/g, "1")
-            .replace(/[OoQ]/g, "0");
+    const match = source.match(/7|8|9|10|11|12/);
 
-    const match =
-        source.match(/7|8|9|10|11|12/);
-
-    return match
-        ? match[0]
-        : "";
+    return match ? match[0] : "";
 }
 
 
-/* =========================================================
-   SECTION CLEANING
-========================================================= */
+/* SECTION CLEANING */
 
 function cleanSection(section) {
-
     return String(section)
         .replace(/\s+/g, " ")
         .replace(/^[\-–—:\s]+/, "")
@@ -1406,15 +997,10 @@ function cleanSection(section) {
 }
 
 
-/* =========================================================
-   LRN VALIDATION
-========================================================= */
+/* LRN VALIDATION */
 
 function isValidLRN(lrn) {
-
-    return /^\d{12}$/.test(
-        String(lrn).trim()
-    );
+    return /^\d{12}$/.test(String(lrn).trim());
 }
 
 
@@ -1423,21 +1009,11 @@ function isValidLRN(lrn) {
 ========================================================= */
 
 async function checkDatabase() {
-
-    const lrn =
-        lrnField.value.trim();
-
-    const idNumber =
-        idField.value.trim();
-
-    const name =
-        nameField.value.trim();
-
-    const grade =
-        gradeField.value.trim();
-
-    const section =
-        sectionField.value.trim();
+    const lrn = lrnField.value.trim();
+    const idNumber = idField.value.trim();
+    const name = nameField.value.trim();
+    const grade = gradeField.value.trim();
+    const section = sectionField.value.trim();
 
     if (
         !isValidLRN(lrn) &&
@@ -1446,7 +1022,6 @@ async function checkDatabase() {
         grade.length === 0 &&
         section.length === 0
     ) {
-
         status.textContent =
             "No usable student information was detected.";
 
@@ -1454,53 +1029,32 @@ async function checkDatabase() {
         return;
     }
 
-    status.textContent =
-        "Identifying student...";
-
+    status.textContent = "Identifying student...";
     databaseButton.disabled = true;
-
     databaseResult.style.display = "none";
 
     try {
+        const params = new URLSearchParams({
+            lrn: lrn,
+            id: idNumber,
+            name: name,
+            grade: grade,
+            section: section
+        });
 
-        const params =
-            new URLSearchParams({
+        const url = DATABASE_URL + "?" + params.toString();
 
-                lrn: lrn,
-                id: idNumber,
-                name: name,
-                grade: grade,
-                section: section
-            });
+        console.log("DATABASE REQUEST:", url);
 
-        const url =
-            DATABASE_URL +
-            "?" +
-            params.toString();
-
-        console.log(
-            "DATABASE REQUEST:",
-            url
-        );
-
-        const response =
-            await fetch(url);
+        const response = await fetch(url);
 
         if (!response.ok) {
-
-            throw new Error(
-                "HTTP error: " +
-                response.status
-            );
+            throw new Error("HTTP error: " + response.status);
         }
 
-        const result =
-            await response.json();
+        const result = await response.json();
 
-        console.log(
-            "DATABASE RESULT:",
-            result
-        );
+        console.log("DATABASE RESULT:", result);
 
 
         /* SUCCESSFUL DATABASE MATCH */
@@ -1510,142 +1064,88 @@ async function checkDatabase() {
             result.match === true &&
             result.student
         ) {
+            const student = result.student;
 
-            const student =
-                result.student;
-
-            nameField.value =
-                String(student.name || "");
-
-            gradeField.value =
-                String(student.grade || "");
-
-            sectionField.value =
-                String(student.section || "");
-
-            lrnField.value =
-                String(student.lrn || "");
-
-            idField.value =
-                String(student.idNumber || "");
+            nameField.value = String(student.name || "");
+            gradeField.value = String(student.grade || "");
+            sectionField.value = String(student.section || "");
+            lrnField.value = String(student.lrn || "");
+            idField.value = String(student.idNumber || "");
 
             databaseResult.style.display = "block";
+            databaseResult.className = "database-result valid";
 
-            databaseResult.className =
-                "database-result valid";
-
-            databaseStatus.textContent =
-                "🟢 VALID STUDENT";
+            databaseStatus.textContent = "🟢 VALID STUDENT";
 
             databaseDetails.innerHTML =
-
                 "<strong>Name:</strong> " +
                 escapeHTML(student.name || "") +
-
                 "<br><br>" +
-
                 "<strong>LRN:</strong> " +
                 escapeHTML(student.lrn || "") +
-
                 "<br><br>" +
-
                 "<strong>ID Number:</strong> " +
                 escapeHTML(student.idNumber || "") +
-
                 "<br><br>" +
-
                 "<strong>Grade:</strong> " +
                 escapeHTML(student.grade || "") +
-
                 "<br><br>" +
-
                 "<strong>Section:</strong> " +
                 escapeHTML(student.section || "");
 
-            status.textContent =
-                "Student identified successfully.";
-
+            status.textContent = "Student identified successfully.";
             progressBar.style.width = "100%";
 
         } else {
-
-            /* STUDENT NOT FOUND */
-
             databaseResult.style.display = "block";
+            databaseResult.className = "database-result invalid";
 
-            databaseResult.className =
-                "database-result invalid";
-
-            databaseStatus.textContent =
-                "🔴 STUDENT NOT FOUND";
+            databaseStatus.textContent = "🔴 STUDENT NOT FOUND";
 
             databaseDetails.innerHTML =
-
                 "<strong>Name:</strong> " +
                 escapeHTML(name || "Not detected") +
-
                 "<br>" +
-
                 "<strong>LRN:</strong> " +
                 escapeHTML(lrn || "Not detected") +
-
                 "<br>" +
-
                 "<strong>ID Number:</strong> " +
                 escapeHTML(idNumber || "Not detected") +
-
                 "<br>" +
-
                 "<strong>Grade:</strong> " +
                 escapeHTML(grade || "Not detected") +
-
                 "<br>" +
-
                 "<strong>Section:</strong> " +
                 escapeHTML(section || "Not detected");
 
-            status.textContent =
-                "No matching student.";
+            status.textContent = "No matching student.";
         }
 
     } catch (error) {
-
-        console.error(
-            "DATABASE ERROR:",
-            error
-        );
+        console.error("DATABASE ERROR:", error);
 
         databaseResult.style.display = "block";
+        databaseResult.className = "database-result invalid";
 
-        databaseResult.className =
-            "database-result invalid";
-
-        databaseStatus.textContent =
-            "⚠️ DATABASE CONNECTION FAILED";
+        databaseStatus.textContent = "⚠️ DATABASE CONNECTION FAILED";
 
         databaseDetails.innerHTML =
             "Could not connect to Google Apps Script." +
-            "<br><br>" +
-            "<small>" +
+            "<br><br><small>" +
             escapeHTML(error.message) +
             "</small>";
 
-        status.textContent =
-            "Database connection failed.";
+        status.textContent = "Database connection failed.";
 
     } finally {
-
         databaseButton.disabled = false;
     }
 }
 
 
-/* =========================================================
-   HTML SECURITY
-========================================================= */
+/* HTML SECURITY im gay as hell*/
 
 function escapeHTML(value) {
-
     return String(value)
         .replace(/&/g, "&amp;")
         .replace(/</g, "&lt;")
@@ -1655,6 +1155,5 @@ function escapeHTML(value) {
 }
 
 </script>
-
 </body>
 </html>
